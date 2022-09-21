@@ -9,7 +9,6 @@ class MinuteTimer(private val timerTask: TimerTask) : Timer() {
         private val ONE_MINUTE = 60 * ONE_SECOND // millis in one minute
     }
 
-    private var startTime: Long = 0
     private var _timer = Timer()
 
     fun start() {
