@@ -1,79 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.main.MainFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <Button
-        android:id="@+id/startButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/start_tracking"
-        app:layout_constraintBottom_toTopOf="@+id/progressSunburn"
-        app:layout_constraintEnd_toStartOf="@+id/stopButton"
-        app:layout_constraintStart_toStartOf="parent" />
+    <data>
+        <variable
+            name="viewModel"
+            type="com.androidandrew.sunscreen.ui.main.MainViewModel" />
+    </data>
 
-    <Button
-        android:id="@+id/stopButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/stop_tracking"
-        app:layout_constraintBottom_toBottomOf="@+id/startButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/startButton" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.main.MainFragment">
 
-    <ProgressBar
-        android:id="@+id/progressSunburn"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:progressDrawable="@drawable/gradient_sunburn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/textSunburn"
-        app:layout_constraintBottom_toBottomOf="@id/textSunburn"
-        tools:progress="100"/>
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/start_tracking"
+            android:onClick="@{() -> viewModel.onStart()}"
+            app:layout_constraintBottom_toTopOf="@+id/progressSunburn"
+            app:layout_constraintEnd_toStartOf="@+id/stopButton"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/progressVitaminD"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:progressDrawable="@drawable/gradient_vitamin_d"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/textVitaminD"
-        app:layout_constraintBottom_toBottomOf="@id/textVitaminD"
-        tools:progress="100"/>
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/stop_tracking"
+            android:onClick="@{() -> viewModel.onStop()}"
+            app:layout_constraintBottom_toBottomOf="@+id/startButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/startButton" />
 
-    <TextView
-        android:id="@+id/textSunburn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/sunburn_progress"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startButton" />
+        <ProgressBar
+            android:id="@+id/progressSunburn"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:scaleY="1.5"
+            android:max="100"
+            android:progressDrawable="@drawable/gradient_sunburn"
+            android:progress="@{viewModel.sunUnitsToday.intValue()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/textSunburn"
+            app:layout_constraintBottom_toBottomOf="@id/textSunburn"
+            tools:progress="80" />
 
-    <TextView
-        android:id="@+id/textVitaminD"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/vitamin_d"
-        android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textSunburn" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ProgressBar
+            android:id="@+id/progressVitaminD"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:scaleY="1.5"
+            android:max="100"
+            android:progressDrawable="@drawable/gradient_vitamin_d"
+            android:progress="@{viewModel.sunUnitsToday.intValue()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/textVitaminD"
+            app:layout_constraintBottom_toBottomOf="@id/textVitaminD"
+            tools:progress="80" />
+
+        <TextView
+            android:id="@+id/textSunburn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/sunburn_progress"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="@id/progressSunburn"
+            app:layout_constraintStart_toStartOf="@id/progressSunburn"
+            app:layout_constraintTop_toBottomOf="@+id/startButton" />
+
+        <TextView
+            android:id="@+id/textVitaminD"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/vitamin_d"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/progressVitaminD"
+            app:layout_constraintStart_toStartOf="@id/progressVitaminD"
+            app:layout_constraintTop_toBottomOf="@+id/textSunburn" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
