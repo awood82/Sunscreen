@@ -2,7 +2,7 @@ package com.androidandrew.sunscreen.tracker.sunburn
 
 import java.util.*
 
-class MinuteTimer(private val timerTask: TimerTask) : Timer() {
+class MinuteTimer(private val timerTask: TimerTask, private val delay: Long = ONE_MINUTE) : Timer() {
 
     companion object {
         private const val ONE_SECOND = 1000L // milliseconds in one second
@@ -13,7 +13,7 @@ class MinuteTimer(private val timerTask: TimerTask) : Timer() {
 
     fun start() {
         _timer = Timer()
-        _timer.scheduleAtFixedRate(timerTask, ONE_MINUTE, ONE_MINUTE)
+        _timer.scheduleAtFixedRate(timerTask, delay, ONE_MINUTE)
     }
 
     fun stop() {

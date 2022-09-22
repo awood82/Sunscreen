@@ -30,7 +30,7 @@ fun UvPrediction.getNearestPoints(currentTime: LocalTime): UvPrediction {
 }
 
 // Assumes a linear progression over an hour of UV prediction points.
-fun UvPrediction.getUvNow(currentTime: LocalTime): Double {
+fun UvPrediction.getUvNow(currentTime: LocalTime = LocalTime.now()): Double {
     val prediction = getNearestPoints(currentTime)
     val sinceStart = Duration.between(prediction[0].time, currentTime)
     val totalDuration = Duration.between(prediction[0].time, prediction[1].time) // usually an hour

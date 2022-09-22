@@ -2,31 +2,86 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.androidandrew.sunscreen.tracker.sunburn.MinuteTimer
+import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
+import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import java.time.LocalTime
 import java.util.*
 
 class MainViewModel : ViewModel() {
 
+    // TODO: Remove hardcoded value
+    private val hardcodedUvPrediction = listOf(
+        UvPredictionPoint(LocalTime.NOON.minusHours(5), 0.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(4), 1.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(3), 2.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(2), 4.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(1), 6.0),
+        UvPredictionPoint(LocalTime.NOON, 8.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(1), 8.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(2), 7.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(3), 5.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(4), 3.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(5), 1.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(6), 0.0),
+    )
+
+    // TODO: Remove hardcoded value
+    private val hardcodedSkinType = 2
+
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
 
-    private val minuteTimer = MinuteTimer(object : TimerTask() {
+    private val _minutesToBurn = MutableLiveData(0L)
+    val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
+        "$minutes min"
+    }
+
+    private val updateTimer = MinuteTimer(object : TimerTask() {
         override fun run() {
-            _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(5.0) ) // TODO: hard-coded test value
+            val minutesToBurn = SunburnCalculator.computeMaxTime(
+                uvPrediction = hardcodedUvPrediction,
+                currentTime = LocalTime.now(),
+                sunUnitsSoFar = _sunUnitsToday.value!!,
+                skinType = hardcodedSkinType,
+                spf = SunburnCalculator.spfNoSunscreen,
+                altitudeInKm = 0,
+                isOnSnowOrWater = false)
+            _minutesToBurn.postValue(minutesToBurn.toLong())
+        }
+    }, delay = 0)
+
+    private val trackingTimer = MinuteTimer(object : TimerTask() {
+        override fun run() {
+            val additionalSunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
+                uvIndex = hardcodedUvPrediction.getUvNow(),
+                skinType = hardcodedSkinType,
+                spf = SunburnCalculator.spfNoSunscreen,
+                altitudeInKm = 0,
+                isOnSnowOrWater = false
+            )
+            _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits))
         }
     })
 
-    fun onStart() {
-        minuteTimer.start()
+    init {
+        updateTimer.start()
     }
 
-    fun onStop() {
-        minuteTimer.stop()
+    fun onStartTracking() {
+        trackingTimer.start()
+    }
+
+    fun onStopTracking() {
+        trackingTimer.stop()
     }
 
     override fun onCleared() {
         super.onCleared()
-        minuteTimer.cancel()
+        updateTimer.cancel()
+        trackingTimer.cancel()
     }
 }

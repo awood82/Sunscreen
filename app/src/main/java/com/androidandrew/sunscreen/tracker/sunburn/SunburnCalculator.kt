@@ -10,11 +10,11 @@ import java.time.LocalTime
  * Skin type, sunscreen SPF, UV index, altitude, and water/snow reflection.
  * Reference: https://www.omnicalculator.com/other/sunscreen
  */
-class SunburnCalculator {
+object SunburnCalculator {
 
-    companion object {
-        const val maxSunUnits = 100.0
-    }
+    const val maxSunUnits = 100.0
+
+    const val spfNoSunscreen = 1
 
     private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
 
@@ -22,8 +22,8 @@ class SunburnCalculator {
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
      * This assumes a constant UV factor, so isn't a perfect estimate.
      */
-    fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int,
-        altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+    fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int,
+                       spf: Int = spfNoSunscreen, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
         val maxMinutes = minuteMagicNumber * getSkinBlockFactor(skinType) * spf /
                 (uvIndex * getAltitudeFactor(altitudeInKm) * getReflectionFactor(isOnSnowOrWater))
         return max(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, 0.0)
@@ -33,8 +33,9 @@ class SunburnCalculator {
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
      * This takes into account changing UV factors each hour, so is a more accurate estimate.
      */
-    fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime, sunUnitsSoFar: Double = 0.0,
-        skinType: Int, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+    fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime = LocalTime.now(),
+                       sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int = spfNoSunscreen,
+                       altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
         var maxMinutes = 0L
         var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
 
@@ -56,7 +57,8 @@ class SunburnCalculator {
     /**
      * Returns the % of maximum sun exposure experienced by a person in one minute.
      */
-    fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+    fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int = spfNoSunscreen,
+                                   altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
         return maxSunUnits / computeMaxTime(
             uvIndex,
             0.0,
