@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.tracker.sunburn
 
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import java.lang.Double.max
 import java.time.LocalTime
 
 /**
@@ -11,30 +12,36 @@ import java.time.LocalTime
  */
 class SunburnCalculator {
 
+    companion object {
+        const val maxSunUnits = 100.0
+    }
+
     private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
-    private val maxSunUnits = 100.0
 
     /**
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
      * This assumes a constant UV factor, so isn't a perfect estimate.
      */
-    fun computeMaxTime(skinType: Int, uvIndex: Double, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
-        return minuteMagicNumber * getSkinBlockFactor(skinType) * spf /
+    fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int,
+        altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+        val maxMinutes = minuteMagicNumber * getSkinBlockFactor(skinType) * spf /
                 (uvIndex * getAltitudeFactor(altitudeInKm) * getReflectionFactor(isOnSnowOrWater))
+        return max(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, 0.0)
     }
 
     /**
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
      * This takes into account changing UV factors each hour, so is a more accurate estimate.
      */
-    fun computeMaxTime(skinType: Int, uvPrediction: UvPrediction, currentTime: LocalTime, sunUnitsSoFar: Double = 0.0, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+    fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime, sunUnitsSoFar: Double = 0.0,
+        skinType: Int, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
         var maxMinutes = 0L
         var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
 
         while (sunUnitsRemaining > 0.0) {
             val sunUnits = computeSunUnitsInOneMinute(
-                skinType = skinType,
                 uvIndex = uvPrediction.getUvNow(currentTime.plusMinutes(maxMinutes)),
+                skinType = skinType,
                 spf = spf,
                 altitudeInKm = altitudeInKm,
                 isOnSnowOrWater = isOnSnowOrWater
@@ -49,8 +56,15 @@ class SunburnCalculator {
     /**
      * Returns the % of maximum sun exposure experienced by a person in one minute.
      */
-    fun computeSunUnitsInOneMinute(skinType: Int, uvIndex: Double, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
-        return maxSunUnits / computeMaxTime(skinType, uvIndex, spf, altitudeInKm, isOnSnowOrWater)
+    fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int, altitudeInKm: Int, isOnSnowOrWater: Boolean): Double {
+        return maxSunUnits / computeMaxTime(
+            uvIndex,
+            0.0,
+            skinType,
+            spf,
+            altitudeInKm,
+            isOnSnowOrWater
+        )
     }
 
     private fun getSkinBlockFactor(type: Int): Int {
