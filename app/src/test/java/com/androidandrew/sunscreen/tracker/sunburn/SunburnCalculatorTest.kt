@@ -150,4 +150,30 @@ class SunburnCalculatorTest {
 
         assertEquals(19.5, maxTime, delta)
     }
+
+    // If skintype isn't set, we can't compute
+    @Test
+    fun computeMaxTime_withSkinTypeUnknown_is0Minutes() {
+        val maxTime = calc.computeMaxTime(
+            skinType = 0,
+            uvIndex = 5.0,
+            spf = 1,
+            altitudeInKm = 0,
+            isOnSnowOrWater = true)
+
+        assertEquals(0.0, maxTime, delta)
+    }
+
+    // If the max time is 20 minutes, then the sun units in one minute is 5. 100% / 20min = 5%/min
+    @Test
+    fun computeSunUnits_withMaxTime20Minutes_is5Percent() {
+        val sunUnits = calc.computeSunUnitsInOneMinute(
+            skinType = 2,
+            uvIndex = 5.0,
+            spf = 1,
+            altitudeInKm = 0,
+            isOnSnowOrWater = false)
+
+        assertEquals(5.0, sunUnits, delta)
+    }
 }
