@@ -20,7 +20,7 @@ fun UvPrediction.getNearestPoints(currentTime: LocalTime): List<UvPredictionPoin
 
     var returnIndex = 0
     for (i in 0..returnList.size) {
-        if (currentTime.isAfter(returnList[i].time)) {
+        if (!currentTime.isBefore(returnList[i].time)) {
             returnIndex = i
         } else {
             break
