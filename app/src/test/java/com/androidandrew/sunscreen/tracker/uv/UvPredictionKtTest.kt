@@ -11,12 +11,14 @@ class UvPredictionKtTest {
     private val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 6.0)
     private val delta = 0.1
     private val midnight = LocalTime.MIDNIGHT
-    private val eleven = LocalTime.NOON.minusHours(1)
+    private val sixAm = LocalTime.NOON.minusHours(6)
+    private val elevenAm = LocalTime.NOON.minusHours(1)
     private val elevenFifteen = LocalTime.NOON.minusMinutes(45)
     private val noon = LocalTime.NOON
     private val twelve30 = LocalTime.NOON.plusMinutes(30)
     private val twelve45 = LocalTime.NOON.plusMinutes(45)
     private val one = LocalTime.NOON.plusHours(1)
+    private val sixPm = LocalTime.NOON.plusHours(6)
 
     @Test
     fun getNearestPoints_withEmptyList_returnsNoPrediction() {
@@ -105,8 +107,7 @@ class UvPredictionKtTest {
 
         val uv = prediction.getUvNow(elevenFifteen)
 
-        assertEquals(8.0, elevenAmPrediction.uvIndex, delta)
-        assertEquals(10.0, noonPrediction.uvIndex, delta)
+        // 8.0 @ 11a, 10.0 @ 12p
         assertEquals(8.5, uv, delta)
     }
 
@@ -116,8 +117,7 @@ class UvPredictionKtTest {
 
         val uv = prediction.getUvNow(twelve45)
 
-        assertEquals(10.0, noonPrediction.uvIndex, delta)
-        assertEquals(6.0, onePmPrediction.uvIndex, delta)
+        // 10.0 @ 12p, 6.0 @ 1p
         assertEquals(7.0, uv, delta)
     }
 }

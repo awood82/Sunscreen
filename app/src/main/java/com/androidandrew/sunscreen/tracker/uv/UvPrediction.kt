@@ -13,7 +13,7 @@ val NO_PREDICTION_AFTER = UvPredictionPoint(time = LocalTime.MIDNIGHT.plusHours(
  * Returns a List w/ 2 elements with the current hour and next hour's predictions.
  * Prerequisite: UvPredictionPoints are in sorted, ascending order by time.
  */
-fun UvPrediction.getNearestPoints(currentTime: LocalTime): List<UvPredictionPoint> {
+fun UvPrediction.getNearestPoints(currentTime: LocalTime): UvPrediction {
     val returnList = this.toMutableList()
     returnList.add(0, NO_PREDICTION_BEFORE)
     returnList.add(NO_PREDICTION_AFTER)
