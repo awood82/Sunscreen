@@ -1,9 +1,6 @@
 package com.androidandrew.sunscreen.ui.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.androidandrew.sunscreen.tracker.sunburn.MinuteTimer
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
@@ -11,7 +8,7 @@ import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import java.time.LocalTime
 import java.util.*
 
-class MainViewModel : ViewModel() {
+class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : ViewModel() {
 
     // TODO: Remove hardcoded value
     private val hardcodedUvPrediction = listOf(
@@ -37,37 +34,25 @@ class MainViewModel : ViewModel() {
 
     private val _minutesToBurn = MutableLiveData(0L)
     val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
+        println("$minutes transformed")
         "$minutes min"
     }
 
     private val updateTimer = MinuteTimer(object : TimerTask() {
         override fun run() {
-            val minutesToBurn = SunburnCalculator.computeMaxTime(
-                uvPrediction = hardcodedUvPrediction,
-                currentTime = LocalTime.now(),
-                sunUnitsSoFar = _sunUnitsToday.value!!,
-                skinType = hardcodedSkinType,
-                spf = SunburnCalculator.spfNoSunscreen,
-                altitudeInKm = 0,
-                isOnSnowOrWater = false)
-            _minutesToBurn.postValue(minutesToBurn.toLong())
+            updateTimeToBurn()
         }
-    }, delay = 0)
+    })
 
     private val trackingTimer = MinuteTimer(object : TimerTask() {
         override fun run() {
-            val additionalSunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
-                uvIndex = hardcodedUvPrediction.getUvNow(),
-                skinType = hardcodedSkinType,
-                spf = SunburnCalculator.spfNoSunscreen,
-                altitudeInKm = 0,
-                isOnSnowOrWater = false
-            )
-            _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits))
+            updateBurnProgress()
+            updateVitaminDProgress()
         }
     })
 
     init {
+        updateTimeToBurn()
         updateTimer.start()
     }
 
@@ -77,6 +62,34 @@ class MainViewModel : ViewModel() {
 
     fun onStopTracking() {
         trackingTimer.stop()
+    }
+
+    private fun updateTimeToBurn() {
+        val minutesToBurn = SunburnCalculator.computeMaxTime(
+            uvPrediction = hardcodedUvPrediction,
+            currentTime = currentTime,
+            sunUnitsSoFar = _sunUnitsToday.value!!,
+            skinType = hardcodedSkinType,
+            spf = SunburnCalculator.spfNoSunscreen,
+            altitudeInKm = 0,
+            isOnSnowOrWater = false)
+        _minutesToBurn.postValue(minutesToBurn.toLong())
+        println("Minutes = $minutesToBurn")
+    }
+
+    private fun updateBurnProgress() {
+        val additionalSunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
+            uvIndex = hardcodedUvPrediction.getUvNow(currentTime),
+            skinType = hardcodedSkinType,
+            spf = SunburnCalculator.spfNoSunscreen,
+            altitudeInKm = 0,
+            isOnSnowOrWater = false
+        )
+        _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits))
+    }
+
+    private fun updateVitaminDProgress() {
+        // TODO
     }
 
     override fun onCleared() {

@@ -7,7 +7,7 @@ data class UvPredictionPoint(val time: LocalTime, val uvIndex: Double)
 
 typealias UvPrediction = List<UvPredictionPoint>
 val NO_PREDICTION_BEFORE = UvPredictionPoint(time = LocalTime.MIDNIGHT, uvIndex = 0.0)
-val NO_PREDICTION_AFTER = UvPredictionPoint(time = LocalTime.MIDNIGHT.plusHours(23).plusMinutes(59), uvIndex = 0.0)
+val NO_PREDICTION_AFTER = UvPredictionPoint(time = LocalTime.MIDNIGHT.plusHours(23).plusMinutes(59).plusSeconds(59), uvIndex = 0.0)
 
 /***
  * Returns a List w/ 2 elements with the current hour and next hour's predictions.

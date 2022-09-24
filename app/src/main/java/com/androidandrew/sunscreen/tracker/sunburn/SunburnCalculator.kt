@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.tracker.sunburn
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import java.lang.Double.max
+import java.lang.Double.min
 import java.time.LocalTime
 
 /**
@@ -13,10 +14,10 @@ import java.time.LocalTime
 object SunburnCalculator {
 
     const val maxSunUnits = 100.0
-
     const val spfNoSunscreen = 1
+    const val NO_BURN_EXPECTED = 60 * 24.0 // minutes in a day
 
-    private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
+    private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
 
     /**
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
@@ -26,7 +27,8 @@ object SunburnCalculator {
                        spf: Int = spfNoSunscreen, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
         val maxMinutes = minuteMagicNumber * getSkinBlockFactor(skinType) * spf /
                 (uvIndex * getAltitudeFactor(altitudeInKm) * getReflectionFactor(isOnSnowOrWater))
-        return max(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, 0.0)
+
+        return min(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, NO_BURN_EXPECTED)
     }
 
     /**
@@ -40,8 +42,15 @@ object SunburnCalculator {
         var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
 
         while (sunUnitsRemaining > 0.0) {
+            val simulatedTime = currentTime.plusMinutes(maxMinutes)
+
+            // Check for no burn likely today
+            if (simulatedTime.equals(LocalTime.MIDNIGHT) && maxMinutes > 0) {
+                return NO_BURN_EXPECTED
+            }
+
             val sunUnits = computeSunUnitsInOneMinute(
-                uvIndex = uvPrediction.getUvNow(currentTime.plusMinutes(maxMinutes)),
+                uvIndex = uvPrediction.getUvNow(simulatedTime),
                 skinType = skinType,
                 spf = spf,
                 altitudeInKm = altitudeInKm,
