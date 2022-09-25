@@ -1,10 +1,14 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.network.EpaApi
 import com.androidandrew.sunscreen.tracker.sunburn.MinuteTimer
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.util.*
 
@@ -28,6 +32,12 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
 
     // TODO: Remove hardcoded value
     private val hardcodedSkinType = 2
+
+    private var networkJob: Job? = null
+    private var uvPrediction: UvPrediction = hardcodedUvPrediction // TODO: Remove hardcoded value
+
+    private val _networkResponse = MutableLiveData<String>()
+    val networkResponse: LiveData<String> = _networkResponse
 
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
@@ -54,6 +64,7 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
     })
 
     init {
+        refreshNetwork()
         updateTimeToBurn()
         updateTimer.start()
     }
@@ -66,9 +77,22 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
         trackingTimer.stop()
     }
 
+    private fun refreshNetwork() {
+        networkJob?.cancel()
+        networkJob = viewModelScope.launch {
+            try {
+                val response = EpaApi.service.getUvForecast()
+                _networkResponse.postValue(response)
+            } catch (e: Exception) {
+                _networkResponse.postValue(e.message)
+                uvPrediction = hardcodedUvPrediction // TODO: Remove hardcoded prediction, handle errors
+            }
+        }
+    }
+
     private fun updateTimeToBurn() {
         val minutesToBurn = SunburnCalculator.computeMaxTime(
-            uvPrediction = hardcodedUvPrediction,
+            uvPrediction = uvPrediction,
             currentTime = currentTime,
             sunUnitsSoFar = _sunUnitsToday.value!!,
             skinType = hardcodedSkinType,
@@ -81,7 +105,7 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
 
     private fun updateBurnProgress() {
         val additionalSunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
-            uvIndex = hardcodedUvPrediction.getUvNow(currentTime),
+            uvIndex = uvPrediction.getUvNow(currentTime),
             skinType = hardcodedSkinType,
             spf = SunburnCalculator.spfNoSunscreen,
             altitudeInKm = 0,

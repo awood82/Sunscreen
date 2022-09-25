@@ -35,9 +35,7 @@ class MainViewModelTest {
         currentTimeDefaultNoon = currentTimeDefaultNoon.plusHours(6)
         createViewModel()
 
-        // Expects NO_BURN_EXPECTED as Int for now
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
         assertEquals("No burn expected", burnTimeString)
-        //assertTrue(burnTimeString.startsWith(SunburnCalculator.NO_BURN_EXPECTED.toInt().toString()))
     }
 }

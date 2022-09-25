@@ -42,6 +42,11 @@ class MainFragment : Fragment() {
             Toast.makeText(context, "$sunUnits units", Toast.LENGTH_LONG).show()
         }
 
+        viewModel.networkResponse.observe(viewLifecycleOwner) { response ->
+            android.util.Log.e("Sunscreen", "$response")
+            Toast.makeText(context, "Response: $response", Toast.LENGTH_LONG).show()
+        }
+
         return binding.root
     }
 }
