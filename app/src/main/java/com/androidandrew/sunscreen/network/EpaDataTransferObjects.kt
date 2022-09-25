@@ -26,7 +26,7 @@ fun HourlyUvIndexForecast.asUvPredictionPoint(): UvPredictionPoint {
 }
 
 fun DailyUvIndexForecast.asUvPrediction(): UvPrediction {
-    return map { hourly ->
+    return this.sortedBy {it.order}.map { hourly ->
         hourly.asUvPredictionPoint()
-    }//.sortedBy { it.time }
+    }
 }

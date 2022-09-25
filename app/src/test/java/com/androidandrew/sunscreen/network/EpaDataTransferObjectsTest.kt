@@ -26,4 +26,15 @@ class EpaDataTransferObjectsTest {
         assertEquals(14, uvPrediction[1].uvIndex.toInt())
         assertEquals(2, uvPrediction[2].uvIndex.toInt())
     }
+
+    @Test
+    fun dailyUvIndexForecast_asUvPrediction_outOfOrder_isSorted() {
+        val unsortedForecast = listOf(forecast12pm, forecast6am, forecast6pm)
+
+        val uvPrediction = unsortedForecast.asUvPrediction()
+
+        assertEquals(2, uvPrediction[0].uvIndex.toInt())
+        assertEquals(14, uvPrediction[1].uvIndex.toInt())
+        assertEquals(2, uvPrediction[2].uvIndex.toInt())
+    }
 }
