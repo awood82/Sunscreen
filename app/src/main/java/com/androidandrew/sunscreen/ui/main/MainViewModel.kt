@@ -83,7 +83,7 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
             try {
                 // TODO: Dependency inject the network service
                 val response = EpaApi.service.getUvForecast()
-                _networkResponse.postValue(response)
+                _networkResponse.postValue(response.toString())
             } catch (e: Exception) {
                 _networkResponse.postValue(e.message)
                 uvPrediction = hardcodedUvPrediction // TODO: Remove hardcoded prediction, handle errors

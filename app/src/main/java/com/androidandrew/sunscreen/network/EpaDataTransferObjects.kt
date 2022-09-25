@@ -1,9 +1,9 @@
 package com.androidandrew.sunscreen.network
 
+import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.time.LocalDateTime
 import java.time.LocalTime
 
 @JsonClass(generateAdapter = true)
@@ -14,11 +14,19 @@ data class HourlyUvIndexForecast(
     @Json(name="UV_VALUE") val uv: Int
 )
 
-/*data class DateTimeDto()
+typealias DailyUvIndexForecast = List<HourlyUvIndexForecast>
 
-fun HourlyUvIndexForecast.asUvPrediction(): UvPredictionPoint {
-    val localDateTime: LocalDateTime = LocalDateTime(dateTimeString)
+//data class DateTimeDto()
+
+fun HourlyUvIndexForecast.asUvPredictionPoint(): UvPredictionPoint {
     return UvPredictionPoint(
-        time = LocalTime.of(localDateTime.)
+        time = LocalTime.now(),
+        uvIndex = uv.toDouble()
     )
-}*/
+}
+
+fun DailyUvIndexForecast.asUvPrediction(): UvPrediction {
+    return map { hourly ->
+        hourly.asUvPredictionPoint()
+    }//.sortedBy { it.time }
+}

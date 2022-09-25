@@ -13,7 +13,7 @@ private val BASE_URL = "https://data.epa.gov/"
 interface EpaService {
     // TODO: Remove hardcoded ZIP code
     @GET("efservice/getEnvirofactsUVHOURLY/ZIP/92123/JSON")
-    suspend fun getUvForecast(): String  //List<HourlyUvIndexForecast>>
+    suspend fun getUvForecast(): DailyUvIndexForecast
 }
 
 private val moshi = Moshi.Builder()
