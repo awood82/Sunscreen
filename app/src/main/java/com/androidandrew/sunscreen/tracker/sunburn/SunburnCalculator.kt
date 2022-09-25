@@ -68,7 +68,7 @@ object SunburnCalculator {
      */
     fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int = spfNoSunscreen,
                                    altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        return maxSunUnits / computeMaxTime(
+        val maxTime = computeMaxTime(
             uvIndex,
             0.0,
             skinType,
@@ -76,6 +76,10 @@ object SunburnCalculator {
             altitudeInKm,
             isOnSnowOrWater
         )
+        return when(maxTime) {
+            NO_BURN_EXPECTED -> 0.0
+            else -> maxSunUnits / maxTime
+        }
     }
 
     private fun getSkinBlockFactor(type: Int): Int {

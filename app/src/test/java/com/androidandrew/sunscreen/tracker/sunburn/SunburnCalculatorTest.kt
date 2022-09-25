@@ -418,4 +418,15 @@ class SunburnCalculatorTest {
 
         assertEquals(SunburnCalculator.NO_BURN_EXPECTED, maxTime, delta)
     }
+
+    @Test
+    fun computeSunUnitsInOneMinute_whenUvIndexIs0_returns0() {
+        val sunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
+            uvIndex = 0.0,
+            skinType = 5,
+            spf = 50
+        )
+
+        assertEquals(0.0, sunUnits, 0.001)
+    }
 }
