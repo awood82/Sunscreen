@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaApi
+import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.tracker.sunburn.MinuteTimer
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
@@ -64,9 +65,9 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
     })
 
     init {
-        refreshNetwork()
         updateTimeToBurn()
         updateTimer.start()
+        refreshNetwork()
     }
 
     fun onStartTracking() {
@@ -84,6 +85,8 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
                 // TODO: Dependency inject the network service
                 val response = EpaApi.service.getUvForecast("92123")
                 _networkResponse.postValue(response.toString())
+                uvPrediction = response.asUvPrediction()
+                updateTimeToBurn()
             } catch (e: Exception) {
                 _networkResponse.postValue(e.message)
                 uvPrediction = hardcodedUvPrediction // TODO: Remove hardcoded prediction, handle errors
