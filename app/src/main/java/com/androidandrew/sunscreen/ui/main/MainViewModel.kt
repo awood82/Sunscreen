@@ -81,6 +81,7 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
             try {
+                // TODO: Dependency inject the network service
                 val response = EpaApi.service.getUvForecast()
                 _networkResponse.postValue(response)
             } catch (e: Exception) {
