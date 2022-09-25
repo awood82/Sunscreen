@@ -5,6 +5,7 @@ import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @JsonClass(generateAdapter = true)
 data class HourlyUvIndexForecast(
@@ -16,11 +17,14 @@ data class HourlyUvIndexForecast(
 
 typealias DailyUvIndexForecast = List<HourlyUvIndexForecast>
 
-//data class DateTimeDto()
+// Convert the DATE_TIME String, in the format of "Sep/26/2022 08 AM", to a LocalTime
+fun String.asLocalTime(): LocalTime {
+    return LocalTime.parse(this, DateTimeFormatter.ofPattern("MMM/dd/yyyy h a"))
+}
 
 fun HourlyUvIndexForecast.asUvPredictionPoint(): UvPredictionPoint {
     return UvPredictionPoint(
-        time = LocalTime.now(),
+        time = dateTimeString.asLocalTime(),
         uvIndex = uv.toDouble()
     )
 }

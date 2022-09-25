@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.network
 
 import junit.framework.Assert.assertEquals
 import org.junit.Test
+import java.time.LocalTime
 
 class EpaDataTransferObjectsTest {
 
@@ -16,6 +17,24 @@ class EpaDataTransferObjectsTest {
         val uvPredictionPoint = forecast12pm.asUvPredictionPoint()
 
         assertEquals(14, uvPredictionPoint.uvIndex.toInt())
+    }
+
+    @Test
+    fun hourlyUvIndexForecast_asUvPredictionPoint_convertsNoonTime() {
+        val expectedTime = LocalTime.NOON
+
+        val uvPredictionPoint = forecast12pm.asUvPredictionPoint()
+
+        assertEquals(expectedTime, uvPredictionPoint.time)
+    }
+
+    @Test
+    fun hourlyUvIndexForecast_asUvPredictionPoint_convertsEveningTime() {
+        val expectedTime = LocalTime.NOON.plusHours(6)
+
+        val uvPredictionPoint = forecast6pm.asUvPredictionPoint()
+
+        assertEquals(expectedTime, uvPredictionPoint.time)
     }
 
     @Test
