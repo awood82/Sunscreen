@@ -2,7 +2,6 @@ package com.androidandrew.sunscreen.tracker.sunburn
 
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
-import java.lang.Double.max
 import java.lang.Double.min
 import java.time.LocalTime
 
@@ -18,6 +17,7 @@ object SunburnCalculator {
     const val NO_BURN_EXPECTED = 60 * 24.0 // minutes in a day
 
     private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
+    private val lastMinuteInDay = LocalTime.MIDNIGHT.minusMinutes(1).minusNanos(1)
 
     /**
      * Returns the maximum minutes of sun exposure a person could get before starting to burn.
@@ -45,7 +45,7 @@ object SunburnCalculator {
             val simulatedTime = currentTime.plusMinutes(maxMinutes)
 
             // Check for no burn likely today
-            if (simulatedTime.equals(LocalTime.MIDNIGHT) && maxMinutes > 0) {
+            if (simulatedTime.isAfter(lastMinuteInDay) && maxMinutes > 0) {
                 return NO_BURN_EXPECTED
             }
 

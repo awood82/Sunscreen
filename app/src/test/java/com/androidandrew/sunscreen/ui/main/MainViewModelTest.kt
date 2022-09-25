@@ -37,6 +37,7 @@ class MainViewModelTest {
 
         // Expects NO_BURN_EXPECTED as Int for now
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
-        assertTrue(burnTimeString.startsWith(SunburnCalculator.NO_BURN_EXPECTED.toInt().toString()))
+        assertEquals("No burn expected", burnTimeString)
+        //assertTrue(burnTimeString.startsWith(SunburnCalculator.NO_BURN_EXPECTED.toInt().toString()))
     }
 }

@@ -34,8 +34,10 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
 
     private val _minutesToBurn = MutableLiveData(0L)
     val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
-        println("$minutes transformed")
-        "$minutes min"
+        when (minutes) {
+            SunburnCalculator.NO_BURN_EXPECTED.toLong() -> "No burn expected"
+            else -> "$minutes min"
+        }
     }
 
     private val updateTimer = MinuteTimer(object : TimerTask() {
