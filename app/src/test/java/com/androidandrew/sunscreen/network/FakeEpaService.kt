@@ -29,7 +29,7 @@ object FakeEpaService : EpaService {
         HourlyUvIndexForecast(21, "92101", "Sep/26/2022 12 AM", 0)
     )
 
-    override suspend fun getUvForecast(): DailyUvIndexForecast {
+    override suspend fun getUvForecast(zipCode: String): DailyUvIndexForecast {
         return sampleDailyUvForecast
     }
 }

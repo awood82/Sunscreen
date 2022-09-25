@@ -7,13 +7,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 private val BASE_URL = "https://data.epa.gov/"
 
 interface EpaService {
     // TODO: Remove hardcoded ZIP code
-    @GET("efservice/getEnvirofactsUVHOURLY/ZIP/92123/JSON")
-    suspend fun getUvForecast(): DailyUvIndexForecast
+    @GET("efservice/getEnvirofactsUVHOURLY/ZIP/{zipCode}/JSON")
+    suspend fun getUvForecast(@Path("zipCode") zipCode: String): DailyUvIndexForecast
 }
 
 private val moshi = Moshi.Builder()
