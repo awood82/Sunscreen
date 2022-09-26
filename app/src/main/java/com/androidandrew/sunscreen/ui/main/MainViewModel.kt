@@ -59,6 +59,8 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     })
 
     private var trackingTimer: MinuteTimer? = null
+    private val _isStartTrackingEnabled = MutableLiveData(true)
+    val isStartTrackingEnabled: LiveData<Boolean> = _isStartTrackingEnabled
 
     init {
         updateTimeToBurn()
@@ -70,11 +72,22 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         trackingTimer?.cancel()
         trackingTimer = createTrackingTimer().also {
             it.start()
+            _isStartTrackingEnabled.value = false
         }
     }
 
     fun onStopTracking() {
         trackingTimer?.cancel()
+        _isStartTrackingEnabled.value = true
+    }
+
+    private fun createTrackingTimer(): MinuteTimer {
+        return MinuteTimer(object : TimerTask() {
+            override fun run() {
+                updateBurnProgress()
+                updateVitaminDProgress()
+            }
+        })
     }
 
     private fun refreshNetwork() {
@@ -119,15 +132,6 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
 
     private fun updateVitaminDProgress() {
         // TODO
-    }
-
-    private fun createTrackingTimer(): MinuteTimer {
-        return MinuteTimer(object : TimerTask() {
-            override fun run() {
-                updateBurnProgress()
-                updateVitaminDProgress()
-            }
-        })
     }
 
     override fun onCleared() {
