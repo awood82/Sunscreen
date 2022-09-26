@@ -9,9 +9,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+//import org.robolectric.annotation.LooperMode
 import java.time.*
 
 @RunWith(AndroidJUnit4::class)
+//@LooperMode(LooperMode.Mode.PAUSED)
 class MainViewModelTest {
 
     @get:Rule
@@ -44,5 +46,14 @@ class MainViewModelTest {
 
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
         assertEquals("No burn expected", burnTimeString)
+    }
+
+    @Test
+    fun onStartTracking_canBeCalledMultipleTimes() {
+        createViewModel()
+        vm.onStartTracking()
+        vm.onStopTracking()
+
+        vm.onStartTracking()
     }
 }

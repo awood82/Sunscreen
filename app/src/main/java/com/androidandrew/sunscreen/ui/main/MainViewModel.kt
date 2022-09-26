@@ -58,12 +58,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         }
     })
 
-    private val trackingTimer = MinuteTimer(object : TimerTask() {
-        override fun run() {
-            updateBurnProgress()
-            updateVitaminDProgress()
-        }
-    })
+    private var trackingTimer: MinuteTimer? = null
 
     init {
         updateTimeToBurn()
@@ -72,11 +67,14 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     fun onStartTracking() {
-        trackingTimer.start()
+        trackingTimer?.cancel()
+        trackingTimer = createTrackingTimer().also {
+            it.start()
+        }
     }
 
     fun onStopTracking() {
-        trackingTimer.stop()
+        trackingTimer?.cancel()
     }
 
     private fun refreshNetwork() {
@@ -123,9 +121,18 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         // TODO
     }
 
+    private fun createTrackingTimer(): MinuteTimer {
+        return MinuteTimer(object : TimerTask() {
+            override fun run() {
+                updateBurnProgress()
+                updateVitaminDProgress()
+            }
+        })
+    }
+
     override fun onCleared() {
         super.onCleared()
         updateTimer.cancel()
-        trackingTimer.cancel()
+        trackingTimer?.cancel()
     }
 }
