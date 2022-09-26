@@ -84,7 +84,7 @@ class MainViewModel(private var currentTime: LocalTime = LocalTime.now()) : View
         networkJob = viewModelScope.launch {
             try {
                 // TODO: Dependency inject the network service
-                val response = EpaApi.service.getUvForecast("92123")
+                val response = EpaApi.service.getUvForecast("92123") // TODO: Remove hardcoded location
                 _networkResponse.postValue(response.toString())
                 uvPrediction = response.asUvPrediction()
                 updateTimeToBurn()
