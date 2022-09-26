@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.util.*
 
-class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : ViewModel() {
+class MainViewModel(private var currentTime: LocalTime = LocalTime.now()) : ViewModel() {
 
     // TODO: Remove hardcoded value
     private val hardcodedUvPrediction = listOf(
@@ -53,6 +53,7 @@ class MainViewModel(private val currentTime: LocalTime = LocalTime.now()) : View
 
     private val updateTimer = MinuteTimer(object : TimerTask() {
         override fun run() {
+            currentTime = currentTime.plusMinutes(1)
             updateTimeToBurn()
         }
     })
