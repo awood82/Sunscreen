@@ -38,7 +38,7 @@ object SunburnCalculator {
     fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime = LocalTime.now(),
                        sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int = spfNoSunscreen,
                        altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        var maxMinutes = 0L
+        var maxMinutes = 0L // TODO: Use Double to get more accurate sun units for partial minutes
         var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
 
         while (sunUnitsRemaining > 0.0) {

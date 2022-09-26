@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.tracker.sunburn
+package com.androidandrew.sunscreen.time
 
 import java.util.*
 
