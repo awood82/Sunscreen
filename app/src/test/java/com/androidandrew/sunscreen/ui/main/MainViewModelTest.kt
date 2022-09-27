@@ -20,7 +20,7 @@ class MainViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var vm: MainViewModel
-    private val fakeUvService = FakeEpaService
+    private val fakeUvService = FakeEpaService()
     private val noon = Instant.parse("2022-09-25T12:00:00.00Z")
     private val clockDefaultNoon = Clock.fixed(noon, ZoneId.of("UTC"))
 
@@ -46,6 +46,15 @@ class MainViewModelTest {
 
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
         assertEquals("No burn expected", burnTimeString)
+    }
+
+    @Test
+    fun burnTimeString_ifNoNetworkConnection_isUnknown() {
+        fakeUvService.simulateError()
+        createViewModel()
+
+        val burnTimeString = vm.burnTimeString.getOrAwaitValue()
+        assertEquals("Unknown", burnTimeString)
     }
 
     @Test

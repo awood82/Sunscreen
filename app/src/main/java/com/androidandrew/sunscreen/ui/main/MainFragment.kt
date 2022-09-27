@@ -39,6 +39,10 @@ class MainFragment : Fragment() {
             Toast.makeText(context, "$sunUnits units", Toast.LENGTH_LONG).show()
         }
 
+        mainViewModel.vitaminDUnitsToday.observe(viewLifecycleOwner) { iu ->
+            Toast.makeText(context, "Vitamin D $iu IU", Toast.LENGTH_LONG).show()
+        }
+
         mainViewModel.networkResponse.observe(viewLifecycleOwner) { response ->
             android.util.Log.e("Sunscreen", response)
             Toast.makeText(context, "Response: $response", Toast.LENGTH_LONG).show()

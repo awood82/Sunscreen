@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.tracker.sunburn
 
+import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import java.lang.Double.min
@@ -25,8 +26,8 @@ object SunburnCalculator {
      */
     fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int,
                        spf: Int = spfNoSunscreen, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        val maxMinutes = minuteMagicNumber * getSkinBlockFactor(skinType) * spf /
-                (uvIndex * getAltitudeFactor(altitudeInKm) * getReflectionFactor(isOnSnowOrWater))
+        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * spf /
+                (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm) * UvFactor.getReflectionFactor(isOnSnowOrWater))
 
         return min(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, NO_BURN_EXPECTED)
     }
@@ -82,26 +83,5 @@ object SunburnCalculator {
         }
     }
 
-    private fun getSkinBlockFactor(type: Int): Int {
-        return when(type) {
-            1 -> 2
-            2 -> 3
-            3 -> 6
-            4 -> 9
-            5 -> 12
-            6 -> 15
-            else -> 0
-        }
-    }
 
-    private fun getReflectionFactor(isReflective: Boolean): Int {
-        return when(isReflective) {
-            false -> 1
-            true -> 2
-        }
-    }
-
-    private fun getAltitudeFactor(altitudeInKm: Int): Double {
-        return 1.0 + 0.15 * (altitudeInKm / 1000.0)
-    }
 }
