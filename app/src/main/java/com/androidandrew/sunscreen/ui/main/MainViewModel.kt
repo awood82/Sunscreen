@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.time.MinuteTimer
+import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
@@ -127,9 +128,9 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
             val additionalVitaminDIU = VitaminDCalculator.computeIUVitaminDInOneMinute(
                 uvIndex = it.getUvNow(LocalTime.now(clock)),
                 skinType = hardcodedSkinType,
+                clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
                 spf = VitaminDCalculator.spfNoSunscreen,
-                altitudeInKm = 0,
-                percentOfBodyExposed = 100.0
+                altitudeInKm = 0
             )
             _vitaminDUnitsToday.postValue((_vitaminDUnitsToday.value)?.plus(additionalVitaminDIU))
         }

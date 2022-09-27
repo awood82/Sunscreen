@@ -15,8 +15,8 @@ object VitaminDCalculator {
      * Uses a ratio estimated from time to sunburn in:
      * https://www.climate-policy-watcher.org/ultraviolet-radiation-2/calculation-of-optimal-times-for-exposure-to-sunlight.html
      */
-    fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, spf: Int = spfNoSunscreen,
-                                   altitudeInKm: Int = 0, percentOfBodyExposed: Double = 100.0): Double {
+    fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, clothing: UvFactor.Clothing,
+                                     spf: Int = spfNoSunscreen, altitudeInKm: Int = 0): Double {
         val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * spf /
                 (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm))
         val vitDConversionFactor = when {
@@ -25,6 +25,6 @@ object VitaminDCalculator {
             uvIndex >= 9 -> 0.1
             else -> return 0.0
         }
-        return recommendedIU * percentOfBodyExposed / 100.0 / (maxMinutes * vitDConversionFactor)
+        return recommendedIU * UvFactor.getSkinExposedFactor(clothing) / 100.0 / (maxMinutes * vitDConversionFactor)
     }
 }

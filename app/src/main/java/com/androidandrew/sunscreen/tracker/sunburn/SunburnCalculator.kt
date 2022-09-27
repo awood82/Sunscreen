@@ -4,6 +4,7 @@ import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import java.lang.Double.min
+import java.time.Duration
 import java.time.LocalTime
 
 /**
@@ -39,9 +40,32 @@ object SunburnCalculator {
     fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime = LocalTime.now(),
                        sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int = spfNoSunscreen,
                        altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        var maxMinutes = 0L // TODO: Use Double to get more accurate sun units for partial minutes
         var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
+        val minutesLeftInDay = Duration.between(currentTime, lastMinuteInDay)
+        var maxMinutes = 0.0
 
+        if (sunUnitsRemaining <= 0) {
+            return 0.0
+        }
+
+        while (maxMinutes < minutesLeftInDay.toMinutes()) {
+            val simulatedTime = currentTime.plusMinutes(maxMinutes.toLong())
+            val sunUnits = computeSunUnitsInOneMinute(
+                uvIndex = uvPrediction.getUvNow(simulatedTime),
+                skinType = skinType,
+                spf = spf,
+                altitudeInKm = altitudeInKm,
+                isOnSnowOrWater = isOnSnowOrWater
+            )
+            maxMinutes++
+            sunUnitsRemaining -= sunUnits
+            if (sunUnitsRemaining <= 0.0) {
+                // Adding a negative number will subtract a fraction of a minute
+                return maxMinutes + sunUnitsRemaining / sunUnits
+            }
+        }
+        return NO_BURN_EXPECTED
+/*
         while (sunUnitsRemaining > 0.0) {
             val simulatedTime = currentTime.plusMinutes(maxMinutes)
 
@@ -62,6 +86,7 @@ object SunburnCalculator {
         }
 
         return maxMinutes.toDouble()
+        */
     }
 
     /**

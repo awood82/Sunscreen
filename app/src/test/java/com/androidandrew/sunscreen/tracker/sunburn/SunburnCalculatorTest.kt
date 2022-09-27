@@ -9,6 +9,7 @@ import java.time.LocalTime
 class SunburnCalculatorTest {
     
     private val delta = 0.1
+    private val maxTimeDelta = 0.99
 
     // A baseline test to compare to the omni calculator website
     @Test
@@ -208,7 +209,7 @@ class SunburnCalculatorTest {
             isOnSnowOrWater = false
         )
 
-        assertEquals(45.0, maxTime, delta)
+        assertEquals(45.0, maxTime, maxTimeDelta)
     }
 
     // maxTime is 30 minutes w/ constant UV, so it should be more w/ falling UV
@@ -247,7 +248,7 @@ class SunburnCalculatorTest {
             isOnSnowOrWater = false
         )
 
-        assertEquals(15.0, maxTime, delta)
+        assertEquals(15.0, maxTime, maxTimeDelta)
     }
 
     @Test
@@ -267,7 +268,7 @@ class SunburnCalculatorTest {
             isOnSnowOrWater = false
         )
 
-        assertEquals(110.0, maxTime, delta)
+        assertEquals(110.0, maxTime, maxTimeDelta)
     }
 
     @Test
