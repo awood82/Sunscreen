@@ -24,7 +24,8 @@ class MainFragmentTest: BaseUiTest() {
     }
 
     @After
-    fun teardown() {
+    override fun tearDown() {
+        super.tearDown()
         try {
             fragmentScenario.withFragment { requireActivity().stopLockTask() }
         } catch (e: Exception) {
@@ -43,5 +44,15 @@ class MainFragmentTest: BaseUiTest() {
 
         onView(withId(R.id.startButton)).check(matches(isNotEnabled()))
         onView(withId(R.id.stopButton)).check(matches(isEnabled()))
+    }
+
+    @Test
+    fun init_sunburnPercent_isDisplayed() {
+        onView(withId(R.id.textSunburnProgress)).check(matches(withText("0%")))
+    }
+
+    @Test
+    fun init_vitaminD_IU_isDisplayed() {
+        onView(withId(R.id.textVitaminDProgress)).check(matches(withText("0 IU")))
     }
 }

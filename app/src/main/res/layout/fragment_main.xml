@@ -117,6 +117,28 @@
             app:layout_constraintStart_toStartOf="@id/progressVitaminD"
             app:layout_constraintTop_toBottomOf="@+id/textSunburn" />
 
+        <TextView
+            android:id="@+id/textSunburnProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@{viewModel.sunUnitsTrackingLabel}"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="@id/progressSunburn"
+            app:layout_constraintBottom_toBottomOf="@id/progressSunburn"
+            app:layout_constraintEnd_toEndOf="@id/progressSunburn" />
+
+        <TextView
+            android:id="@+id/textVitaminDProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@{viewModel.vitaminDTrackingLabel}"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="@id/progressVitaminD"
+            app:layout_constraintBottom_toBottomOf="@id/progressVitaminD"
+            app:layout_constraintEnd_toEndOf="@id/progressVitaminD" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

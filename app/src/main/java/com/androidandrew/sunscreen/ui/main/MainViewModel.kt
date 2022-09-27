@@ -29,9 +29,15 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
 
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
+    val sunUnitsTrackingLabel: LiveData<String> = Transformations.map(_sunUnitsToday) { units ->
+        "${units.toInt()}%"
+    }
 
     private val _vitaminDUnitsToday = MutableLiveData(0.0) // in IU. Studies recommend 400-1000-4000 IU.
     val vitaminDUnitsToday: LiveData<Double> = _vitaminDUnitsToday
+    val vitaminDTrackingLabel: LiveData<String> = Transformations.map(_vitaminDUnitsToday) { units ->
+        "${units.toInt()} IU"
+    }
 
     private val _minutesToBurn = MutableLiveData(0L)
     val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
