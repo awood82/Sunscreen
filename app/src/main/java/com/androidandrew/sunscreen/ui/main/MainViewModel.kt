@@ -3,7 +3,7 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.asUvPrediction
-import com.androidandrew.sunscreen.time.MinuteTimer
+import com.androidandrew.sunscreen.time.DelayedRepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
@@ -48,13 +48,13 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         }
     }
 
-    private val updateTimer = MinuteTimer(object : TimerTask() {
+    private val updateTimer = DelayedRepeatingTimer(object : TimerTask() {
         override fun run() {
             updateTimeToBurn()
         }
-    })
+    }, DelayedRepeatingTimer.ONE_MINUTE, DelayedRepeatingTimer.ONE_MINUTE)
 
-    private var trackingTimer: MinuteTimer? = null
+    private var trackingTimer: DelayedRepeatingTimer? = null
     private val _isStartTrackingEnabled = MutableLiveData(false)
     val isStartTrackingEnabled: LiveData<Boolean> = _isStartTrackingEnabled
 
@@ -76,13 +76,13 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         _isStartTrackingEnabled.value = true
     }
 
-    private fun createTrackingTimer(): MinuteTimer {
-        return MinuteTimer(object : TimerTask() {
+    private fun createTrackingTimer(): DelayedRepeatingTimer {
+        return DelayedRepeatingTimer(object : TimerTask() {
             override fun run() {
                 updateBurnProgress()
                 updateVitaminDProgress()
             }
-        })
+        }, DelayedRepeatingTimer.ONE_SECOND, DelayedRepeatingTimer.ONE_SECOND)
     }
 
     private fun refreshNetwork() {
@@ -124,7 +124,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 spf = SunburnCalculator.spfNoSunscreen,
                 altitudeInKm = 0,
                 isOnSnowOrWater = false
-            )
+            ) / 60.0 // TODO: Magic number, seconds in a minute
             _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits) )
         }
     }
@@ -137,7 +137,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
                 spf = VitaminDCalculator.spfNoSunscreen,
                 altitudeInKm = 0
-            )
+            ) / 60.0 // TODO: Magic number, seconds in a minute
             _vitaminDUnitsToday.postValue((_vitaminDUnitsToday.value)?.plus(additionalVitaminDIU))
         }
     }

@@ -35,19 +35,6 @@ class MainFragment : Fragment() {
         binding.viewModel = mainViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        mainViewModel.sunUnitsToday.observe(viewLifecycleOwner) { sunUnits ->
-            Toast.makeText(context, "$sunUnits units", Toast.LENGTH_LONG).show()
-        }
-
-        mainViewModel.vitaminDUnitsToday.observe(viewLifecycleOwner) { iu ->
-            Toast.makeText(context, "Vitamin D $iu IU", Toast.LENGTH_LONG).show()
-        }
-
-        mainViewModel.networkResponse.observe(viewLifecycleOwner) { response ->
-            android.util.Log.e("Sunscreen", response)
-            Toast.makeText(context, "Response: $response", Toast.LENGTH_LONG).show()
-        }
-
         return binding.root
     }
 }
