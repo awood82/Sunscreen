@@ -3,7 +3,7 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.asUvPrediction
-import com.androidandrew.sunscreen.time.DelayedRepeatingTimer
+import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
@@ -48,13 +48,13 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         }
     }
 
-    private val updateTimer = DelayedRepeatingTimer(object : TimerTask() {
+    private val updateTimer = RepeatingTimer(object : TimerTask() {
         override fun run() {
             updateTimeToBurn()
         }
-    }, DelayedRepeatingTimer.ONE_MINUTE, DelayedRepeatingTimer.ONE_MINUTE)
+    }, RepeatingTimer.ONE_MINUTE, RepeatingTimer.ONE_MINUTE)
 
-    private var trackingTimer: DelayedRepeatingTimer? = null
+    private var trackingTimer: RepeatingTimer? = null
     private val _isStartTrackingEnabled = MutableLiveData(false)
     val isStartTrackingEnabled: LiveData<Boolean> = _isStartTrackingEnabled
 
@@ -76,13 +76,13 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         _isStartTrackingEnabled.value = true
     }
 
-    private fun createTrackingTimer(): DelayedRepeatingTimer {
-        return DelayedRepeatingTimer(object : TimerTask() {
+    private fun createTrackingTimer(): RepeatingTimer {
+        return RepeatingTimer(object : TimerTask() {
             override fun run() {
                 updateBurnProgress()
                 updateVitaminDProgress()
             }
-        }, DelayedRepeatingTimer.ONE_SECOND, DelayedRepeatingTimer.ONE_SECOND)
+        }, RepeatingTimer.ONE_SECOND, RepeatingTimer.ONE_SECOND)
     }
 
     private fun refreshNetwork() {
