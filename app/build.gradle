@@ -36,6 +36,7 @@ android {
 
 ext {
     appCompatVersion = '1.5.1'
+    chartVersion = 'v3.1.0'
     constraintLayoutVersion = '2.1.4'
     coreVersion = '1.8.0'
     coreTestVersion = '2.1.0'
@@ -76,6 +77,9 @@ dependencies {
     // Moshi
     implementation "com.squareup.moshi:moshi:$moshiVersion"
     implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
+
+    // Graphs and charts
+    implementation "com.github.PhilJay:MPAndroidChart:$chartVersion"
 
     // Unit testing
     testImplementation "junit:junit:$junitVersion"

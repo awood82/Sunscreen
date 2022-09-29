@@ -7,8 +7,11 @@ import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
+import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -17,15 +20,14 @@ import java.util.*
 
 class MainViewModel(private val uvService: EpaService, private val clock: Clock) : ViewModel() {
 
-    // TODO: Remove hardcoded value
-    private val hardcodedSkinType = 2
+    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
     private val UNKNOWN_BURN_TIME = -1L
 
     private var networkJob: Job? = null
-    private var uvPrediction: UvPrediction? = null
 
-    private val _networkResponse = MutableLiveData<String>()
-    val networkResponse: LiveData<String> = _networkResponse
+    private var uvPrediction: UvPrediction? = null
+    private val _chartData = MutableLiveData<LineDataSet>()
+    val chartData: LiveData<LineDataSet> = _chartData
 
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
@@ -88,14 +90,14 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private fun refreshNetwork() {
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
+//            uvPrediction = hardcodedUvPrediction
             uvPrediction = try {
                 val response = uvService.getUvForecast("92123") // TODO: Remove hardcoded location
-                _networkResponse.postValue(response.toString())
                 response.asUvPrediction()
             } catch (e: Exception) {
-                _networkResponse.postValue(e.message)
                 null
             }
+            updateChart()
             updateTimeToBurn()
         }
     }
@@ -139,6 +141,19 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 altitudeInKm = 0
             ) / 60.0 // TODO: Magic number, seconds in a minute
             _vitaminDUnitsToday.postValue((_vitaminDUnitsToday.value)?.plus(additionalVitaminDIU))
+        }
+    }
+
+    private fun updateChart() {
+        uvPrediction?.let {
+            val entries = mutableListOf<Entry>()
+
+            // TODO: Remove leading and trailing 0's
+
+            for (point in uvPrediction!!) {
+                entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
+            }
+            _chartData.value = LineDataSet(entries, "UV Index")
         }
     }
 

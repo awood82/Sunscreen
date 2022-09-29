@@ -139,6 +139,15 @@
             app:layout_constraintBottom_toBottomOf="@id/progressVitaminD"
             app:layout_constraintEnd_toEndOf="@id/progressVitaminD" />
 
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/uvChart"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/startButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textTimeToBurn" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

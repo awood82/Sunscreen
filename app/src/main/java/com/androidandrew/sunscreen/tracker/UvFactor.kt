@@ -19,7 +19,6 @@ object UvFactor {
             Clothing.SHORTS_T_SHIRT -> 35.0
             Clothing.PANTS_T_SHIRT -> 25.0
             Clothing.PANTS_LONG_SLEEVE_SHIRT -> 11.0
-            else -> 1.0
         }
     }
 
