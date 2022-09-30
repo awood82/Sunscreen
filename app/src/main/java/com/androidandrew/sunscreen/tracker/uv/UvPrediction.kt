@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.tracker.uv
 
+import java.lang.Integer.min
 import java.time.Duration
 import java.time.LocalTime
 
@@ -19,7 +20,7 @@ fun UvPrediction.getNearestPoints(currentTime: LocalTime): UvPrediction {
     returnList.add(NO_PREDICTION_AFTER)
 
     var returnIndex = 0
-    for (i in 0..returnList.size) {
+    for (i in 0 until returnList.size) {
         if (!currentTime.isBefore(returnList[i].time)) {
             returnIndex = i
         } else {
@@ -39,4 +40,40 @@ fun UvPrediction.getUvNow(currentTime: LocalTime = LocalTime.now()): Double {
     val uvAdjustment = progress * uvDifference
 
     return prediction[0].uvIndex + uvAdjustment
+}
+
+/**
+ * Removes duplicate 0.0 values from the beginning and end of a UvPrediction list.
+ * Undefined behavior if all values are 0.0.
+ */
+fun UvPrediction.trim(): UvPrediction {
+    return this.trimLeadingZeroes().trimTrailingZeroes()
+}
+
+private fun UvPrediction.trimLeadingZeroes(): UvPrediction {
+    var numLeadingZeroes = 0
+    for (point in this) {
+        when (point.uvIndex) {
+            0.0 -> numLeadingZeroes++
+            else -> break
+        }
+    }
+    return when (numLeadingZeroes) {
+        0 -> this
+        else -> this.drop(numLeadingZeroes - 1)
+    }
+}
+
+private fun UvPrediction.trimTrailingZeroes(): UvPrediction {
+    var numTrailingZeroes = 0
+    for (point in this.reversed()) {
+        when (point.uvIndex) {
+            0.0 -> numTrailingZeroes++
+            else -> break
+        }
+    }
+    return when (numTrailingZeroes) {
+        0 -> this
+        else -> this.dropLast(numTrailingZeroes - 1)
+    }
 }

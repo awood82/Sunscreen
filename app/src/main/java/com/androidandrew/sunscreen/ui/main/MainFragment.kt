@@ -1,8 +1,7 @@
 package com.androidandrew.sunscreen.ui.main
 
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +10,7 @@ import androidx.fragment.app.Fragment
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
 import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.lang.Integer.min
 
 class MainFragment : Fragment() {
 
@@ -40,7 +37,11 @@ class MainFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
 
         mainViewModel.chartData.observe(viewLifecycleOwner) { lineDataSet ->
+            UvChartFormatter.formatDataSet(lineDataSet)
             binding.uvChart.apply {
+                UvChartFormatter.formatChart(
+                    lineChart = this,
+                    use24HourTime = DateFormat.is24HourFormat(requireContext()))
                 data = LineData(lineDataSet)
                 invalidate()
             }

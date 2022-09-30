@@ -9,6 +9,7 @@ import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import com.androidandrew.sunscreen.tracker.uv.trim
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
@@ -19,6 +20,26 @@ import java.time.LocalTime
 import java.util.*
 
 class MainViewModel(private val uvService: EpaService, private val clock: Clock) : ViewModel() {
+
+    // TODO: Remove hardcoded value
+    private val hardcodedUvPrediction = listOf(
+        UvPredictionPoint(LocalTime.NOON.minusHours(7), 0.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(6), 0.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(5), 0.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(4), 1.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(3), 3.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(2), 6.0),
+        UvPredictionPoint(LocalTime.NOON.minusHours(1), 10.0),
+        UvPredictionPoint(LocalTime.NOON, 12.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(1), 11.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(2), 8.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(3), 5.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(4), 3.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(5), 1.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(6), 0.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(7), 0.0),
+        UvPredictionPoint(LocalTime.NOON.plusHours(8), 0.0),
+    )
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
     private val UNKNOWN_BURN_TIME = -1L
@@ -88,15 +109,15 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     private fun refreshNetwork() {
+        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
-//            uvPrediction = hardcodedUvPrediction
-            uvPrediction = try {
+            /*uvPrediction = try {
                 val response = uvService.getUvForecast("92123") // TODO: Remove hardcoded location
-                response.asUvPrediction()
+                response.asUvPrediction().trim()
             } catch (e: Exception) {
                 null
-            }
+            }*/
             updateChart()
             updateTimeToBurn()
         }
@@ -153,7 +174,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
             for (point in uvPrediction!!) {
                 entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
             }
-            _chartData.value = LineDataSet(entries, "UV Index")
+            _chartData.value = LineDataSet(entries, "")
         }
     }
 

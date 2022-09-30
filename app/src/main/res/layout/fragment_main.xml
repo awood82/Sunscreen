@@ -143,7 +143,8 @@
             android:id="@+id/uvChart"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/startButton"
+            android:layout_margin="@dimen/default_margin"
+            app:layout_constraintDimensionRatio="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textTimeToBurn" />
