@@ -39,28 +39,16 @@
             tools:text="30 min" />
 
         <Button
-            android:id="@+id/startButton"
+            android:id="@+id/trackingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
-            android:text="@string/start_tracking"
-            android:enabled="@{viewModel.isStartTrackingEnabled()}"
-            android:onClick="@{() -> viewModel.onStartTracking()}"
+            android:enabled="@{viewModel.isTrackingEnabled()}"
+            android:onClick="@{() -> viewModel.onTrackingClicked()}"
+            android:text="@{viewModel.isCurrentlyTracking ? @string/stop_tracking : @string/start_tracking}"
             app:layout_constraintBottom_toTopOf="@+id/progressSunburn"
-            app:layout_constraintEnd_toStartOf="@+id/stopButton"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/stopButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:text="@string/stop_tracking"
-            android:enabled="@{!viewModel.isStartTrackingEnabled()}"
-            android:onClick="@{() -> viewModel.onStopTracking()}"
-            app:layout_constraintBottom_toBottomOf="@+id/startButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/startButton" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ProgressBar
             android:id="@+id/progressSunburn"
@@ -103,7 +91,7 @@
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="@id/progressSunburn"
             app:layout_constraintStart_toStartOf="@id/progressSunburn"
-            app:layout_constraintTop_toBottomOf="@+id/startButton" />
+            app:layout_constraintTop_toBottomOf="@+id/trackingButton" />
 
         <TextView
             android:id="@+id/textVitaminD"

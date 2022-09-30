@@ -78,25 +78,29 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }, RepeatingTimer.ONE_MINUTE, RepeatingTimer.ONE_MINUTE)
 
     private var trackingTimer: RepeatingTimer? = null
-    private val _isStartTrackingEnabled = MutableLiveData(false)
-    val isStartTrackingEnabled: LiveData<Boolean> = _isStartTrackingEnabled
+    private val _isTrackingEnabled = MutableLiveData(false)
+    val isTrackingEnabled: LiveData<Boolean> = _isTrackingEnabled
+    private val _isCurrentlyTracking = MutableLiveData(false)
+    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
 
     init {
         refreshNetwork()
         updateTimer.start()
     }
 
-    fun onStartTracking() {
+    fun onTrackingClicked() {
         trackingTimer?.cancel()
-        trackingTimer = createTrackingTimer().also {
-            it.start()
-            _isStartTrackingEnabled.value = false
+        when (_isCurrentlyTracking.value) {
+            true -> {
+                _isCurrentlyTracking.value = false
+            }
+            else -> {
+                trackingTimer = createTrackingTimer().also {
+                    it.start()
+                }
+                _isCurrentlyTracking.value = true
+            }
         }
-    }
-
-    fun onStopTracking() {
-        trackingTimer?.cancel()
-        _isStartTrackingEnabled.value = true
     }
 
     private fun createTrackingTimer(): RepeatingTimer {
@@ -109,17 +113,18 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     private fun refreshNetwork() {
-        uvPrediction = hardcodedUvPrediction.trim()
+//        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
-            /*uvPrediction = try {
+            uvPrediction = try {
                 val response = uvService.getUvForecast("92123") // TODO: Remove hardcoded location
                 response.asUvPrediction().trim()
             } catch (e: Exception) {
                 null
-            }*/
+            }
             updateChart()
             updateTimeToBurn()
+            _isTrackingEnabled.postValue(uvPrediction != null)
         }
     }
 

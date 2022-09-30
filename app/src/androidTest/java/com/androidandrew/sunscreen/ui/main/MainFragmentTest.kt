@@ -32,18 +32,42 @@ class MainFragmentTest: BaseUiTest() {
         }
     }
 
+    /* TODO: Setup forecast
+    @Test
+    fun init_ifUvForecastDoesNotExist_trackingIsDisabled() {
+        // TODO: Setup forecast
+        onView(withId(R.id.trackingButton)).apply {
+            check(matches(isNotEnabled()))
+            check(matches(withText(R.string.start_tracking)))
+        }
+    }*/
+
+    /* Disabled until user settings are no longer hardcoded
+    @Test
+    fun init_ifUserDoesNotExist_trackingIsDisabled() {
+        // TODO: Setup user
+        onView(withId(R.id.trackingButton)).apply {
+            check(matches(isNotEnabled()))
+            check(matches(withText(R.string.start_tracking)))
+        }
+    }*/
+
     @Test
     fun init_ifUserAndUvForecastExist_enablesStartTracking() {
-        onView(withId(R.id.startButton)).check(matches(isEnabled()))
-        onView(withId(R.id.stopButton)).check(matches(isNotEnabled()))
+        onView(withId(R.id.trackingButton)).apply {
+            check(matches(isEnabled()))
+            check(matches(withText(R.string.start_tracking)))
+        }
     }
 
     @Test
     fun whenTrackingStarted_stopIsEnabled() {
-        onView(withId(R.id.startButton)).perform(click())
+        onView(withId(R.id.trackingButton)).perform(click())
 
-        onView(withId(R.id.startButton)).check(matches(isNotEnabled()))
-        onView(withId(R.id.stopButton)).check(matches(isEnabled()))
+        onView(withId(R.id.trackingButton)).apply {
+            check(matches(isEnabled()))
+            check(matches(withText(R.string.stop_tracking)))
+        }
     }
 
     @Test

@@ -4,8 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sunscreen.network.FakeEpaService
 import com.androidandrew.sunscreen.util.getOrAwaitValue
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,11 +57,26 @@ class MainViewModelTest {
     }
 
     @Test
-    fun onStartTracking_canBeCalledMultipleTimes() {
+    fun onTrackingClicked_canBeCalledMultipleTimes() {
         createViewModel()
-        vm.onStartTracking()
-        vm.onStopTracking()
 
-        vm.onStartTracking()
+        vm.onTrackingClicked()
+        vm.onTrackingClicked()
+        vm.onTrackingClicked()
+    }
+
+    @Test
+    fun trackingButton_whenNoPredictionExists_isDisabled() {
+        fakeUvService.simulateError()
+        createViewModel()
+
+        assertFalse(vm.isTrackingEnabled.getOrAwaitValue())
+    }
+
+    @Test
+    fun trackingButton_whenPredictionExists_isEnabled() {
+        createViewModel()
+
+        assertTrue(vm.isTrackingEnabled.getOrAwaitValue())
     }
 }
