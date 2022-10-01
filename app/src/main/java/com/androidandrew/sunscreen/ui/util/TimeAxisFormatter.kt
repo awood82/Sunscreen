@@ -14,7 +14,7 @@ class TimeAxisFormatter(private val use24HourTime: Boolean) : ValueFormatter() {
     private fun getLocalTimeFormatter(): DateTimeFormatter {
         return when (use24HourTime) {
             true -> DateTimeFormatter.ofPattern("H:mm")
-            false -> DateTimeFormatter.ofPattern("h:mm a")
+            false -> DateTimeFormatter.ofPattern("ha")
         }
     }
 }
