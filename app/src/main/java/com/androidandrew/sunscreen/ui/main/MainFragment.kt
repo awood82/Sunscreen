@@ -9,7 +9,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
+import com.androidandrew.sunscreen.ui.util.UvChartFormatter
 import com.github.mikephil.charting.data.LineData
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainFragment : Fragment() {
@@ -20,6 +22,7 @@ class MainFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by viewModel()
     private lateinit var binding: FragmentMainBinding
+    private val chartFormatter: UvChartFormatter by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,9 +40,9 @@ class MainFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
 
         mainViewModel.chartData.observe(viewLifecycleOwner) { lineDataSet ->
-            UvChartFormatter.formatDataSet(lineDataSet)
+            chartFormatter.formatDataSet(lineDataSet)
             binding.uvChart.apply {
-                UvChartFormatter.formatChart(
+                chartFormatter.formatChart(
                     lineChart = this,
                     use24HourTime = DateFormat.is24HourFormat(requireContext()))
                 data = LineData(lineDataSet)

@@ -5,7 +5,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalTime
 
-class UvPredictionKtTest {
+class UvPredictionTest {
 
     private val midnight = LocalTime.MIDNIGHT
     private val fiveAm = LocalTime.NOON.minusHours(7)

@@ -1,11 +1,12 @@
-package com.androidandrew.sunscreen.ui.main
+package com.androidandrew.sunscreen.ui.util
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.LineDataSet
 
-object UvChartFormatter {
+class UvChartFormatter(private val context: Context) {
 
     private val colors = listOf(
         Color.parseColor("#FF004400"),
@@ -43,6 +44,7 @@ object UvChartFormatter {
             axisMaximum = 12.0f // Y-axis goes a little past extreme UV 11
             granularity = 1.0f
             isGranularityEnabled = true
+//            textColor = context.resolveColorAttr
         }
         lineChart.axisRight.apply {
             isEnabled = false
