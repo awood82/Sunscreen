@@ -103,4 +103,7 @@ dependencies {
 
     androidTestImplementation "androidx.test.ext:junit:$junitTestExtVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+
+    testImplementation project(":sharedTest")
+    androidTestImplementation project(":sharedTest")
 }

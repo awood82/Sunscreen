@@ -1,5 +1,8 @@
-package com.androidandrew.sunscreen.network
+package com.androidandrew.sharedtest.network
 
+import com.androidandrew.sunscreen.network.DailyUvIndexForecast
+import com.androidandrew.sunscreen.network.EpaService
+import com.androidandrew.sunscreen.network.HourlyUvIndexForecast
 import java.io.IOException
 
 class FakeEpaService : EpaService {

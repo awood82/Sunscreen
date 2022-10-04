@@ -2,7 +2,8 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sunscreen.network.FakeEpaService
+import com.androidandrew.sharedtest.network.FakeEpaService
+import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.util.getOrAwaitValue
 import org.junit.Assert.*
 import org.junit.Rule
@@ -20,10 +21,8 @@ class MainViewModelTest {
 
     private lateinit var vm: MainViewModel
     private val fakeUvService = FakeEpaService()
-    private val noon = Instant.parse("2022-09-25T12:00:00.00Z")
-    private val clockDefaultNoon = Clock.fixed(noon, ZoneId.of("UTC"))
 
-    private fun createViewModel(clock: Clock = clockDefaultNoon) {
+    private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
         vm = MainViewModel(fakeUvService, clock)
     }
 
@@ -40,7 +39,7 @@ class MainViewModelTest {
 
     @Test
     fun burnTimeString_ifNoBurnExpected_isNotSet() {
-        val clock6pm = Clock.offset(clockDefaultNoon, Duration.ofHours(6))
+        val clock6pm = Clock.offset(FakeData.clockDefaultNoon, Duration.ofHours(6))
         createViewModel(clock6pm)
 
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
