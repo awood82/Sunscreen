@@ -62,7 +62,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         "${units.toInt()} IU"
     }
 
-    private val _minutesToBurn = MutableLiveData(0L)
+    private val _minutesToBurn = MutableLiveData<Long>()
     val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
         when (minutes) {
             UNKNOWN_BURN_TIME -> "Unknown"
