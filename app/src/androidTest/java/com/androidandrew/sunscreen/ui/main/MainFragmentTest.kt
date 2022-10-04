@@ -7,10 +7,14 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.di.testModule
+import com.androidandrew.sunscreen.network.EpaService
+import com.androidandrew.sunscreen.network.FakeEpaService
 import com.androidandrew.sunscreen.util.BaseUiTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.koin.java.KoinJavaComponent.inject
 
 class MainFragmentTest: BaseUiTest() {
 

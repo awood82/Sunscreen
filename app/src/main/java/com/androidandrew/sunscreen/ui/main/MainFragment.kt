@@ -40,13 +40,16 @@ class MainFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
 
         mainViewModel.chartData.observe(viewLifecycleOwner) { lineDataSet ->
-            chartFormatter.formatDataSet(lineDataSet)
-            binding.uvChart.apply {
-                chartFormatter.formatChart(
-                    lineChart = this,
-                    use24HourTime = DateFormat.is24HourFormat(requireContext()))
-                data = LineData(lineDataSet)
-                invalidate()
+            lineDataSet?.let {
+                chartFormatter.formatDataSet(lineDataSet)
+                binding.uvChart.apply {
+                    chartFormatter.formatChart(
+                        lineChart = this,
+                        use24HourTime = DateFormat.is24HourFormat(requireContext())
+                    )
+                    data = LineData(lineDataSet)
+                    invalidate()
+                }
             }
         }
 
