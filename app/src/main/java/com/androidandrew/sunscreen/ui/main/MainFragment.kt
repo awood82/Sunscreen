@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
-import com.androidandrew.sunscreen.ui.util.UvChartFormatter
+import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.github.mikephil.charting.data.LineData
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -48,6 +48,10 @@ class MainFragment : Fragment() {
                 data = LineData(lineDataSet)
                 invalidate()
             }
+        }
+
+        mainViewModel.chartHighlightValue.observe(viewLifecycleOwner) { x ->
+            binding.uvChart.highlightValue(x, 0)
         }
 
         return binding.root

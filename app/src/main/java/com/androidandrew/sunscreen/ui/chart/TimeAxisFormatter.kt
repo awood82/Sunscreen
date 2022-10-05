@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.util
+package com.androidandrew.sunscreen.ui.chart
 
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.formatter.ValueFormatter

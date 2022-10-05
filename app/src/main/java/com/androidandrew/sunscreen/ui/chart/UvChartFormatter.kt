@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.util
+package com.androidandrew.sunscreen.ui.chart
 
 import android.content.Context
 import android.content.res.Configuration
@@ -48,6 +48,8 @@ class UvChartFormatter(context: Context) {
         lineChart.xAxis.apply {
             textColor = primaryTextColor
             valueFormatter = TimeAxisFormatter(use24HourTime)
+            granularity = 0.1f
+            isGranularityEnabled = true
         }
         lineChart.axisLeft.apply {
             textColor = primaryTextColor
@@ -75,5 +77,8 @@ class UvChartFormatter(context: Context) {
             GradientDrawable.Orientation.BOTTOM_TOP,
             uvColors.subList(0, upperColorIndex).toIntArray())
         lineDataSet.fillDrawable = dynamicGradient
+
+        lineDataSet.isHighlightEnabled = true
+        lineDataSet.valueFormatter = UvValueFormatter()
     }
 }

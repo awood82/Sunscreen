@@ -49,6 +49,8 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private var uvPrediction: UvPrediction? = null
     private val _chartData = MutableLiveData<LineDataSet>()
     val chartData: LiveData<LineDataSet> = _chartData
+    private val _chartHighlightValue = MutableLiveData<Float>()
+    val chartHighlightValue: LiveData<Float> = _chartHighlightValue
 
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
@@ -74,6 +76,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val updateTimer = RepeatingTimer(object : TimerTask() {
         override fun run() {
             updateTimeToBurn()
+            updateChartTimeSelection()
         }
     }, RepeatingTimer.ONE_MINUTE, RepeatingTimer.ONE_MINUTE)
 
@@ -123,6 +126,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 null
             }
             updateChart()
+            updateChartTimeSelection()
             updateTimeToBurn()
             _isTrackingEnabled.postValue(uvPrediction != null)
         }
@@ -174,12 +178,16 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         uvPrediction?.let {
             val entries = mutableListOf<Entry>()
 
-            // TODO: Remove leading and trailing 0's
-
             for (point in uvPrediction!!) {
                 entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
             }
-            _chartData.value = LineDataSet(entries, "")
+            _chartData.postValue(LineDataSet(entries, ""))
+        }
+    }
+
+    private fun updateChartTimeSelection() {
+        with (LocalTime.now(clock)) {
+            _chartHighlightValue.postValue( (hour + minute / 60.0).toFloat() )
         }
     }
 
