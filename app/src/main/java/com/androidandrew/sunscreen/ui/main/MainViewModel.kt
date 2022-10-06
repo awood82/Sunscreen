@@ -45,8 +45,10 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val UNKNOWN_BURN_TIME = -1L
 
     private var networkJob: Job? = null
-
     private var uvPrediction: UvPrediction? = null
+    private val _snackbarMessage = MutableLiveData<String>()
+    val snackbarMessage: LiveData<String> = _snackbarMessage
+
     private val _chartData = MutableLiveData<LineDataSet>()
     val chartData: LiveData<LineDataSet> = _chartData
     private val _chartHighlightValue = MutableLiveData<Float>()
@@ -55,7 +57,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val _sunUnitsToday = MutableLiveData(0.0) // ~100.0 means almost-certain sunburn
     val sunUnitsToday: LiveData<Double> = _sunUnitsToday
     val sunUnitsTrackingLabel: LiveData<String> = Transformations.map(_sunUnitsToday) { units ->
-        "${units.toInt()}%"
+        "${units.toInt()} %"
     }
 
     private val _vitaminDUnitsToday = MutableLiveData(0.0) // in IU. Studies recommend 400-1000-4000 IU.
@@ -119,14 +121,16 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     private fun refreshNetwork() {
+        android.util.Log.e("EPA", "refreshNetwork")
 //        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
-            uvPrediction = try {
+            try {
                 val response = uvService.getUvForecast("92123") // TODO: Remove hardcoded location
-                response.asUvPrediction().trim()
+                uvPrediction = response.asUvPrediction().trim()
             } catch (e: Exception) {
-                null
+//                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
+                _snackbarMessage.postValue(e.message)
             }
             updateChart()
             updateChartTimeSelection()
@@ -188,8 +192,10 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     private fun updateChartTimeSelection() {
-        with (LocalTime.now(clock)) {
-            _chartHighlightValue.postValue( (hour + minute / 60.0).toFloat() )
+        uvPrediction?.let {
+            with(LocalTime.now(clock)) {
+                _chartHighlightValue.postValue((hour + minute / 60.0).toFloat())
+            }
         }
     }
 

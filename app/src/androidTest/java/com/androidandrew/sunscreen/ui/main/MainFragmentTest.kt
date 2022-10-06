@@ -6,13 +6,11 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
 class MainFragmentTest: BaseUiTest() {
 
@@ -74,7 +72,7 @@ class MainFragmentTest: BaseUiTest() {
 
     @Test
     fun init_sunburnPercent_isDisplayed() {
-        onView(withId(R.id.textSunburnProgress)).check(matches(withText("0%")))
+        onView(withId(R.id.textSunburnProgress)).check(matches(withText("0 %")))
     }
 
     @Test

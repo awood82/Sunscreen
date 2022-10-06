@@ -12,8 +12,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import androidx.test.platform.app.InstrumentationRegistry
+import com.androidandrew.sharedtest.network.FakeEpaService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -35,7 +35,7 @@ abstract class BaseUiTest {
 
     @After
     open fun tearDown() {
-        // Do nothing
+        FakeEpaService.exception = null
     }
 
     private fun setupNavController() {

@@ -11,6 +11,7 @@ import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.github.mikephil.charting.data.LineData
+import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -52,6 +53,10 @@ class MainFragment : Fragment() {
 
         mainViewModel.chartHighlightValue.observe(viewLifecycleOwner) { x ->
             binding.uvChart.highlightValue(x, 0)
+        }
+
+        mainViewModel.snackbarMessage.observe(viewLifecycleOwner) { message ->
+            Snackbar.make(binding.main, message, Snackbar.LENGTH_INDEFINITE).show()
         }
 
         return binding.root

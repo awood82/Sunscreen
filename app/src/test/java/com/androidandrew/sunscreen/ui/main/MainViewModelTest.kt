@@ -5,10 +5,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.util.getOrAwaitValue
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.IOException
 //import org.robolectric.annotation.LooperMode
 import java.time.*
 
@@ -20,10 +22,15 @@ class MainViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var vm: MainViewModel
-    private val fakeUvService = FakeEpaService()
+    private val fakeUvService = FakeEpaService
 
     private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
         vm = MainViewModel(fakeUvService, clock)
+    }
+
+    @After
+    fun tearDown() {
+        fakeUvService.exception = null
     }
 
     @Test
@@ -48,7 +55,7 @@ class MainViewModelTest {
 
     @Test
     fun burnTimeString_ifNoNetworkConnection_isUnknown() {
-        fakeUvService.simulateError()
+        fakeUvService.exception = IOException()
         createViewModel()
 
         val burnTimeString = vm.burnTimeString.getOrAwaitValue()
@@ -66,7 +73,7 @@ class MainViewModelTest {
 
     @Test
     fun trackingButton_whenNoPredictionExists_isDisabled() {
-        fakeUvService.simulateError()
+        fakeUvService.exception = IOException()
         createViewModel()
 
         assertFalse(vm.isTrackingEnabled.getOrAwaitValue())
@@ -124,5 +131,13 @@ class MainViewModelTest {
 
         vm.spf = "51"
         assertEquals(50, vm.getSpfClamped())
+    }
+
+    @Test
+    fun networkError_triggersSnackbar() {
+        fakeUvService.exception = IOException("Network error")
+        createViewModel()
+
+        assertEquals("Network error", vm.snackbarMessage.getOrAwaitValue())
     }
 }

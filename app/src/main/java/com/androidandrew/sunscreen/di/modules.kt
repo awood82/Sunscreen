@@ -9,7 +9,9 @@ import org.koin.dsl.module
 import java.time.Clock
 
 val appModule = module {
+    single { EpaApi.service }
+
     factory { UvChartFormatter(androidContext()) }
 
-    viewModel { MainViewModel(EpaApi.service, Clock.systemDefaultZone()) }
+    viewModel { MainViewModel(get(), Clock.systemDefaultZone()) }
 }
