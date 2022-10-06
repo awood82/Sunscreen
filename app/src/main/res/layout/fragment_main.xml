@@ -42,7 +42,8 @@
             android:id="@+id/trackingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
             android:enabled="@{viewModel.isTrackingEnabled()}"
             android:onClick="@{() -> viewModel.onTrackingClicked()}"
             android:text="@{viewModel.isCurrentlyTracking ? @string/stop_tracking : @string/start_tracking}"
@@ -65,10 +66,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
-            android:ems="3"
+            android:ems="2"
             android:hint="@string/spf_hint"
             android:inputType="number"
             android:text="@={viewModel.spf}"
+            android:textAlignment="center"
             android:afterTextChanged="@{()->viewModel.onSpfChanged()}"
             app:layout_constraintStart_toEndOf="@id/textSpf"
             app:layout_constraintBaseline_toBaselineOf="@id/checkBoxSnowOrWater" />
@@ -125,7 +127,7 @@
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="@id/progressSunburn"
             app:layout_constraintStart_toStartOf="@id/progressSunburn"
-            app:layout_constraintTop_toBottomOf="@+id/editSpf" />
+            app:layout_constraintTop_toBottomOf="@+id/checkBoxSnowOrWater" />
 
         <TextView
             android:id="@+id/textVitaminD"

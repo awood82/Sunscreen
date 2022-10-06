@@ -148,7 +148,6 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
             )
         } ?: UNKNOWN_BURN_TIME
         _minutesToBurn.postValue(minutesToBurn.toLong())
-        println("Minutes = $minutesToBurn")
     }
 
     private fun updateBurnProgress() {
