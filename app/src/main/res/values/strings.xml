@@ -5,4 +5,7 @@
     <string name="sunburn_progress">Sunburn</string>
     <string name="vitamin_d">Vitamin D</string>
     <string name="could_burn">You could burn in</string>
+    <string name="spf">SPF</string>
+    <string name="spf_hint">1</string>
+    <string name="snow_or_water">On snow or water</string>
 </resources>

@@ -78,4 +78,51 @@ class MainViewModelTest {
 
         assertTrue(vm.isTrackingEnabled.getOrAwaitValue())
     }
+
+    @Test
+    fun onSnowOrWaterChanged_togglesValue() {
+        createViewModel()
+        val startingValue = vm.isOnSnowOrWater
+
+        vm.onSnowOrWaterChanged()
+        assertEquals(!startingValue, vm.isOnSnowOrWater)
+
+        vm.onSnowOrWaterChanged()
+        assertEquals(startingValue, vm.isOnSnowOrWater)
+    }
+
+    @Test
+    fun onSnowOrWaterChanged_changesBurnEstimate() {
+        createViewModel()
+        // Assumes that the box starts unchecked
+        val startingBurnTime = vm.burnTimeString.getOrAwaitValue()
+
+        vm.onSnowOrWaterChanged()
+        val endingBurnTime = vm.burnTimeString.getOrAwaitValue()
+
+        assertNotEquals(startingBurnTime, endingBurnTime)
+    }
+
+    @Test
+    fun getSpfClamped_clampsBetween1and50() {
+        createViewModel()
+
+        vm.spf = "0"
+        assertEquals(1, vm.getSpfClamped())
+
+        vm.spf = "1"
+        assertEquals(1, vm.getSpfClamped())
+
+        vm.spf = "-1"
+        assertEquals(1, vm.getSpfClamped())
+
+        vm.spf = ""
+        assertEquals(1, vm.getSpfClamped())
+
+        vm.spf = "50"
+        assertEquals(50, vm.getSpfClamped())
+
+        vm.spf = "51"
+        assertEquals(50, vm.getSpfClamped())
+    }
 }

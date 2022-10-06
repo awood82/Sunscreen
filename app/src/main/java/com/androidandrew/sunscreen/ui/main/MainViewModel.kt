@@ -86,6 +86,9 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val _isCurrentlyTracking = MutableLiveData(false)
     val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
 
+    var isOnSnowOrWater = false
+    var spf = "1"
+
     init {
         refreshNetwork()
         updateTimer.start()
@@ -139,9 +142,9 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 currentTime = LocalTime.now(clock),
                 sunUnitsSoFar = _sunUnitsToday.value!!,
                 skinType = hardcodedSkinType,
-                spf = SunburnCalculator.spfNoSunscreen,
+                spf = getSpfClamped(),
                 altitudeInKm = 0,
-                isOnSnowOrWater = false
+                isOnSnowOrWater = isOnSnowOrWater
             )
         } ?: UNKNOWN_BURN_TIME
         _minutesToBurn.postValue(minutesToBurn.toLong())
@@ -153,9 +156,9 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
             val additionalSunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
                 uvIndex = it.getUvNow(LocalTime.now(clock)),
                 skinType = hardcodedSkinType,
-                spf = SunburnCalculator.spfNoSunscreen,
+                spf = getSpfClamped(),
                 altitudeInKm = 0,
-                isOnSnowOrWater = false
+                isOnSnowOrWater = isOnSnowOrWater
             ) / 60.0 // TODO: Magic number, seconds in a minute
             _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits) )
         }
@@ -167,7 +170,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 uvIndex = it.getUvNow(LocalTime.now(clock)),
                 skinType = hardcodedSkinType,
                 clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
-                spf = VitaminDCalculator.spfNoSunscreen,
+                spf = getSpfClamped(),
                 altitudeInKm = 0
             ) / 60.0 // TODO: Magic number, seconds in a minute
             _vitaminDUnitsToday.postValue((_vitaminDUnitsToday.value)?.plus(additionalVitaminDIU))
@@ -188,6 +191,26 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private fun updateChartTimeSelection() {
         with (LocalTime.now(clock)) {
             _chartHighlightValue.postValue( (hour + minute / 60.0).toFloat() )
+        }
+    }
+
+    fun onSnowOrWaterChanged() {
+        isOnSnowOrWater = !isOnSnowOrWater
+        updateTimeToBurn()
+    }
+
+    fun onSpfChanged() {
+        android.util.Log.e("Burn", "spf = $spf, clamped = ${getSpfClamped()}")
+        updateTimeToBurn()
+    }
+
+    fun getSpfClamped(): Int {
+        val spfInt = spf.toIntOrNull()
+        return when {
+            spfInt == null -> 1
+            spfInt > 50 -> 50
+            spfInt < 1 -> 1
+            else -> spfInt
         }
     }
 

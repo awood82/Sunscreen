@@ -46,9 +46,43 @@
             android:enabled="@{viewModel.isTrackingEnabled()}"
             android:onClick="@{() -> viewModel.onTrackingClicked()}"
             android:text="@{viewModel.isCurrentlyTracking ? @string/stop_tracking : @string/start_tracking}"
-            app:layout_constraintBottom_toTopOf="@+id/progressSunburn"
+            app:layout_constraintBottom_toTopOf="@+id/checkBoxSnowOrWater"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textSpf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/spf"
+            app:layout_constraintBaseline_toBaselineOf="@id/editSpf"
+            app:layout_constraintEnd_toStartOf="@id/editSpf"
+            app:layout_constraintStart_toStartOf="@+id/progressSunburn" />
+
+        <EditText
+            android:id="@+id/editSpf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:ems="3"
+            android:hint="@string/spf_hint"
+            android:inputType="number"
+            android:text="@={viewModel.spf}"
+            android:afterTextChanged="@{()->viewModel.onSpfChanged()}"
+            app:layout_constraintStart_toEndOf="@id/textSpf"
+            app:layout_constraintBaseline_toBaselineOf="@id/checkBoxSnowOrWater" />
+
+        <CheckBox
+            android:id="@+id/checkBoxSnowOrWater"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/snow_or_water"
+            android:checked="@{viewModel.isOnSnowOrWater}"
+            android:onClick="@{()->viewModel.onSnowOrWaterChanged()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/progressSunburn" />
 
         <ProgressBar
             android:id="@+id/progressSunburn"
@@ -91,7 +125,7 @@
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="@id/progressSunburn"
             app:layout_constraintStart_toStartOf="@id/progressSunburn"
-            app:layout_constraintTop_toBottomOf="@+id/trackingButton" />
+            app:layout_constraintTop_toBottomOf="@+id/editSpf" />
 
         <TextView
             android:id="@+id/textVitaminD"
@@ -132,7 +166,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="@dimen/default_margin"
-            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintDimensionRatio="1.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textTimeToBurn" />
