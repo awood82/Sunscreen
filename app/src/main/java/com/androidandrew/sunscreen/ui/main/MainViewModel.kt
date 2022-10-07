@@ -21,6 +21,10 @@ import java.util.*
 
 class MainViewModel(private val uvService: EpaService, private val clock: Clock) : ViewModel() {
 
+    companion object {
+        private val UNKNOWN_BURN_TIME = -1L
+        private val ZIP_CODE_LENGTH = 5
+    }
     // TODO: Remove hardcoded value
     private val hardcodedUvPrediction = listOf(
         UvPredictionPoint(LocalTime.NOON.minusHours(7), 0.0),
@@ -42,7 +46,6 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     )
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
-    private val UNKNOWN_BURN_TIME = -1L
 
     private var networkJob: Job? = null
     private var uvPrediction: UvPrediction? = null
@@ -88,6 +91,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val _isCurrentlyTracking = MutableLiveData(false)
     val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
 
+    var location = "92123"
     var isOnSnowOrWater = false
     var spf = "1"
 
@@ -99,9 +103,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     fun onTrackingClicked() {
         trackingTimer?.cancel()
         when (_isCurrentlyTracking.value) {
-            true -> {
-                _isCurrentlyTracking.value = false
-            }
+            true -> _isCurrentlyTracking.value = false
             else -> {
                 trackingTimer = createTrackingTimer().also {
                     it.start()
@@ -121,12 +123,11 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     }
 
     private fun refreshNetwork() {
-        android.util.Log.e("EPA", "refreshNetwork")
 //        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
             try {
-                val response = uvService.getUvForecast("92123") // TODO: Remove hardcoded location
+                val response = uvService.getUvForecast(location)
                 uvPrediction = response.asUvPrediction().trim()
             } catch (e: Exception) {
 //                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
@@ -204,8 +205,14 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         updateTimeToBurn()
     }
 
+    fun onLocationChanged() {
+        if (location.length == ZIP_CODE_LENGTH
+            && location.toIntOrNull() != null) {
+            refreshNetwork()
+        }
+    }
+
     fun onSpfChanged() {
-        android.util.Log.e("Burn", "spf = $spf, clamped = ${getSpfClamped()}")
         updateTimeToBurn()
     }
 

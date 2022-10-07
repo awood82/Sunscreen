@@ -4,6 +4,7 @@
     <string name="stop_tracking">Stop Tracking</string>
     <string name="sunburn_progress">Sunburn</string>
     <string name="vitamin_d">Vitamin D</string>
+    <string name="location">Location</string>
     <string name="could_burn">You could burn in</string>
     <string name="spf">SPF</string>
     <string name="spf_hint">1</string>
