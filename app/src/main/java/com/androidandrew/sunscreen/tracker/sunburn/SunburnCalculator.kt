@@ -6,6 +6,7 @@ import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import java.lang.Double.min
 import java.time.Duration
 import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 
 /**
  * Computes maximum time in the sun based on these factors:
@@ -16,7 +17,7 @@ object SunburnCalculator {
 
     const val maxSunUnits = 100.0
     const val spfNoSunscreen = 1
-    const val NO_BURN_EXPECTED = 60 * 24.0 // minutes in a day
+    val NO_BURN_EXPECTED = TimeUnit.DAYS.toMinutes(1).toDouble()
 
     private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
     private val lastMinuteInDay = LocalTime.MIDNIGHT.minusMinutes(1).minusNanos(1)

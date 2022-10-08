@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalTime
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class MainViewModel(private val uvService: EpaService, private val clock: Clock) : ViewModel() {
 
@@ -83,7 +84,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
             updateTimeToBurn()
             updateChartTimeSelection()
         }
-    }, RepeatingTimer.ONE_MINUTE, RepeatingTimer.ONE_MINUTE)
+    }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
     private var trackingTimer: RepeatingTimer? = null
     private val _isTrackingEnabled = MutableLiveData(false)
@@ -119,7 +120,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 updateBurnProgress()
                 updateVitaminDProgress()
             }
-        }, RepeatingTimer.ONE_SECOND, RepeatingTimer.ONE_SECOND)
+        }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
     }
 
     private fun refreshNetwork() {
@@ -163,7 +164,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 spf = getSpfClamped(),
                 altitudeInKm = 0,
                 isOnSnowOrWater = isOnSnowOrWater
-            ) / 60.0 // TODO: Magic number, seconds in a minute
+            ) / TimeUnit.MINUTES.toSeconds(1)
             _sunUnitsToday.postValue( (_sunUnitsToday.value)?.plus(additionalSunUnits) )
         }
     }
@@ -176,7 +177,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
                 clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
                 spf = getSpfClamped(),
                 altitudeInKm = 0
-            ) / 60.0 // TODO: Magic number, seconds in a minute
+            ) / TimeUnit.MINUTES.toSeconds(1)
             _vitaminDUnitsToday.postValue((_vitaminDUnitsToday.value)?.plus(additionalVitaminDIU))
         }
     }
@@ -195,7 +196,7 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private fun updateChartTimeSelection() {
         uvPrediction?.let {
             with(LocalTime.now(clock)) {
-                _chartHighlightValue.postValue((hour + minute / 60.0).toFloat())
+                _chartHighlightValue.postValue((hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat())
             }
         }
     }
