@@ -6,10 +6,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.database.UserSettingsDao
 
-class FakeDatabase {
+object FakeDatabase {
 
     var db: SunscreenDatabase
-    var dao: UserSettingsDao
 
     init {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -17,6 +16,10 @@ class FakeDatabase {
             // Allowing main thread queries, just for testing
             .allowMainThreadQueries()
             .build()
-        dao = db.userSettingsDao
+    }
+
+    fun clearDatabase() {
+        db.userTrackingDao.deleteAll()
+        db.userSettingsDao.deleteAll()
     }
 }

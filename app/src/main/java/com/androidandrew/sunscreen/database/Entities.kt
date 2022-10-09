@@ -12,3 +12,15 @@ data class UserSetting constructor(
     @ColumnInfo(name="value")
     var value: String
 )
+
+@Entity(tableName = "user_tracking_table")
+data class UserTracking constructor(
+    @PrimaryKey(autoGenerate = false)
+    var date: String,
+
+    @ColumnInfo(name="burn_progress")
+    var burnProgress: Double,
+
+    @ColumnInfo(name="vitamin_d_progress")
+    var vitaminDProgress: Double
+)

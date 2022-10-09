@@ -7,6 +7,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
+import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiTest

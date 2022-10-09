@@ -13,6 +13,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sharedtest.network.FakeEpaService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -29,13 +30,14 @@ abstract class BaseUiTest {
 
     @Before
     open fun setup() {
-//        TestUtil.clearDatabase()
         setupNavController()
+        FakeDatabase.clearDatabase()
     }
 
     @After
     open fun tearDown() {
         FakeEpaService.exception = null
+        FakeDatabase.clearDatabase()
     }
 
     private fun setupNavController() {

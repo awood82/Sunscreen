@@ -10,8 +10,8 @@ import org.koin.dsl.module
 
 val testModule = module {
     single { FakeEpaService }
-//    single { FakeDatabase().db }
-    single { SunscreenRepository(FakeDatabase().db, FakeData.clockDefaultNoon) }
+    single { FakeDatabase.db }
+    single { SunscreenRepository(FakeDatabase.db, FakeData.clockDefaultNoon) }
 
     viewModel { MainViewModel(FakeEpaService, get(), FakeData.clockDefaultNoon) }
 }

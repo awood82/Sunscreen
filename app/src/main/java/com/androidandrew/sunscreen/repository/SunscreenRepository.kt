@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.database.UserSetting
 import com.androidandrew.sunscreen.database.UserSettingsDao
+import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,6 +12,18 @@ import java.time.Clock
 
 class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock,
                           private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+
+    fun getUserTrackingInfo(date: String): LiveData<UserTracking?> {
+//        withContext(dispatcher) {
+        return database.userTrackingDao.getSync(date)
+//        }
+    }
+
+    suspend fun setUserTrackingInfo(tracking: UserTracking) {
+        withContext(dispatcher) {
+            database.userTrackingDao.insert(tracking)
+        }
+    }
 
     suspend fun getLocation(): String? {
         return readStringSetting(UserSettingsDao.LOCATION)?.value
