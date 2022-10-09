@@ -7,7 +7,7 @@ import java.time.ZoneId
 
 class FakeData {
     companion object {
-        val zip = "92123"
+        val zip = "12345"
         val dateNetworkFormatted = "Sep/25/2022"
         val nextDateNetworkFormatted = "Sep/26/2022"
         val localDate = LocalDate.of(2022, 9, 25)

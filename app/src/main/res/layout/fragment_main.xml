@@ -23,11 +23,20 @@
             android:layout_margin="@dimen/default_margin"
             android:hint="@string/location"
             android:inputType="textPostalAddress"
-            android:text="@={viewModel.location}"
-            android:afterTextChanged="@{()->viewModel.onLocationChanged()}"
-            app:layout_constraintTop_toTopOf="parent"
+            android:text="@={viewModel.locationEditText}"
+            app:layout_constraintEnd_toStartOf="@+id/search"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_menu_search"
+            android:onClick="@{() -> viewModel.onSearchLocation()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/editLocation"
+            app:layout_constraintBottom_toBottomOf="@id/editLocation" />
 
         <TextView
             android:id="@+id/textYouCouldBurn"

@@ -4,8 +4,10 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.withFragment
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
+import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiTest
 import org.junit.After
@@ -32,15 +34,18 @@ class MainFragmentTest: BaseUiTest() {
         }
     }
 
-    /* TODO: Setup forecast
+    private fun searchZip(zip: String = FakeData.zip) {
+        onView(withId(R.id.editLocation)).perform(typeText(zip))
+        onView(withId(R.id.search)).perform(click())
+    }
+
     @Test
     fun init_ifUvForecastDoesNotExist_trackingIsDisabled() {
-        // TODO: Setup forecast
         onView(withId(R.id.trackingButton)).apply {
             check(matches(isNotEnabled()))
             check(matches(withText(R.string.start_tracking)))
         }
-    }*/
+    }
 
     /* Disabled until user settings are no longer hardcoded
     @Test
@@ -53,7 +58,9 @@ class MainFragmentTest: BaseUiTest() {
     }*/
 
     @Test
-    fun init_ifUserAndUvForecastExist_enablesStartTracking() {
+    fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() {
+        searchZip()
+
         onView(withId(R.id.trackingButton)).apply {
             check(matches(isEnabled()))
             check(matches(withText(R.string.start_tracking)))
@@ -62,6 +69,8 @@ class MainFragmentTest: BaseUiTest() {
 
     @Test
     fun whenTrackingStarted_stopIsEnabled() {
+        searchZip()
+
         onView(withId(R.id.trackingButton)).perform(click())
 
         onView(withId(R.id.trackingButton)).apply {

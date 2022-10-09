@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.asUvPrediction
+import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
@@ -20,7 +21,8 @@ import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class MainViewModel(private val uvService: EpaService, private val clock: Clock) : ViewModel() {
+class MainViewModel(private val uvService: EpaService, private val repository: SunscreenRepository,
+                    private val clock: Clock) : ViewModel() {
 
     companion object {
         private val UNKNOWN_BURN_TIME = -1L
@@ -52,6 +54,9 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private var uvPrediction: UvPrediction? = null
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
+
+    private val _closeKeyboard = MutableLiveData<Boolean>(false)
+    val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
     private val _chartData = MutableLiveData<LineDataSet>()
     val chartData: LiveData<LineDataSet> = _chartData
@@ -92,12 +97,17 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
     private val _isCurrentlyTracking = MutableLiveData(false)
     val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
 
-    var location = "92123"
+    val locationEditText = MutableLiveData("")
     var isOnSnowOrWater = false
     var spf = "1"
 
     init {
-        refreshNetwork()
+        viewModelScope.launch {
+            repository.getLocation()?.let {
+                locationEditText.postValue(it)
+                refreshNetwork(it)
+            }
+        }
         updateTimer.start()
     }
 
@@ -123,12 +133,12 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
     }
 
-    private fun refreshNetwork() {
+    private fun refreshNetwork(zipCode: String) {
 //        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
             try {
-                val response = uvService.getUvForecast(location)
+                val response = uvService.getUvForecast(zipCode)
                 uvPrediction = response.asUvPrediction().trim()
             } catch (e: Exception) {
 //                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
@@ -206,11 +216,22 @@ class MainViewModel(private val uvService: EpaService, private val clock: Clock)
         updateTimeToBurn()
     }
 
-    fun onLocationChanged() {
-        if (location.length == ZIP_CODE_LENGTH
-            && location.toIntOrNull() != null) {
-            refreshNetwork()
+    fun onSearchLocation() {
+        _closeKeyboard.postValue(true)
+        _closeKeyboard.postValue(false)
+        locationEditText.value?.let { location ->
+            if (isValidZipCode(location)) {
+                refreshNetwork(location)
+                viewModelScope.launch {
+                    repository.setLocation(location)
+                }
+            }
         }
+    }
+
+    private fun isValidZipCode(location: String): Boolean {
+        return location.length == ZIP_CODE_LENGTH
+            && location.toIntOrNull() != null
     }
 
     fun onSpfChanged() {
