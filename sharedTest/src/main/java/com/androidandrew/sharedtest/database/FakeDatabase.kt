@@ -4,9 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.androidandrew.sunscreen.database.SunscreenDatabase
-import com.androidandrew.sunscreen.database.UserSettingsDao
 
-object FakeDatabase {
+class FakeDatabase {
 
     var db: SunscreenDatabase
 
@@ -21,5 +20,10 @@ object FakeDatabase {
     fun clearDatabase() {
         db.userTrackingDao.deleteAll()
         db.userSettingsDao.deleteAll()
+    }
+
+    fun tearDown() {
+        clearDatabase()
+        db.close()
     }
 }

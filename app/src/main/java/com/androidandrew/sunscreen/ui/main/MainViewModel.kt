@@ -52,6 +52,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     )
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
+    private var lastDateUsed = getDateToday()
 
     private var networkJob: Job? = null
     private var uvPrediction: UvPrediction? = null
@@ -66,7 +67,8 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private val _chartHighlightValue = MutableLiveData<Float>()
     val chartHighlightValue: LiveData<Float> = _chartHighlightValue
 
-    private val _userTrackingInfo = repository.getUserTrackingInfo(getDateToday())
+
+    private var _userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
     val sunUnitsToday = Transformations.map(_userTrackingInfo) { tracking ->
         tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
     }
@@ -90,6 +92,16 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         }
     }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
+    private val dailyInfoTimer = RepeatingTimer(object: TimerTask() {
+        override fun run() {
+            if (lastDateUsed != getDateToday()) {
+                lastDateUsed = getDateToday()
+                _userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
+                onSearchLocation() // Will only refresh if the ZIP code is valid
+            }
+        }
+    }, 10000L, TimeUnit.MINUTES.toMillis(1))
+
     private var trackingTimer: RepeatingTimer? = null
     private val _isTrackingEnabled = MutableLiveData(false)
     val isTrackingEnabled: LiveData<Boolean> = _isTrackingEnabled
@@ -108,6 +120,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
             }
         }
         updateTimer.start()
+        dailyInfoTimer.start()
     }
 
     fun onTrackingClicked() {
@@ -128,7 +141,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
             override fun run() {
                 viewModelScope.launch {
                     val userTrackingInfo = UserTracking(
-                        date = getDateToday(),
+                        date = lastDateUsed,
                         burnProgress = (sunUnitsToday.value)?.plus(getBurnProgress()) ?: 0.0,
                         vitaminDProgress = (vitaminDUnitsToday.value)?.plus(getVitaminDProgress()) ?: 0.0
                     )

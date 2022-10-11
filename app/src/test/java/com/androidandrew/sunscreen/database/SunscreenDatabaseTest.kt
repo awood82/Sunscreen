@@ -26,31 +26,30 @@ class SunscreenDatabaseTest {
     @Before
     fun setup() {
         databaseHolder = FakeDatabase()
-        databaseHolder.dao.deleteAll()
+//        databaseHolder.clearDatabase()
     }
 
     @After
     @Throws(IOException::class)
     fun teardown() {
-        databaseHolder.dao.deleteAll()
-        databaseHolder.db.close()
+        databaseHolder.tearDown()
     }
 
     @Test
     fun insert_thenGet_retrievesSetting() = runTest {
         val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
-        databaseHolder.dao.insert(userSetting)
+        databaseHolder.db.userSettingsDao.insert(userSetting)
 
-        val dbSetting = databaseHolder.dao.get(UserSettingsDao.LOCATION)
+        val dbSetting = databaseHolder.db.userSettingsDao.get(UserSettingsDao.LOCATION)
         assertEquals("12345", dbSetting?.value)
     }
 
     @Test
     fun getSync_thenInsert_getsUpdatedLiveDataSetting() = runTest {
-        val dbLive = databaseHolder.dao.getSync(UserSettingsDao.LOCATION)
+        val dbLive = databaseHolder.db.userSettingsDao.getSync(UserSettingsDao.LOCATION)
 
         val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
-        databaseHolder.dao.insert(userSetting)
+        databaseHolder.db.userSettingsDao.insert(userSetting)
 
         assertEquals("12345", dbLive.getOrAwaitValue()?.value)
     }

@@ -7,10 +7,10 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiTest
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -82,11 +82,11 @@ class MainFragmentTest: BaseUiTest() {
 
     @Test
     fun init_sunburnPercent_isDisplayed() {
-        onView(withId(R.id.textSunburnProgress)).check(matches(withText("0 %")))
+        onView(withId(R.id.textSunburnProgress)).check(matches(withText(containsString(" %"))))
     }
 
     @Test
     fun init_vitaminD_IU_isDisplayed() {
-        onView(withId(R.id.textVitaminDProgress)).check(matches(withText("0 IU")))
+        onView(withId(R.id.textVitaminDProgress)).check(matches(withText(containsString(" IU"))))
     }
 }

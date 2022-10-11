@@ -22,11 +22,12 @@ val appModule = module {
             .build()
     }
 
+    single<Clock> { Clock.systemDefaultZone() }
     single { EpaApi.service }
     single { provideDatabase(androidContext()) }
-    single { SunscreenRepository(get(), Clock.systemDefaultZone()) }
+    single { SunscreenRepository(get(), get()) }
 
     factory { UvChartFormatter(androidContext()) }
 
-    viewModel { MainViewModel(get(), get(), Clock.systemDefaultZone()) }
+    viewModel { MainViewModel(get(), get(), get()) }
 }

@@ -31,7 +31,7 @@ class MainFragmentWithNetworkErrorTest : BaseUiTest() {
         super.setup()
 
         FakeEpaService.exception = IOException(errorMessage)
-        FakeDatabase.db.userSettingsDao.insert(
+        FakeDatabase().db.userSettingsDao.insert(
             UserSetting(UserSettingsDao.LOCATION, FakeData.zip)
         )
 

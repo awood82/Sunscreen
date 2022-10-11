@@ -37,8 +37,7 @@ class MainViewModelTest {
     private var initDb = false
 
     private suspend fun createViewModel(useMock: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
-        fakeDatabaseHolder.db.userSettingsDao.deleteAll()
-        fakeDatabaseHolder.db.userTrackingDao.deleteAll()
+        fakeDatabaseHolder.clearDatabase()
         repository = SunscreenRepository(fakeDatabaseHolder.db, clock)
         if (initDb) {
             repository.setLocation(FakeData.zip)
@@ -52,7 +51,7 @@ class MainViewModelTest {
     @After
     fun tearDown() {
         fakeUvService.exception = null
-        fakeDatabaseHolder.teardown()
+        fakeDatabaseHolder.tearDown()
     }
 
     private fun searchZip(zip: String) {

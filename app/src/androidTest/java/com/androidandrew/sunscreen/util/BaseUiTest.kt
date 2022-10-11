@@ -31,13 +31,13 @@ abstract class BaseUiTest {
     @Before
     open fun setup() {
         setupNavController()
-        FakeDatabase.clearDatabase()
+//        FakeDatabase().clearDatabase()
     }
 
     @After
     open fun tearDown() {
         FakeEpaService.exception = null
-        FakeDatabase.clearDatabase()
+//        FakeDatabase().tearDown()
     }
 
     private fun setupNavController() {

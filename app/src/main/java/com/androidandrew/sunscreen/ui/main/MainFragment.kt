@@ -58,7 +58,7 @@ class MainFragment : Fragment() {
         }
 
         mainViewModel.snackbarMessage.observe(viewLifecycleOwner) { message ->
-            Snackbar.make(binding.main, message, Snackbar.LENGTH_INDEFINITE).show()
+            Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()
         }
 
         mainViewModel.closeKeyboard.observe(viewLifecycleOwner) {
