@@ -68,7 +68,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     val chartHighlightValue: LiveData<Float> = _chartHighlightValue
 
 
-    private var _userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
+    private var _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
     val sunUnitsToday = Transformations.map(_userTrackingInfo) { tracking ->
         tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
     }
@@ -96,7 +96,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         override fun run() {
             if (lastDateUsed != getDateToday()) {
                 lastDateUsed = getDateToday()
-                _userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
+                _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
                 onSearchLocation() // Will only refresh if the ZIP code is valid
             }
         }
@@ -139,12 +139,13 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private fun createTrackingTimer(): RepeatingTimer {
         return RepeatingTimer(object : TimerTask() {
             override fun run() {
+                val addToBurn = getBurnProgress()
+                val addToVitaminD = getVitaminDProgress()
                 viewModelScope.launch {
-                    val userTrackingInfo = UserTracking(
-                        date = lastDateUsed,
-                        burnProgress = (sunUnitsToday.value)?.plus(getBurnProgress()) ?: 0.0,
-                        vitaminDProgress = (vitaminDUnitsToday.value)?.plus(getVitaminDProgress()) ?: 0.0
-                    )
+                    val userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
+                        ?: UserTracking(lastDateUsed, 0.0, 0.0)
+                    userTrackingInfo.burnProgress += addToBurn
+                    userTrackingInfo.vitaminDProgress += addToVitaminD
                     repository.setUserTrackingInfo(userTrackingInfo)
                 }
             }

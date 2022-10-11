@@ -13,10 +13,14 @@ import java.time.Clock
 class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock,
                           private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
-    fun getUserTrackingInfo(date: String): LiveData<UserTracking?> {
-//        withContext(dispatcher) {
+    fun getUserTrackingInfoSync(date: String): LiveData<UserTracking?> {
         return database.userTrackingDao.getSync(date)
-//        }
+    }
+
+    suspend fun getUserTrackingInfo(date: String): UserTracking? {
+        return withContext(dispatcher) {
+            database.userTrackingDao.get(date)
+        }
     }
 
     suspend fun setUserTrackingInfo(tracking: UserTracking) {
