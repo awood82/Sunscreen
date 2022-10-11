@@ -17,20 +17,20 @@ class UvChartFormatter(context: Context) {
     }
     private val uvColors = listOf(
         Color.parseColor("#FF004400"),
-        Color.parseColor("#FF00FF00"),
-        Color.parseColor("#FF00FF00"),
-        Color.parseColor("#FFFFFF00"),
-        Color.parseColor("#FFFFFF00"),
-        Color.parseColor("#FFFFFF00"),
+        Color.parseColor("#FF00CC00"),
+        Color.parseColor("#FF00CC00"),
+        Color.parseColor("#FFCCCC00"),
+        Color.parseColor("#FFCCCC00"),
+        Color.parseColor("#FFCCCC00"),
         Color.parseColor("#FFFF8800"),
         Color.parseColor("#FFFF8800"),
         Color.parseColor("#FFFF0000"),
         Color.parseColor("#FFFF0000"),
         Color.parseColor("#FFFF0000"),
-        Color.parseColor("#FFFF00FF"),
-        Color.parseColor("#FFFF00FF"),
-        Color.parseColor("#FFFF00FF"),
-        Color.parseColor("#FFFF00FF")
+        Color.parseColor("#FFCC00FF"),
+        Color.parseColor("#FFCC00FF"),
+        Color.parseColor("#FFCC00FF"),
+        Color.parseColor("#FFCC00FF")
     )
 
     fun formatDataSet(lineDataSet: LineDataSet) {
