@@ -67,6 +67,16 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private val _chartHighlightValue = MutableLiveData<Float>()
     val chartHighlightValue: LiveData<Float> = _chartHighlightValue
 
+    private var trackingTimer: RepeatingTimer? = null
+    private val _isTrackingEnabled = MutableLiveData(false)
+    val isTrackingEnabled: LiveData<Boolean> = _isTrackingEnabled
+    private val _isCurrentlyTracking = MutableLiveData(false)
+    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
+
+    val locationEditText = MutableLiveData("")
+    var isOnSnowOrWater = false
+    var spf = "1"
+
 
     private var _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
     val sunUnitsToday = Transformations.map(_userTrackingInfo) { tracking ->
@@ -92,25 +102,18 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         }
     }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
-    private val dailyInfoTimer = RepeatingTimer(object: TimerTask() {
+    private val dailyTrackingRefreshTimer = RepeatingTimer(object: TimerTask() {
         override fun run() {
             if (lastDateUsed != getDateToday()) {
                 lastDateUsed = getDateToday()
+                viewModelScope.launch {
+                    forceTrackingRefresh()
+                }
                 _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
                 onSearchLocation() // Will only refresh if the ZIP code is valid
             }
         }
-    }, 10000L, TimeUnit.MINUTES.toMillis(1))
-
-    private var trackingTimer: RepeatingTimer? = null
-    private val _isTrackingEnabled = MutableLiveData(false)
-    val isTrackingEnabled: LiveData<Boolean> = _isTrackingEnabled
-    private val _isCurrentlyTracking = MutableLiveData(false)
-    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
-
-    val locationEditText = MutableLiveData("")
-    var isOnSnowOrWater = false
-    var spf = "1"
+    }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
     init {
         viewModelScope.launch {
@@ -120,7 +123,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
             }
         }
         updateTimer.start()
-        dailyInfoTimer.start()
+        dailyTrackingRefreshTimer.start()
     }
 
     fun onTrackingClicked() {
@@ -142,11 +145,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
                 val addToBurn = getBurnProgress()
                 val addToVitaminD = getVitaminDProgress()
                 viewModelScope.launch {
-                    val userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
-                        ?: UserTracking(lastDateUsed, 0.0, 0.0)
-                    userTrackingInfo.burnProgress += addToBurn
-                    userTrackingInfo.vitaminDProgress += addToVitaminD
-                    repository.setUserTrackingInfo(userTrackingInfo)
+                    forceTrackingRefresh(addToBurn, addToVitaminD)
                 }
             }
         }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
@@ -168,6 +167,16 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
             updateTimeToBurn()
             _isTrackingEnabled.postValue(uvPrediction != null)
         }
+    }
+
+    suspend fun forceTrackingRefresh(
+        burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
+
+        val userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
+            ?: UserTracking(lastDateUsed, 0.0, 0.0)
+        userTrackingInfo.burnProgress += burnDelta
+        userTrackingInfo.vitaminDProgress += vitaminDDelta
+        repository.setUserTrackingInfo(userTrackingInfo)
     }
 
     private fun updateTimeToBurn() {
