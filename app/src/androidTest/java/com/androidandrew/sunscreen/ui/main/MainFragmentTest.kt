@@ -3,8 +3,7 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.withFragment
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.androidandrew.sharedtest.util.FakeData
@@ -36,7 +35,7 @@ class MainFragmentTest: BaseUiTest() {
     }
 
     private fun searchZip(zip: String = FakeData.zip) {
-        onView(withId(R.id.editLocation)).perform(typeText(zip))
+        onView(withId(R.id.editLocation)).perform(replaceText(zip))
         onView(withId(R.id.search)).perform(click())
     }
 

@@ -19,19 +19,20 @@ import org.junit.Test
 class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
 
     private fun searchZip(zip: String = FakeData.zip) {
-        onView(withId(R.id.editLocation)).perform(ViewActions.typeText(zip))
+        onView(withId(R.id.editLocation)).perform(ViewActions.replaceText(zip))
         onView(withId(R.id.search)).perform(click())
     }
 
     @LargeTest
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
-        var vitaminDProgressBar: ProgressBar = fragmentScenario.withFragment { requireActivity().findViewById(R.id.progressVitaminD) }
+        val vitaminDProgressBar: ProgressBar = fragmentScenario.withFragment { requireActivity().findViewById(R.id.progressVitaminD) }
         searchZip()
 
+        val progressStart = vitaminDProgressBar.progress
         onView(withId(R.id.trackingButton)).perform(click())
         runBlocking { delay(5000) }
-        val progress = vitaminDProgressBar.progress
+        val progressMid = vitaminDProgressBar.progress
 
         uiDevice.pressHome()
         runBlocking { delay(3000) }
@@ -41,9 +42,9 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         uiDevice.pressRecentApps()
 
         runBlocking { delay(2000) } // Give some time for UI to refresh
-        val newProgress = vitaminDProgressBar.progress
+        val progressEnd = vitaminDProgressBar.progress
 
-        assertNotEquals(progress, newProgress)
-        assertTrue("new=$newProgress, old=$progress", newProgress >= progress * 2)
+        assertNotEquals(progressMid, progressEnd)
+        assertTrue("start=$progressStart, mid=$progressMid, end=$progressEnd", progressEnd - progressMid >= progressMid - progressStart)
     }
 }
