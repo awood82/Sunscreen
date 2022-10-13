@@ -9,7 +9,6 @@ import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
-import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import com.androidandrew.sunscreen.tracker.uv.trim
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
@@ -30,26 +29,6 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         private val UNKNOWN_BURN_TIME = -1L
         private val ZIP_CODE_LENGTH = 5
     }
-
-    // TODO: Remove hardcoded value
-    private val hardcodedUvPrediction = listOf(
-        UvPredictionPoint(LocalTime.NOON.minusHours(7), 0.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(6), 0.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(5), 0.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(4), 1.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(3), 3.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(2), 6.0),
-        UvPredictionPoint(LocalTime.NOON.minusHours(1), 10.0),
-        UvPredictionPoint(LocalTime.NOON, 12.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(1), 11.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(2), 8.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(3), 5.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(4), 3.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(5), 1.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(6), 0.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(7), 0.0),
-        UvPredictionPoint(LocalTime.NOON.plusHours(8), 0.0),
-    )
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
     private var lastDateUsed = getDateToday()
@@ -169,9 +148,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         }
     }
 
-    suspend fun forceTrackingRefresh(
-        burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
-
+    suspend fun forceTrackingRefresh(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
         val userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
             ?: UserTracking(lastDateUsed, 0.0, 0.0)
         userTrackingInfo.burnProgress += burnDelta
@@ -221,7 +198,6 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private fun updateChart() {
         uvPrediction?.let {
             val entries = mutableListOf<Entry>()
-
             for (point in uvPrediction!!) {
                 entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
             }

@@ -5,11 +5,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.util.getOrAwaitValue
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -30,22 +33,32 @@ class MainViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var vm: MainViewModel
+    private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
     private val mockUvService = mockk<EpaService>()
     private val fakeDatabaseHolder = FakeDatabase()
-    private lateinit var repository: SunscreenRepository
+    private lateinit var realRepository: SunscreenRepository
+    private val mockRepository = mockk<SunscreenRepository>(relaxed = true)
     private var initDb = false
+    private val delta = 0.1
 
-    private suspend fun createViewModel(useMock: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
+    private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepo: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
+        this.clock = clock
         fakeDatabaseHolder.clearDatabase()
-        repository = SunscreenRepository(fakeDatabaseHolder.db, clock)
+        realRepository = SunscreenRepository(fakeDatabaseHolder.db, clock)
         if (initDb) {
-            repository.setLocation(FakeData.zip)
+            realRepository.setLocation(FakeData.zip)
+            coEvery { mockRepository.getLocation() } returns FakeData.zip
         }
-        vm = when (useMock) {
-            true -> MainViewModel(mockUvService, repository, clock)
-            else -> MainViewModel(fakeUvService, repository, clock)
+        val networkToUse = when (useMockNetwork) {
+            true -> mockUvService
+            false -> fakeUvService
         }
+        val repositoryToUse = when (useMockRepo) {
+            true -> mockRepository
+            false -> realRepository
+        }
+        vm = MainViewModel(networkToUse, repositoryToUse, clock)
     }
 
     @After
@@ -195,7 +208,7 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_isLessThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("1234")
 
@@ -204,7 +217,7 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_isMoreThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("123456")
 
@@ -213,7 +226,7 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_is5Digits_refreshesNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("12345")
 
@@ -222,7 +235,7 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPrefix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("ABC45")
 
@@ -231,7 +244,7 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPostfix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("123DE")
 
@@ -240,11 +253,48 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_has5Digits_andSomeLetters_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMock = true)
+        createViewModel(useMockNetwork = true)
 
         searchZip("12345ABC")
 
         coVerify(exactly=0) { mockUvService.getUvForecast("12345") }
         coVerify(exactly=0) { mockUvService.getUvForecast("12345ABC") }
+    }
+
+    @Test
+    fun forceTrackingRefresh_withNoPreviousTrackingInfo_triggersRepositoryUpdate() = runTest {
+        coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
+        createViewModel(useMockNetwork = false, useMockRepo = true)
+
+        vm.forceTrackingRefresh()
+
+        coVerify { mockRepository.setUserTrackingInfo(any()) }
+    }
+
+    @Test
+    fun forceTrackingRefresh_withArguments_updatesRepositoryValues() = runTest {
+        coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
+        createViewModel(useMockNetwork = false, useMockRepo = true)
+
+        vm.forceTrackingRefresh(1.0, 2.0)
+
+        val slot = slot<UserTracking>()
+        coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
+        assertEquals(1.0, slot.captured.burnProgress, delta)
+        assertEquals(2.0, slot.captured.vitaminDProgress, delta)
+    }
+
+    @Test
+    fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
+        createViewModel(useMockNetwork = false, useMockRepo = true)
+        val userInfo = UserTracking(date = LocalDate.now(clock).toString(), burnProgress = 10.0, vitaminDProgress = 20.0)
+        coEvery { mockRepository.getUserTrackingInfo(any()) } returns userInfo
+
+        vm.forceTrackingRefresh(1.0, 2.0)
+
+        val slot = slot<UserTracking>()
+        coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
+        assertEquals(11.0, slot.captured.burnProgress, delta)
+        assertEquals(22.0, slot.captured.vitaminDProgress, delta)
     }
 }
