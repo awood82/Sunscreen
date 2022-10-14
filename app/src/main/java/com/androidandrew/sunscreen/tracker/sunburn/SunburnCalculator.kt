@@ -28,7 +28,7 @@ object SunburnCalculator {
      */
     fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int,
                        spf: Int = spfNoSunscreen, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * spf /
+        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * getSpfClamped(spf) /
                 (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm) * UvFactor.getReflectionFactor(isOnSnowOrWater))
 
         return min(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, NO_BURN_EXPECTED)
@@ -54,7 +54,7 @@ object SunburnCalculator {
             val sunUnits = computeSunUnitsInOneMinute(
                 uvIndex = uvPrediction.getUvNow(simulatedTime),
                 skinType = skinType,
-                spf = spf,
+                spf = getSpfClamped(spf),
                 altitudeInKm = altitudeInKm,
                 isOnSnowOrWater = isOnSnowOrWater
             )
@@ -66,28 +66,6 @@ object SunburnCalculator {
             }
         }
         return NO_BURN_EXPECTED
-/*
-        while (sunUnitsRemaining > 0.0) {
-            val simulatedTime = currentTime.plusMinutes(maxMinutes)
-
-            // Check for no burn likely today
-            if (simulatedTime.isAfter(lastMinuteInDay) && maxMinutes > 0) {
-                return NO_BURN_EXPECTED
-            }
-
-            val sunUnits = computeSunUnitsInOneMinute(
-                uvIndex = uvPrediction.getUvNow(simulatedTime),
-                skinType = skinType,
-                spf = spf,
-                altitudeInKm = altitudeInKm,
-                isOnSnowOrWater = isOnSnowOrWater
-            )
-            sunUnitsRemaining -= sunUnits
-            maxMinutes++
-        }
-
-        return maxMinutes.toDouble()
-        */
     }
 
     /**
@@ -99,7 +77,7 @@ object SunburnCalculator {
             uvIndex = uvIndex,
             sunUnitsSoFar = 0.0,
             skinType = skinType,
-            spf = spf,
+            spf = getSpfClamped(spf),
             altitudeInKm = altitudeInKm,
             isOnSnowOrWater = isOnSnowOrWater
         )
@@ -109,5 +87,11 @@ object SunburnCalculator {
         }
     }
 
-
+    internal fun getSpfClamped(spf: Int): Int {
+        return when {
+            spf > 50 -> 50
+            spf < 1 -> 1
+            else -> spf
+        }
+    }
 }

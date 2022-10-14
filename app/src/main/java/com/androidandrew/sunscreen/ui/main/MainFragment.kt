@@ -9,11 +9,15 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.github.mikephil.charting.data.LineData
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -42,19 +46,32 @@ class MainFragment : Fragment() {
         binding.viewModel = mainViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        mainViewModel.chartData.observe(viewLifecycleOwner) { lineDataSet ->
-            chartFormatter.formatDataSet(lineDataSet)
-            binding.uvChart.apply {
-                chartFormatter.formatChart(
-                    lineChart = this,
-                    use24HourTime = DateFormat.is24HourFormat(requireContext()))
-                data = LineData(lineDataSet)
-                invalidate()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.chartData.collect { lineDataSet ->
+                    if (lineDataSet.values.isNotEmpty()) {
+                        chartFormatter.formatDataSet(lineDataSet)
+                        binding.uvChart.apply {
+                            chartFormatter.formatChart(
+                                lineChart = this,
+                                use24HourTime = DateFormat.is24HourFormat(requireContext())
+                            )
+                            data = LineData(lineDataSet)
+                            invalidate()
+                        }
+                    }
+                }
             }
         }
 
-        mainViewModel.chartHighlightValue.observe(viewLifecycleOwner) { x ->
-            binding.uvChart.highlightValue(x, 0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.chartHighlightValue.collect { x ->
+                    if (x >= 0.0f) {
+                        binding.uvChart.highlightValue(x, 0)
+                    }
+                }
+            }
         }
 
         mainViewModel.snackbarMessage.observe(viewLifecycleOwner) { message ->

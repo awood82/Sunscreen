@@ -14,7 +14,9 @@ import com.androidandrew.sunscreen.tracker.uv.trim
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalDate
@@ -22,6 +24,7 @@ import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(private val uvService: EpaService, private val repository: SunscreenRepository,
                     private val clock: Clock) : ViewModel() {
 
@@ -31,73 +34,100 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     }
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
-    private var lastDateUsed = getDateToday()
+
+    val locationEditText = MutableStateFlow("")
+    var isOnSnowOrWater = MutableStateFlow(false)
+    val spf = MutableStateFlow("1")
+
+    private val _lastDateUsed = MutableStateFlow(getDateToday())
+    private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
     private var networkJob: Job? = null
-    private var uvPrediction: UvPrediction? = null
+    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
+
+    private val _isCurrentlyTracking = MutableLiveData(false)
+    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
+
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
 
     private val _closeKeyboard = MutableLiveData(false)
     val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
-    private val _chartData = MutableLiveData<LineDataSet>()
-    val chartData: LiveData<LineDataSet> = _chartData
-    private val _chartHighlightValue = MutableLiveData<Float>()
-    val chartHighlightValue: LiveData<Float> = _chartHighlightValue
+    val chartData = _uvPrediction.mapNotNull { predictionList ->
+        val entries = mutableListOf<Entry>()
+        for (point in predictionList) {
+            entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
+        }
+        LineDataSet(entries, "")
+    }
+
+    val chartHighlightValue = combine(_lastLocalTimeUsed, _uvPrediction) { time, prediction ->
+        when (prediction.isNotEmpty()) {
+            true -> with (time) {
+                    (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
+                }
+            false -> -1.0f
+        }
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = -1.0f)
 
     private var trackingTimer: RepeatingTimer? = null
-    private val _isTrackingEnabled = MutableLiveData(false)
-    val isTrackingEnabled: LiveData<Boolean> = _isTrackingEnabled
-    private val _isCurrentlyTracking = MutableLiveData(false)
-    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
+    val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
+        prediction.isNotEmpty()
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
-    val locationEditText = MutableLiveData("")
-    var isOnSnowOrWater = false
-    var spf = "1"
+    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
+        onSearchLocation() // Will only refresh if the ZIP code is valid
+        repository.getUserTrackingInfoSync(date)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
-
-    private var _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
-    val sunUnitsToday = Transformations.map(_userTrackingInfo) { tracking ->
+    val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
         tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
-    }
-    val vitaminDUnitsToday = Transformations.map(_userTrackingInfo) { tracking ->
-        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
-    }
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
 
-    private val _minutesToBurn = MutableLiveData<Long>()
-    val burnTimeString: LiveData<String> = Transformations.map(_minutesToBurn) { minutes ->
+    val vitaminDUnitsToday = _userTrackingInfo.mapLatest { tracking ->
+        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
+
+    private val _minutesToBurn = combine(_lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { time, forecast, snowOrWater, _ ->
+        when (forecast.isNotEmpty()) {
+            true -> SunburnCalculator.computeMaxTime(
+                uvPrediction = forecast,
+                currentTime = time,
+                sunUnitsSoFar = sunUnitsToday.value, //_userTrackingInfo.value[0].burnProgress,
+                skinType = hardcodedSkinType,
+                spf = getSpf(),
+                altitudeInKm = 0,
+                isOnSnowOrWater = snowOrWater
+            ).toLong()
+            false -> UNKNOWN_BURN_TIME
+        }
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), UNKNOWN_BURN_TIME)
+
+    val burnTimeString = _minutesToBurn.map { minutes ->
         when (minutes) {
             UNKNOWN_BURN_TIME -> "Unknown"
             SunburnCalculator.NO_BURN_EXPECTED.toLong() -> "No burn expected"
             else -> "$minutes min"
         }
-    }
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), "Unknown")
 
     private val updateTimer = RepeatingTimer(object : TimerTask() {
         override fun run() {
-            updateTimeToBurn()
-            updateChartTimeSelection()
+            _lastLocalTimeUsed.value = LocalTime.now(clock)
         }
     }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
     private val dailyTrackingRefreshTimer = RepeatingTimer(object: TimerTask() {
         override fun run() {
-            if (lastDateUsed != getDateToday()) {
-                lastDateUsed = getDateToday()
-                viewModelScope.launch {
-                    forceTrackingRefresh()
-                }
-                _userTrackingInfo = repository.getUserTrackingInfoSync(lastDateUsed)
-                onSearchLocation() // Will only refresh if the ZIP code is valid
-            }
+            _lastDateUsed.value = getDateToday()
         }
     }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
     init {
         viewModelScope.launch {
             repository.getLocation()?.let {
-                locationEditText.postValue(it)
+                locationEditText.value = it
                 refreshNetwork(it)
             }
         }
@@ -121,107 +151,65 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private fun createTrackingTimer(): RepeatingTimer {
         return RepeatingTimer(object : TimerTask() {
             override fun run() {
-                val addToBurn = getBurnProgress()
-                val addToVitaminD = getVitaminDProgress()
                 viewModelScope.launch {
-                    forceTrackingRefresh(addToBurn, addToVitaminD)
+                    updateTracking(getBurnProgress(), getVitaminDProgress())
                 }
             }
         }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
     }
 
     private fun refreshNetwork(zipCode: String) {
-//        uvPrediction = hardcodedUvPrediction.trim()
         networkJob?.cancel()
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
-                uvPrediction = response.asUvPrediction().trim()
+                _uvPrediction.value = response.asUvPrediction().trim()
             } catch (e: Exception) {
 //                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
                 _snackbarMessage.postValue(e.message)
             }
-            updateChart()
-            updateChartTimeSelection()
-            updateTimeToBurn()
-            _isTrackingEnabled.postValue(uvPrediction != null)
         }
     }
 
-    suspend fun forceTrackingRefresh(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
-        val userTrackingInfo = repository.getUserTrackingInfo(lastDateUsed)
-            ?: UserTracking(lastDateUsed, 0.0, 0.0)
-        userTrackingInfo.burnProgress += burnDelta
-        userTrackingInfo.vitaminDProgress += vitaminDDelta
-        repository.setUserTrackingInfo(userTrackingInfo)
-    }
-
-    private fun updateTimeToBurn() {
-        val minutesToBurn = uvPrediction?.let {
-            SunburnCalculator.computeMaxTime(
-                uvPrediction = it,
-                currentTime = LocalTime.now(clock),
-                sunUnitsSoFar = sunUnitsToday.value ?: 0.0,
-                skinType = hardcodedSkinType,
-                spf = getSpfClamped(),
-                altitudeInKm = 0,
-                isOnSnowOrWater = isOnSnowOrWater
-            )
-        } ?: UNKNOWN_BURN_TIME
-        _minutesToBurn.postValue(minutesToBurn.toLong())
+    suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
+        val userTracking = UserTracking(
+            date = _lastDateUsed.value,
+            burnProgress = sunUnitsToday.value + burnDelta,
+            vitaminDProgress = vitaminDUnitsToday.value + vitaminDDelta
+        )
+        repository.setUserTrackingInfo(userTracking)
     }
 
     private fun getBurnProgress(): Double {
-        return uvPrediction?.let {
-            SunburnCalculator.computeSunUnitsInOneMinute(
-                uvIndex = it.getUvNow(LocalTime.now(clock)),
-                skinType = hardcodedSkinType,
-                spf = getSpfClamped(),
-                altitudeInKm = 0,
-                isOnSnowOrWater = isOnSnowOrWater
-            ) / TimeUnit.MINUTES.toSeconds(1)
-        } ?: 0.0
+        return when (_uvPrediction.value.isNotEmpty()) {
+            true -> SunburnCalculator.computeSunUnitsInOneMinute(
+                    uvIndex = _uvPrediction.value.getUvNow(_lastLocalTimeUsed.value),
+                    skinType = hardcodedSkinType,
+                    spf = getSpf(),
+                    altitudeInKm = 0,
+                    isOnSnowOrWater = isOnSnowOrWater.value
+                ) / TimeUnit.MINUTES.toSeconds(1)
+            false -> 0.0
+        }
     }
 
     private fun getVitaminDProgress(): Double {
-        return uvPrediction?.let {
-            VitaminDCalculator.computeIUVitaminDInOneMinute(
-                uvIndex = it.getUvNow(LocalTime.now(clock)),
-                skinType = hardcodedSkinType,
-                clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
-                spf = getSpfClamped(),
-                altitudeInKm = 0
-            ) / TimeUnit.MINUTES.toSeconds(1)
-        } ?: 0.0
-    }
-
-    private fun updateChart() {
-        uvPrediction?.let {
-            val entries = mutableListOf<Entry>()
-            for (point in uvPrediction!!) {
-                entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
-            }
-            _chartData.postValue(LineDataSet(entries, ""))
+        return when (_uvPrediction.value.isNotEmpty()) {
+            true -> VitaminDCalculator.computeIUVitaminDInOneMinute(
+                    uvIndex = _uvPrediction.value.getUvNow(_lastLocalTimeUsed.value),
+                    skinType = hardcodedSkinType,
+                    clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
+                    spf = getSpf(),
+                    altitudeInKm = 0
+                ) / TimeUnit.MINUTES.toSeconds(1)
+            false -> 0.0
         }
-    }
-
-    private fun updateChartTimeSelection() {
-        uvPrediction?.let {
-            with(LocalTime.now(clock)) {
-                _chartHighlightValue.postValue((hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat())
-            }
-        }
-    }
-
-    fun onSnowOrWaterChanged() {
-        isOnSnowOrWater = !isOnSnowOrWater
-        updateTimeToBurn()
     }
 
     fun onSearchLocation() {
         _closeKeyboard.postValue(true)
         _closeKeyboard.postValue(false)
-        locationEditText.value?.let { location ->
+        locationEditText.value.let { location ->
             if (isValidZipCode(location)) {
                 refreshNetwork(location)
                 viewModelScope.launch {
@@ -236,22 +224,12 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
             && location.toIntOrNull() != null
     }
 
-    fun onSpfChanged() {
-        updateTimeToBurn()
-    }
-
-    fun getSpfClamped(): Int {
-        val spfInt = spf.toIntOrNull()
-        return when {
-            spfInt == null -> 1
-            spfInt > 50 -> 50
-            spfInt < 1 -> 1
-            else -> spfInt
-        }
-    }
-
     private fun getDateToday(): String {
         return LocalDate.now(clock).toString()
+    }
+
+    private fun getSpf(): Int {
+        return spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen
     }
 
     override fun onCleared() {

@@ -93,7 +93,6 @@
             android:inputType="number"
             android:textAlignment="center"
             android:text="@={viewModel.spf}"
-            android:afterTextChanged="@{()->viewModel.onSpfChanged()}"
             app:layout_constraintStart_toEndOf="@id/textSpf"
             app:layout_constraintBaseline_toBaselineOf="@id/checkBoxSnowOrWater" />
 
@@ -103,8 +102,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
             android:text="@string/snow_or_water"
-            android:checked="@{viewModel.isOnSnowOrWater}"
-            android:onClick="@{()->viewModel.onSnowOrWaterChanged()}"
+            android:checked="@={viewModel.isOnSnowOrWater}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/progressSunburn" />
 

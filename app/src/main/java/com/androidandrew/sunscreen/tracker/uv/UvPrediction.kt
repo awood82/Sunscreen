@@ -1,6 +1,5 @@
 package com.androidandrew.sunscreen.tracker.uv
 
-import java.lang.Integer.min
 import java.time.Duration
 import java.time.LocalTime
 

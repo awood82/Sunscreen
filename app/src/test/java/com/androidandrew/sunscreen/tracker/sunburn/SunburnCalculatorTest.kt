@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.tracker.sunburn
 
 import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -429,5 +430,14 @@ class SunburnCalculatorTest {
         )
 
         assertEquals(0.0, sunUnits, 0.001)
+    }
+
+    @Test
+    fun getSpfClamped_clampsBetween1and50() {
+        assertEquals(1, SunburnCalculator.getSpfClamped(0))
+        assertEquals(1, SunburnCalculator.getSpfClamped(1))
+        assertEquals(1, SunburnCalculator.getSpfClamped(-1))
+        assertEquals(50, SunburnCalculator.getSpfClamped(50))
+        assertEquals(50, SunburnCalculator.getSpfClamped(51))
     }
 }

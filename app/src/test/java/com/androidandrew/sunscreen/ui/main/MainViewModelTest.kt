@@ -8,12 +8,12 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.util.MainCoroutineRule
 import com.androidandrew.sunscreen.util.getOrAwaitValue
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
@@ -32,6 +32,9 @@ class MainViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val mainCoroutineRule = MainCoroutineRule()
+
     private lateinit var vm: MainViewModel
     private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
@@ -49,6 +52,8 @@ class MainViewModelTest {
         if (initDb) {
             realRepository.setLocation(FakeData.zip)
             coEvery { mockRepository.getLocation() } returns FakeData.zip
+        } else {
+            coEvery { mockRepository.getLocation() } returns ""
         }
         val networkToUse = when (useMockNetwork) {
             true -> mockUvService
@@ -83,7 +88,7 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         // Accept any "<number> min" string
-        val burnTimeString = vm.burnTimeString.getOrAwaitValue()
+        val burnTimeString = vm.burnTimeString.first()
         assertTrue(burnTimeString.endsWith("min"))
         val firstChar = burnTimeString[0]
         assertTrue(firstChar.isDigit())
@@ -96,7 +101,7 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.getOrAwaitValue()
+        val burnTimeString = vm.burnTimeString.first()
         assertEquals("No burn expected", burnTimeString)
     }
 
@@ -107,7 +112,7 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.getOrAwaitValue()
+        val burnTimeString = vm.burnTimeString.value//getOrAwaitValue()
         assertEquals("Unknown", burnTimeString)
     }
 
@@ -125,7 +130,7 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
-        assertFalse(vm.isTrackingEnabled.getOrAwaitValue())
+        assertFalse(vm.isTrackingEnabled.value)//getOrAwaitValue())
     }
 
     @Test
@@ -134,56 +139,23 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        assertTrue(vm.isTrackingEnabled.getOrAwaitValue())
-    }
-
-    @Test
-    fun onSnowOrWaterChanged_togglesValue() = runTest {
-        createViewModel()
-        searchZip(FakeData.zip)
-
-        val startingValue = vm.isOnSnowOrWater
-        vm.onSnowOrWaterChanged()
-        assertEquals(!startingValue, vm.isOnSnowOrWater)
-
-        vm.onSnowOrWaterChanged()
-        assertEquals(startingValue, vm.isOnSnowOrWater)
+        assertTrue(vm.isTrackingEnabled.first())
     }
 
     @Test
     fun onSnowOrWaterChanged_changesBurnEstimate() = runTest {
         createViewModel()
         searchZip(FakeData.zip)
-        // Assumes that the box starts unchecked
-        val startingBurnTime = vm.burnTimeString.getOrAwaitValue()
 
-        vm.onSnowOrWaterChanged()
-        val endingBurnTime = vm.burnTimeString.getOrAwaitValue()
+        // The box starts unchecked
+        val startingBurnTime = vm.burnTimeString.first()
 
+        // Now it's checked
+        vm.isOnSnowOrWater.value = true
+        advanceUntilIdle()
+
+        val endingBurnTime = vm.burnTimeString.first()
         assertNotEquals(startingBurnTime, endingBurnTime)
-    }
-
-    @Test
-    fun getSpfClamped_clampsBetween1and50() = runTest {
-        createViewModel()
-
-        vm.spf = "0"
-        assertEquals(1, vm.getSpfClamped())
-
-        vm.spf = "1"
-        assertEquals(1, vm.getSpfClamped())
-
-        vm.spf = "-1"
-        assertEquals(1, vm.getSpfClamped())
-
-        vm.spf = ""
-        assertEquals(1, vm.getSpfClamped())
-
-        vm.spf = "50"
-        assertEquals(50, vm.getSpfClamped())
-
-        vm.spf = "51"
-        assertEquals(50, vm.getSpfClamped())
     }
 
     @Test
@@ -266,7 +238,7 @@ class MainViewModelTest {
         coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
-        vm.forceTrackingRefresh()
+        vm.updateTracking()
 
         coVerify { mockRepository.setUserTrackingInfo(any()) }
     }
@@ -276,7 +248,7 @@ class MainViewModelTest {
         coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
-        vm.forceTrackingRefresh(1.0, 2.0)
+        vm.updateTracking(1.0, 2.0)
 
         val slot = slot<UserTracking>()
         coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
@@ -286,15 +258,17 @@ class MainViewModelTest {
 
     @Test
     fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
-        createViewModel(useMockNetwork = false, useMockRepo = true)
-        val userInfo = UserTracking(date = LocalDate.now(clock).toString(), burnProgress = 10.0, vitaminDProgress = 20.0)
-        coEvery { mockRepository.getUserTrackingInfo(any()) } returns userInfo
+        initDb = true
+        createViewModel(useMockNetwork = false, useMockRepo = false)
 
-        vm.forceTrackingRefresh(1.0, 2.0)
+        vm.updateTracking(10.0, 20.0)
+        advanceUntilIdle()
+        assertEquals(10.0, vm.sunUnitsToday.first(), delta)
+        assertEquals(20.0, vm.vitaminDUnitsToday.first(), delta)
 
-        val slot = slot<UserTracking>()
-        coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
-        assertEquals(11.0, slot.captured.burnProgress, delta)
-        assertEquals(22.0, slot.captured.vitaminDProgress, delta)
+        vm.updateTracking(1.0, 2.0)
+        advanceUntilIdle()
+        assertEquals(11.0, vm.sunUnitsToday.first(), delta)
+        assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
     }
 }

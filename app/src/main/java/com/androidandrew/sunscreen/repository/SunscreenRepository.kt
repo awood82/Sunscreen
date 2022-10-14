@@ -7,13 +7,14 @@ import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.time.Clock
 
 class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock,
                           private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
-    fun getUserTrackingInfoSync(date: String): LiveData<UserTracking?> {
+    fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
         return database.userTrackingDao.getSync(date)
     }
 
