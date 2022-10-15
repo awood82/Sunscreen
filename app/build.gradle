@@ -53,6 +53,7 @@ ext {
     materialVersion = '1.6.1'
     mockkVersion = '1.10.0'
     moshiVersion = '1.14.0'
+    navigationVersion = '2.5.2'
     retrofitVersion = '2.9.0'
     robolectricVersion = '4.9-alpha-1' //4.3.1
     roomVersion = '2.4.3'
@@ -88,6 +89,11 @@ dependencies {
 
     // Graphs and charts
     implementation "com.github.PhilJay:MPAndroidChart:$chartVersion"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
+    androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
 
     // Unit testing
     testImplementation "junit:junit:$junitVersion"
