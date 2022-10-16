@@ -8,6 +8,7 @@ import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -26,5 +27,5 @@ val testModule = module {
     single { provideDatabase(androidContext()) }
     single { SunscreenRepository(get(), get()) }
 
-    viewModel { MainViewModel(get<FakeEpaService>(), get(), get()) }
+    viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get()) }
 }

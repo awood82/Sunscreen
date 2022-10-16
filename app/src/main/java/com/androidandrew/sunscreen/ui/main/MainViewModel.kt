@@ -12,6 +12,7 @@ import com.androidandrew.sunscreen.tracker.uv.UvPrediction
 import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import com.androidandrew.sunscreen.tracker.uv.trim
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
+import com.androidandrew.sunscreen.util.LocationUtil
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,11 +27,10 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(private val uvService: EpaService, private val repository: SunscreenRepository,
-                    private val clock: Clock) : ViewModel() {
+                    private val locationUtil: LocationUtil, private val clock: Clock) : ViewModel() {
 
     companion object {
         private val UNKNOWN_BURN_TIME = -1L
-        private val ZIP_CODE_LENGTH = 5
     }
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
@@ -210,18 +210,13 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         _closeKeyboard.postValue(true)
         _closeKeyboard.postValue(false)
         locationEditText.value.let { location ->
-            if (isValidZipCode(location)) {
+            if (locationUtil.isValidZipCode(location)) {
                 refreshNetwork(location)
                 viewModelScope.launch {
                     repository.setLocation(location)
                 }
             }
         }
-    }
-
-    private fun isValidZipCode(location: String): Boolean {
-        return location.length == ZIP_CODE_LENGTH
-            && location.toIntOrNull() != null
     }
 
     private fun getDateToday(): String {

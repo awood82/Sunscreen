@@ -35,7 +35,9 @@ class SunscreenRepository(private val database: SunscreenDatabase, private val c
     }
 
     suspend fun setLocation(location: String) {
-        saveSetting(UserSettingsDao.LOCATION, location)
+        withContext(dispatcher) {
+            saveSetting(UserSettingsDao.LOCATION, location)
+        }
     }
 
     private suspend fun saveSetting(id: Long, value: String) {

@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">Sunscreen</string>
+
+    <!-- Location screen -->
+    <string name="current_location">Enter your current location</string>
+    <string name="skip">Skip</string>
+
+    <!-- Main tracking screen -->
     <string name="start_tracking">Start Tracking</string>
     <string name="stop_tracking">Stop Tracking</string>
     <string name="sunburn">Sunburn</string>
@@ -11,4 +17,6 @@
     <string name="spf">SPF</string>
     <string name="spf_hint">1</string>
     <string name="snow_or_water">On snow or water</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

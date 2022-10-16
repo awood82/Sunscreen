@@ -20,7 +20,6 @@ class MainFragmentTest: BaseUiTest() {
 
     @Before
     override fun setup() {
-        // NOTE on fixing pinned emulator: adb shell am task lock stop
         super.setup()
         fragmentScenario = launchFragmentUnderTest()
     }
