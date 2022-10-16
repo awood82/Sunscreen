@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.location
+package com.androidandrew.sunscreen.ui.init
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,33 +11,33 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.databinding.FragmentLocationBinding
+import com.androidandrew.sunscreen.databinding.FragmentInitBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class LocationFragment : Fragment() {
+class InitFragment : Fragment() {
 
-    private val locationViewModel: LocationViewModel by viewModel()
-    private lateinit var binding: FragmentLocationBinding
+    private val initViewModel: InitViewModel by viewModel()
+    private lateinit var binding: FragmentInitBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(
             inflater,
-            R.layout.fragment_location,
+            R.layout.fragment_init,
             container,
             false
         )
 
-        binding.viewModel = locationViewModel
+        binding.viewModel = initViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                locationViewModel.navigate.collect { action ->
+                initViewModel.navigate.collect { action ->
                     if (action > 0) {
                         findNavController().navigate(action)
-                        locationViewModel.onNavigationComplete()
+                        initViewModel.onNavigationComplete()
                     }
                 }
             }

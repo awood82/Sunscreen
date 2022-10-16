@@ -8,6 +8,7 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.util.MainCoroutineRule
 import com.androidandrew.sunscreen.util.getOrAwaitValue
 import io.mockk.*
@@ -42,6 +43,7 @@ class MainViewModelTest {
     private val fakeDatabaseHolder = FakeDatabase()
     private lateinit var realRepository: SunscreenRepository
     private val mockRepository = mockk<SunscreenRepository>(relaxed = true)
+    private val locationUtil = LocationUtil()
     private var initDb = false
     private val delta = 0.1
 
@@ -63,7 +65,7 @@ class MainViewModelTest {
             true -> mockRepository
             false -> realRepository
         }
-        vm = MainViewModel(networkToUse, repositoryToUse, clock)
+        vm = MainViewModel(networkToUse, repositoryToUse, locationUtil, clock)
     }
 
     @After

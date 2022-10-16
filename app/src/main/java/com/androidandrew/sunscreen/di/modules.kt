@@ -7,6 +7,7 @@ import com.androidandrew.sunscreen.network.EpaApi
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
+import com.androidandrew.sunscreen.ui.init.InitViewModel
 import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.util.LocationUtil
 import org.koin.android.ext.koin.androidContext
@@ -32,6 +33,7 @@ val appModule = module {
     factory { LocationUtil() }
     factory { UvChartFormatter(androidContext()) }
 
+    viewModel { InitViewModel(get(), get()) }
     viewModel { LocationViewModel(get(), get()) }
     viewModel { MainViewModel(get(), get(), get(), get()) }
 }
