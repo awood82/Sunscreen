@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.main.MainFragment
 import org.junit.After
 import org.junit.Before
@@ -26,7 +27,7 @@ abstract class BaseUiAutomatorTest : BaseUiTest() {
     override fun setup() {
         // NOTE on fixing pinned emulator: adb shell am task lock stop
         super.setup()
-        fragmentScenario = launchFragmentUnderTest()
+        fragmentScenario = launchFragmentUnderTest(R.id.initFragment)
         uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
 

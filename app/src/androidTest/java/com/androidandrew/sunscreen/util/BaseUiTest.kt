@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.util
 
+import androidx.annotation.NavigationRes
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.FragmentScenario
@@ -15,6 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import androidx.test.platform.app.InstrumentationRegistry
+import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sharedtest.network.FakeEpaService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -32,29 +34,34 @@ abstract class BaseUiTest {
 
     @Before
     open fun setup() {
-        setupNavController()
+        createNavController()
+        setNavGraph()
 //        FakeDatabase().clearDatabase()
     }
 
     @After
     open fun tearDown() {
         FakeEpaService.exception = null
-//        FakeDatabase().tearDown()
+        runBlocking {
+            FakeDatabase().tearDown()
+        }
     }
 
-    private fun setupNavController() {
-        navController = TestNavHostController(
-            ApplicationProvider.getApplicationContext()
-        )
+    private fun createNavController() {
+        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+    }
+
+    private fun setNavGraph() {
         runOnUiThread {
             navController.setGraph(R.navigation.navigation)
         }
     }
 
-    protected inline fun <reified T: Fragment> launchFragmentUnderTest(): FragmentScenario<T> {
+    protected inline fun <reified T: Fragment> launchFragmentUnderTest(@NavigationRes initialDestinationId: Int): FragmentScenario<T> {
         val scenario = launchFragmentInContainer<T>(themeResId = R.style.Theme_Sunscreen)
         scenario.withFragment {
             try {
+                (navController as TestNavHostController).setCurrentDestination(initialDestinationId)
                 Navigation.setViewNavController(this.requireView(), navController)
             } catch (e: IllegalStateException) {
 
@@ -64,8 +71,9 @@ abstract class BaseUiTest {
         return scenario
     }
 
-    protected inline fun <reified T: DialogFragment> launchDialogFragmentUnderTest(): FragmentScenario<T> {
+    protected inline fun <reified T: DialogFragment> launchDialogFragmentUnderTest(@NavigationRes initialDestinationId: Int): FragmentScenario<T> {
         val scenario = with (launchFragment<T>(themeResId = R.style.Theme_Sunscreen)) {
+            (navController as TestNavHostController).setCurrentDestination(initialDestinationId)
             onFragment { fragment ->
                 assertNotNull(fragment.dialog)
             }

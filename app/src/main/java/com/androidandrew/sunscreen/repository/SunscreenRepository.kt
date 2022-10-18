@@ -5,29 +5,21 @@ import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.database.UserSetting
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTracking
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 import java.time.Clock
 
-class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock,
-                          private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock) {
 
     fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
-        return database.userTrackingDao.getSync(date)
+        return database.userTrackingDao.get(date)
     }
 
     suspend fun getUserTrackingInfo(date: String): UserTracking? {
-        return withContext(dispatcher) {
-            database.userTrackingDao.get(date)
-        }
+        return database.userTrackingDao.getOnce(date)
     }
 
     suspend fun setUserTrackingInfo(tracking: UserTracking) {
-        withContext(dispatcher) {
-            database.userTrackingDao.insert(tracking)
-        }
+        database.userTrackingDao.insert(tracking)
     }
 
     suspend fun getLocation(): String? {
@@ -35,9 +27,7 @@ class SunscreenRepository(private val database: SunscreenDatabase, private val c
     }
 
     suspend fun setLocation(location: String) {
-        withContext(dispatcher) {
-            saveSetting(UserSettingsDao.LOCATION, location)
-        }
+        saveSetting(UserSettingsDao.LOCATION, location)
     }
 
     private suspend fun saveSetting(id: Long, value: String) {
@@ -45,21 +35,15 @@ class SunscreenRepository(private val database: SunscreenDatabase, private val c
     }
 
     private suspend fun saveSetting(setting: UserSetting) {
-        withContext(dispatcher) {
-            database.userSettingsDao.insert(setting)
+        database.userSettingsDao.insert(setting)
 //            Timber.d("Saved ${setting.id} = ${setting.value}")
-        }
     }
 
-    private suspend fun readStringSettingSync(id: Long): LiveData<UserSetting?> {
-        return withContext(dispatcher) {
-            database.userSettingsDao.getSync(id)
-        }
+    private fun readStringSettingSync(id: Long): LiveData<UserSetting?> {
+        return database.userSettingsDao.get(id)
     }
 
     private suspend fun readStringSetting(id: Long): UserSetting? {
-        return withContext(dispatcher) {
-            database.userSettingsDao.get(id)
-        }
+        return database.userSettingsDao.getOnce(id)
     }
 }

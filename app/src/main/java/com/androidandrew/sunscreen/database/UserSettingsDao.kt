@@ -14,14 +14,14 @@ interface UserSettingsDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(setting: UserSetting)
+    suspend fun insert(setting: UserSetting)
 
     @Query("SELECT * FROM user_settings_table WHERE id=:id")
-    fun get(id: Long): UserSetting?
+    suspend fun getOnce(id: Long): UserSetting?
 
     @Query("SELECT * FROM user_settings_table WHERE id=:id")
-    fun getSync(id: Long): LiveData<UserSetting?>
+    fun get(id: Long): LiveData<UserSetting?>
 
     @Query("DELETE FROM user_settings_table")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

@@ -25,7 +25,6 @@ class LocationViewModel(private val locationUtil: LocationUtil,
         if (locationUtil.isValidZipCode(location.value)) {
             viewModelScope.launch {
                 repository.setLocation(location.value)
-            }.invokeOnCompletion {
                 _navigate.value = R.id.action_locationFragment_to_mainFragment
             }
         }

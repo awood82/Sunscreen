@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabase
 import com.androidandrew.sunscreen.util.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -32,7 +33,9 @@ class SunscreenDatabaseTest {
     @After
     @Throws(IOException::class)
     fun teardown() {
-        databaseHolder.tearDown()
+        runBlocking {
+            databaseHolder.tearDown()
+        }
     }
 
     @Test
@@ -40,13 +43,13 @@ class SunscreenDatabaseTest {
         val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
         databaseHolder.db.userSettingsDao.insert(userSetting)
 
-        val dbSetting = databaseHolder.db.userSettingsDao.get(UserSettingsDao.LOCATION)
+        val dbSetting = databaseHolder.db.userSettingsDao.getOnce(UserSettingsDao.LOCATION)
         assertEquals("12345", dbSetting?.value)
     }
 
     @Test
     fun getSync_thenInsert_getsUpdatedLiveDataSetting() = runTest {
-        val dbLive = databaseHolder.db.userSettingsDao.getSync(UserSettingsDao.LOCATION)
+        val dbLive = databaseHolder.db.userSettingsDao.get(UserSettingsDao.LOCATION)
 
         val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
         databaseHolder.db.userSettingsDao.insert(userSetting)

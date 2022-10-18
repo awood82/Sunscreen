@@ -17,12 +17,12 @@ class FakeDatabase {
             .build()
     }
 
-    fun clearDatabase() {
+    suspend fun clearDatabase() {
         db.userTrackingDao.deleteAll()
         db.userSettingsDao.deleteAll()
     }
 
-    fun tearDown() {
+    suspend fun tearDown() {
         clearDatabase()
         db.close()
     }

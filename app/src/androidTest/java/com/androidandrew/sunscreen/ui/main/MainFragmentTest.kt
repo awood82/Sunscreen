@@ -21,7 +21,7 @@ class MainFragmentTest: BaseUiTest() {
     @Before
     override fun setup() {
         super.setup()
-        fragmentScenario = launchFragmentUnderTest()
+        fragmentScenario = launchFragmentUnderTest(R.id.mainFragment)
     }
 
     @After
@@ -36,14 +36,6 @@ class MainFragmentTest: BaseUiTest() {
     private fun searchZip(zip: String = FakeData.zip) {
         onView(withId(R.id.editLocation)).perform(replaceText(zip))
         onView(withId(R.id.search)).perform(click())
-    }
-
-    @Test
-    fun init_ifUvForecastDoesNotExist_trackingIsDisabled() {
-        onView(withId(R.id.trackingButton)).apply {
-            check(matches(isNotEnabled()))
-            check(matches(withText(R.string.start_tracking)))
-        }
     }
 
     /* Disabled until user settings are no longer hardcoded

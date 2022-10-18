@@ -14,6 +14,7 @@ import com.androidandrew.sunscreen.util.getOrAwaitValue
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -71,7 +72,9 @@ class MainViewModelTest {
     @After
     fun tearDown() {
         fakeUvService.exception = null
-        fakeDatabaseHolder.tearDown()
+        runBlocking {
+            fakeDatabaseHolder.tearDown()
+        }
     }
 
     private fun searchZip(zip: String) {

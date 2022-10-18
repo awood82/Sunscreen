@@ -13,6 +13,7 @@ import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.database.UserSetting
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.util.BaseUiTest
+import kotlinx.coroutines.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -31,11 +32,13 @@ class MainFragmentWithNetworkErrorTest : BaseUiTest() {
         super.setup()
 
         FakeEpaService.exception = IOException(errorMessage)
-        FakeDatabase().db.userSettingsDao.insert(
-            UserSetting(UserSettingsDao.LOCATION, FakeData.zip)
-        )
+        runBlocking {
+            FakeDatabase().db.userSettingsDao.insert(
+                UserSetting(UserSettingsDao.LOCATION, FakeData.zip)
+            )
+        }
 
-        fragmentScenario = launchFragmentUnderTest()
+        fragmentScenario = launchFragmentUnderTest(R.id.mainFragment)
     }
 
     @After

@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.Flow
 interface UserTrackingDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(tracking: UserTracking)
+    suspend fun insert(tracking: UserTracking)
 
     @Query("SELECT * FROM user_tracking_table WHERE date>=:date ORDER BY date DESC LIMIT 1")
-    fun get(date: String): UserTracking?
+    suspend fun getOnce(date: String): UserTracking?
 
     @Query("SELECT * FROM user_tracking_table WHERE date>=:date ORDER BY date DESC LIMIT 1")
-    fun getSync(date: String): Flow<UserTracking?>
+    fun get(date: String): Flow<UserTracking?>
 
     @Query("DELETE FROM user_tracking_table")
-    fun deleteAll()
+    suspend fun deleteAll()
 }
