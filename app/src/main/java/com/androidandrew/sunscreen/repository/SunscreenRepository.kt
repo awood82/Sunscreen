@@ -23,12 +23,28 @@ class SunscreenRepository(private val database: SunscreenDatabase, private val c
     }
 
     suspend fun getLocation(): String? {
-        return readStringSetting(UserSettingsDao.LOCATION)?.value
+        return readStringSetting(UserSettingsDao.LOCATION)
     }
 
     suspend fun setLocation(location: String) {
         saveSetting(UserSettingsDao.LOCATION, location)
     }
+
+//    suspend fun getSpf(): Int? {
+//        return readIntSetting(UserSettingsDao.SPF)
+//    }
+//
+//    suspend fun setSpf(spf: Int) {
+//        saveSetting(UserSettingsDao.SPF, spf.toString())
+//    }
+//
+//    suspend fun getOnSnowOrWater(): Boolean? {
+//        return readBooleanSetting(UserSettingsDao.ON_SNOW_OR_WATER)
+//    }
+//
+//    suspend fun setOnSnowOrWater(isOnSnowOrWater: Boolean) {
+//        saveSetting(UserSettingsDao.ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
+//    }
 
     private suspend fun saveSetting(id: Long, value: String) {
         saveSetting(UserSetting(id, value))
@@ -43,7 +59,19 @@ class SunscreenRepository(private val database: SunscreenDatabase, private val c
         return database.userSettingsDao.get(id)
     }
 
-    private suspend fun readStringSetting(id: Long): UserSetting? {
+    private suspend fun readStringSetting(id: Long): String? {
+        return readSetting(id)?.value
+    }
+
+//    private suspend fun readIntSetting(id: Long): Int? {
+//        return readSetting(id)?.value?.toInt()
+//    }
+//
+//    private suspend fun readBooleanSetting(id: Long): Boolean? {
+//        return readSetting(id)?.value?.toBoolean()
+//    }
+
+    private suspend fun readSetting(id: Long): UserSetting? {
         return database.userSettingsDao.getOnce(id)
     }
 }

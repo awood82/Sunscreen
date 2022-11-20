@@ -8,6 +8,7 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.util.MainCoroutineRule
 import com.androidandrew.sunscreen.util.getOrAwaitValue
@@ -22,8 +23,8 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment.getApplication
 import java.io.IOException
-//import org.robolectric.annotation.LooperMode
 import java.time.*
 
 @ExperimentalCoroutinesApi
@@ -45,6 +46,7 @@ class MainViewModelTest {
     private lateinit var realRepository: SunscreenRepository
     private val mockRepository = mockk<SunscreenRepository>(relaxed = true)
     private val locationUtil = LocationUtil()
+    private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
     private var initDb = false
     private val delta = 0.1
 
@@ -66,7 +68,7 @@ class MainViewModelTest {
             true -> mockRepository
             false -> realRepository
         }
-        vm = MainViewModel(networkToUse, repositoryToUse, locationUtil, clock)
+        vm = MainViewModel(networkToUse, repositoryToUse, locationUtil, clock, serviceController)
     }
 
     @After
@@ -243,7 +245,7 @@ class MainViewModelTest {
         coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
-        vm.updateTracking()
+        updateTracking(0.0, 0.0)
 
         coVerify { mockRepository.setUserTrackingInfo(any()) }
     }
@@ -253,7 +255,7 @@ class MainViewModelTest {
         coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
-        vm.updateTracking(1.0, 2.0)
+        updateTracking(1.0, 2.0)
 
         val slot = slot<UserTracking>()
         coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
@@ -266,14 +268,24 @@ class MainViewModelTest {
         initDb = true
         createViewModel(useMockNetwork = false, useMockRepo = false)
 
-        vm.updateTracking(10.0, 20.0)
+        updateTracking(10.0, 20.0)
         advanceUntilIdle()
         assertEquals(10.0, vm.sunUnitsToday.first(), delta)
         assertEquals(20.0, vm.vitaminDUnitsToday.first(), delta)
 
-        vm.updateTracking(1.0, 2.0)
+        updateTracking(11.0, 22.0)
         advanceUntilIdle()
         assertEquals(11.0, vm.sunUnitsToday.first(), delta)
         assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
+    }
+
+    private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
+        val userTracking = UserTracking(
+            date = LocalDate.now(clock).toString(),
+            burnProgress = burnProgress,
+            vitaminDProgress = vitaminDProgress
+        )
+        mockRepository.setUserTrackingInfo(userTracking)
+        realRepository.setUserTrackingInfo(userTracking)
     }
 }

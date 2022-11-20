@@ -1,17 +1,14 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
-import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.time.RepeatingTimer
-import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.tracker.uv.UvPrediction
-import com.androidandrew.sunscreen.tracker.uv.getUvNow
 import com.androidandrew.sunscreen.tracker.uv.trim
-import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
@@ -26,8 +23,11 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MainViewModel(private val uvService: EpaService, private val repository: SunscreenRepository,
-                    private val locationUtil: LocationUtil, private val clock: Clock) : ViewModel() {
+class MainViewModel(
+    private val uvService: EpaService, private val repository: SunscreenRepository,
+    private val locationUtil: LocationUtil, private val clock: Clock,
+    private val sunTrackerServiceController: SunTrackerServiceController)
+    : ViewModel(), DefaultLifecycleObserver {
 
     companion object {
         private val UNKNOWN_BURN_TIME = -1L
@@ -36,7 +36,7 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
     val locationEditText = MutableStateFlow("")
-    var isOnSnowOrWater = MutableStateFlow(false)
+    val isOnSnowOrWater = MutableStateFlow(false)
     val spf = MutableStateFlow("1")
 
     private val _lastDateUsed = MutableStateFlow(getDateToday())
@@ -71,7 +71,6 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = -1.0f)
 
-    private var trackingTimer: RepeatingTimer? = null
     val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
         prediction.isNotEmpty()
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
@@ -136,26 +135,31 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     }
 
     fun onTrackingClicked() {
-        trackingTimer?.cancel()
         when (_isCurrentlyTracking.value) {
-            true -> _isCurrentlyTracking.value = false
+            true -> {
+                sunTrackerServiceController.unbind()
+                _isCurrentlyTracking.value = false
+            }
             else -> {
-                trackingTimer = createTrackingTimer().also {
-                    it.start()
-                }
+                /* TODO: Could have service read these settings as a flow from the repository,
+                so they'd be able to update in real-time. Need to change the variable definitions here.
+                But since changes are infrequent, keep it simple and just relaunch the service if a setting changes. */
+                sunTrackerServiceController.bind(
+                    uvPrediction = _uvPrediction.value,
+                    skinType = hardcodedSkinType,
+                    spf = spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen,
+                    isOnSnowOrWater = isOnSnowOrWater.value
+                )
                 _isCurrentlyTracking.value = true
             }
         }
     }
 
-    private fun createTrackingTimer(): RepeatingTimer {
-        return RepeatingTimer(object : TimerTask() {
-            override fun run() {
-                viewModelScope.launch {
-                    updateTracking(getBurnProgress(), getVitaminDProgress())
-                }
-            }
-        }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        if (_isCurrentlyTracking.value == true) {
+            sunTrackerServiceController.start()
+        }
     }
 
     private fun refreshNetwork(zipCode: String) {
@@ -168,41 +172,6 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
 //                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
                 _snackbarMessage.postValue(e.message)
             }
-        }
-    }
-
-    suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
-        val userTracking = UserTracking(
-            date = _lastDateUsed.value,
-            burnProgress = sunUnitsToday.value + burnDelta,
-            vitaminDProgress = vitaminDUnitsToday.value + vitaminDDelta
-        )
-        repository.setUserTrackingInfo(userTracking)
-    }
-
-    private fun getBurnProgress(): Double {
-        return when (_uvPrediction.value.isNotEmpty()) {
-            true -> SunburnCalculator.computeSunUnitsInOneMinute(
-                    uvIndex = _uvPrediction.value.getUvNow(_lastLocalTimeUsed.value),
-                    skinType = hardcodedSkinType,
-                    spf = getSpf(),
-                    altitudeInKm = 0,
-                    isOnSnowOrWater = isOnSnowOrWater.value
-                ) / TimeUnit.MINUTES.toSeconds(1)
-            false -> 0.0
-        }
-    }
-
-    private fun getVitaminDProgress(): Double {
-        return when (_uvPrediction.value.isNotEmpty()) {
-            true -> VitaminDCalculator.computeIUVitaminDInOneMinute(
-                    uvIndex = _uvPrediction.value.getUvNow(_lastLocalTimeUsed.value),
-                    skinType = hardcodedSkinType,
-                    clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
-                    spf = getSpf(),
-                    altitudeInKm = 0
-                ) / TimeUnit.MINUTES.toSeconds(1)
-            false -> 0.0
         }
     }
 
@@ -230,6 +199,5 @@ class MainViewModel(private val uvService: EpaService, private val repository: S
     override fun onCleared() {
         super.onCleared()
         updateTimer.cancel()
-        trackingTimer?.cancel()
     }
 }

@@ -2,7 +2,7 @@
     <string name="app_name">Sunscreen</string>
 
     <!-- Location screen -->
-    <string name="current_location">Enter your current location</string>
+    <string name="current_location">Enter the ZIP code of your current location</string>
     <string name="skip">Skip</string>
 
     <!-- Main tracking screen -->
@@ -12,11 +12,16 @@
     <string name="sunburn_progress">%d %%</string>
     <string name="vitamin_d">Vitamin D</string>
     <string name="vitamin_d_progress">%d IU</string>
-    <string name="location">Location</string>
+    <string name="location">ZIP Code</string>
     <string name="could_burn">You could burn in</string>
     <string name="spf">SPF</string>
     <string name="spf_hint">1</string>
     <string name="snow_or_water">On snow or water</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Notification for sun tracking service -->
+    <string name="notification_title">@string/app_name</string>
+    <string name="notification_text">Tracking sun exposure</string>
+
 </resources>

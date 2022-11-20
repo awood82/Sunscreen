@@ -60,6 +60,7 @@ ext {
     roomVersion = '2.4.3'
     splashScreenVersion = '1.0.0'
     testCoreVersion = '1.4.0'
+    timberVersion = '5.0.1'
     uiautomatorVersion = '2.2.0'
 }
 
@@ -103,6 +104,9 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
     androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
+
+    // Logging
+    implementation "com.jakewharton.timber:timber:$timberVersion"
 
     // Unit testing
     testImplementation "junit:junit:$junitVersion"

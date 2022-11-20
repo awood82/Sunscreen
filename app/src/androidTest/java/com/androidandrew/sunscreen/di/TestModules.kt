@@ -24,5 +24,5 @@ val testModule = module {
     single { provideDatabase(androidContext()) }
     single { SunscreenRepository(get(), get()) }
 
-    viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get()) }
+    viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get(), get()) }
 }
