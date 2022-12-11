@@ -1,6 +1,5 @@
 package com.androidandrew.sunscreen.service
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
@@ -8,13 +7,12 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.tracker.uv.trim
-import com.androidandrew.sunscreen.util.MainCoroutineRule
+import com.androidandrew.sunscreen.util.MainDispatcherRule
 import com.androidandrew.sunscreen.util.toDateString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
@@ -26,10 +24,7 @@ import org.junit.runner.RunWith
 class SunTrackerTest {
 
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
-    @get:Rule
-    val mainCoroutineRule = MainCoroutineRule()
+    val mainDispatcherRule = MainDispatcherRule()
 
     private val clock = FakeData.clockDefaultNoon
     private val dbWrapper = FakeDatabaseWrapper()
@@ -66,7 +61,7 @@ class SunTrackerTest {
         sunTracker.setSettings(settings)
 
         sunTracker.startTracking()
-        runBlocking { delay(5000) }
+        doShortDelay()
 
         val info = repo.getUserTrackingInfo(clock.toDateString())
         assertNotNull(info)
@@ -78,13 +73,33 @@ class SunTrackerTest {
     fun stopTracking_stopsUpdatingDatabase() = runTest {
         sunTracker.setSettings(settings)
         sunTracker.startTracking()
-        runBlocking { delay(5000) }
+        doShortDelay()
 
         sunTracker.stopTracking()
         val info = repo.getUserTrackingInfo(clock.toDateString())
-        runBlocking { delay(5000) }
-        val newInfo = repo.getUserTrackingInfo(clock.toDateString())
+        doShortDelay()
 
+        val newInfo = repo.getUserTrackingInfo(clock.toDateString())
         assertEquals(info, newInfo)
+    }
+
+    @Test
+    fun setSettings_afterTrackingStarted_usesNewSettings() = runTest {
+        sunTracker.setSettings(settings)
+        sunTracker.startTracking()
+        doShortDelay()
+
+        sunTracker.setSettings(
+            settings.copy(uvPrediction = emptyList())
+        )
+        val info = repo.getUserTrackingInfo(clock.toDateString())
+        doShortDelay()
+
+        val newInfo = repo.getUserTrackingInfo(clock.toDateString())
+        assertEquals(info, newInfo)
+    }
+    
+    private fun doShortDelay() {
+        runBlocking { delay(1_100) }
     }
 }

@@ -159,6 +159,7 @@ class MainViewModel(
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         if (_isCurrentlyTracking.value == true) {
+            // Start the service so it continues to run while the app is in the background
             sunTrackerServiceController.start()
         }
     }
