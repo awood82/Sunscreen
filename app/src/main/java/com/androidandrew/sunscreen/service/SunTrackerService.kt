@@ -39,7 +39,7 @@ class SunTrackerService : Service(), DefaultLifecycleObserver {
         )
         startForeground(NOTIFICATION_ID, notification)
 
-        sunTracker.startTracking()
+//        sunTracker.startTracking()
     }
 
     override fun onBind(intent: Intent?): IBinder {

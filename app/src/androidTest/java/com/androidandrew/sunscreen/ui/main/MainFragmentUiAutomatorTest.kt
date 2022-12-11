@@ -39,6 +39,7 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
 
         // Return to the app under test
         uiDevice.pressRecentApps()
+        runBlocking { delay(100) }
         uiDevice.pressRecentApps()
 
         runBlocking { delay(2000) } // Give some time for UI to refresh

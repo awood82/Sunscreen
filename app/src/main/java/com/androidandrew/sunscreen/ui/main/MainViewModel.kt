@@ -156,6 +156,18 @@ class MainViewModel(
         }
     }
 
+    fun onSpfChanged(s: CharSequence) {
+        if (_isCurrentlyTracking.value == true) {
+            sunTrackerServiceController.setSpf(s.toString().toIntOrNull() ?: SunburnCalculator.spfNoSunscreen)
+        }
+    }
+
+    fun onIsSnowOrWaterChanged(isOn: Boolean) {
+        if (_isCurrentlyTracking.value == true) {
+            sunTrackerServiceController.setIsOnSnowOrWater(isOn)
+        }
+    }
+
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         if (_isCurrentlyTracking.value == true) {

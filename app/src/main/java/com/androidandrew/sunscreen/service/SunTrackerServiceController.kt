@@ -19,18 +19,22 @@ class SunTrackerServiceController(private val appContext: Context, private val c
             Timber.d("onServiceConnected")
             val binder = service as SunTrackerService.LocalBinder
             sunTracker = binder.getService()
-
-            sendSettingsToService()
+            sunTracker?.let {
+                sendSettingsToSunTracker()
+                it.startTracking()
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             Timber.d("onServiceDisconnected")
+            sunTracker?.stopTracking()
         }
     }
 
     fun setSettings(sunTrackerSettings: SunTrackerSettings) {
         Timber.d("Received new settings, but haven't sent them yet")
         this.sunTrackerSettings = sunTrackerSettings
+        sendSettingsToSunTracker()
     }
 
     fun setSettings(uvPrediction: UvPrediction, skinType: Int, spf: Int, isOnSnowOrWater: Boolean) {
@@ -44,7 +48,21 @@ class SunTrackerServiceController(private val appContext: Context, private val c
         )
     }
 
-    private fun sendSettingsToService() {
+    fun setSpf(spf: Int) {
+        if (::sunTrackerSettings.isInitialized) {
+            sunTrackerSettings = sunTrackerSettings.copy(spf = spf)
+            sendSettingsToSunTracker()
+        }
+    }
+
+    fun setIsOnSnowOrWater(isOnSnowOrWater: Boolean) {
+        if (::sunTrackerSettings.isInitialized) {
+            sunTrackerSettings = sunTrackerSettings.copy(isOnReflectiveSurface = isOnSnowOrWater)
+            sendSettingsToSunTracker()
+        }
+    }
+
+    private fun sendSettingsToSunTracker() {
         (sunTracker as SunTracker?)?.let {
             it.setSettings(sunTrackerSettings)
             Timber.d("Settings were sent to the service")

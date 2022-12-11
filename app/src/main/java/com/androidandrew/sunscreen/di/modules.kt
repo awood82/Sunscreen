@@ -18,6 +18,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 val appModule = module {
     fun provideDatabase(context: Context): SunscreenDatabase {

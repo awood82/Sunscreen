@@ -278,6 +278,44 @@ class MainViewModelTest {
         assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
     }
 
+    @Test
+    fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
+        createViewModel()
+
+        vm.onSpfChanged("5")
+
+      verify(exactly = 0) { serviceController.setSpf(5) }
+    }
+
+    @Test
+    fun onSpfChanged_whileTracking_updatesController() = runTest {
+        createViewModel()
+        vm.onTrackingClicked()
+
+        vm.onSpfChanged("5")
+
+        verify { serviceController.setSpf(5) }
+    }
+
+    @Test
+    fun onIsSnowOrWaterChanged_whileNotTracking_doesNotUpdateController() = runTest {
+        createViewModel()
+
+        vm.onIsSnowOrWaterChanged(true)
+
+        verify(exactly = 0) { serviceController.setIsOnSnowOrWater(true) }
+    }
+
+    @Test
+    fun onIsSnowOrWaterChanged_whileTracking_updatesController() = runTest {
+        createViewModel()
+        vm.onTrackingClicked()
+
+        vm.onIsSnowOrWaterChanged(true)
+
+        verify { serviceController.setIsOnSnowOrWater(true) }
+    }
+
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
         val userTracking = UserTracking(
             date = LocalDate.now(clock).toString(),
