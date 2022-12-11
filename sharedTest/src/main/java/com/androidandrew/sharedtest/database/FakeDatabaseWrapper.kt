@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.androidandrew.sunscreen.database.SunscreenDatabase
 
-class FakeDatabase {
+class FakeDatabaseWrapper {
 
     var db: SunscreenDatabase
 

@@ -2,7 +2,7 @@ package com.androidandrew.sunscreen.database
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sharedtest.database.FakeDatabase
+import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sunscreen.util.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -22,11 +22,11 @@ class SunscreenDatabaseTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var databaseHolder: FakeDatabase
+    private lateinit var databaseHolder: FakeDatabaseWrapper
 
     @Before
     fun setup() {
-        databaseHolder = FakeDatabase()
+        databaseHolder = FakeDatabaseWrapper()
 //        databaseHolder.clearDatabase()
     }
 

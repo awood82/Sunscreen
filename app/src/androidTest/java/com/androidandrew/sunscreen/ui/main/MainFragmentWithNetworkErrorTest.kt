@@ -6,7 +6,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sharedtest.database.FakeDatabase
+import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
@@ -33,7 +33,7 @@ class MainFragmentWithNetworkErrorTest : BaseUiTest() {
 
         FakeEpaService.exception = IOException(errorMessage)
         runBlocking {
-            FakeDatabase().db.userSettingsDao.insert(
+            FakeDatabaseWrapper().db.userSettingsDao.insert(
                 UserSetting(UserSettingsDao.LOCATION, FakeData.zip)
             )
         }

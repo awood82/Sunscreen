@@ -11,23 +11,16 @@ import java.time.Clock
 
 class SunTrackerServiceController(private val appContext: Context, private val clock: Clock) {
 
-    private var sunTrackerService: SunTrackerService? = null
-    private lateinit var uvPrediction: UvPrediction
-    private var skinType = 0
-    private var spf = 0
-    private var isOnSnowOrWater = false
+    private var sunTracker: ISunTracker? = null
+    private lateinit var sunTrackerSettings: SunTrackerSettings
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Timber.d("onServiceConnected")
             val binder = service as SunTrackerService.LocalBinder
-            sunTrackerService = binder.getService()
+            sunTracker = binder.getService()
 
-            sunTrackerService?.setUvPrediction(uvPrediction)
-            sunTrackerService?.setClock(clock)
-            sunTrackerService?.setSkinType(skinType)
-            sunTrackerService?.setSpf(spf)
-            sunTrackerService?.setIsOnSnowOrWater(isOnSnowOrWater)
+            sendSettingsToService()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -35,12 +28,31 @@ class SunTrackerServiceController(private val appContext: Context, private val c
         }
     }
 
-    fun bind(uvPrediction: UvPrediction, skinType: Int, spf: Int, isOnSnowOrWater: Boolean) {
+    fun setSettings(sunTrackerSettings: SunTrackerSettings) {
+        Timber.d("Received new settings, but haven't sent them yet")
+        this.sunTrackerSettings = sunTrackerSettings
+    }
+
+    fun setSettings(uvPrediction: UvPrediction, skinType: Int, spf: Int, isOnSnowOrWater: Boolean) {
+        this.setSettings(
+            SunTrackerSettings(
+                uvPrediction = uvPrediction,
+                hardcodedSkinType = skinType,
+                spf = spf,
+                isOnReflectiveSurface = isOnSnowOrWater
+            )
+        )
+    }
+
+    private fun sendSettingsToService() {
+        (sunTracker as SunTracker?)?.let {
+            it.setSettings(sunTrackerSettings)
+            Timber.d("Settings were sent to the service")
+        } ?: Timber.w("Service has not started yet. Settings were not sent.")
+    }
+
+    fun bind() {
         Timber.d("Trying to bind to SunTrackerService")
-        this.uvPrediction = uvPrediction
-        this.skinType = skinType
-        this.spf = spf
-        this.isOnSnowOrWater = isOnSnowOrWater
         getServiceIntent().also { intent ->
             appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
@@ -49,7 +61,7 @@ class SunTrackerServiceController(private val appContext: Context, private val c
     fun unbind() {
         Timber.d("Trying to unbind from SunTrackerService")
         appContext.unbindService(connection)
-        sunTrackerService = null
+        sunTracker = null
     }
 
     fun start() {

@@ -16,7 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import androidx.test.platform.app.InstrumentationRegistry
-import com.androidandrew.sharedtest.database.FakeDatabase
+import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -43,7 +43,7 @@ abstract class BaseUiTest {
     open fun tearDown() {
         FakeEpaService.exception = null
         runBlocking {
-            FakeDatabase().tearDown()
+            FakeDatabaseWrapper().tearDown()
         }
     }
 

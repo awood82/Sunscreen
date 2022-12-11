@@ -51,13 +51,17 @@ class SunTrackerServiceControllerTest {
     }
 
     private fun bindWithFakeData() {
-        sunTrackerServiceController.bind(
+        val fakeData = SunTrackerSettings(
             uvPrediction = FakeEpaService.sampleDailyUvForecast.map {
                 it.asUvPredictionPoint()
             },
-            skinType = 2,
+            hardcodedSkinType = 2,
             spf = 1,
-            isOnSnowOrWater = false
+            isOnReflectiveSurface = false
         )
+        sunTrackerServiceController.apply {
+            setSettings(fakeData)
+            bind()
+        }
     }
 }

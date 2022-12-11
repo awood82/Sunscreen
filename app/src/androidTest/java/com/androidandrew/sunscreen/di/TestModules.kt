@@ -21,8 +21,8 @@ val testModule = module {
     }
     single { FakeData.clockDefaultNoon }
     single { FakeEpaService }
-    single { provideDatabase(androidContext()) }
-    single { SunscreenRepository(get(), get()) }
+    factory { provideDatabase(androidContext()) }
+    single { SunscreenRepository(get()) }
 
     viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get(), get()) }
 }

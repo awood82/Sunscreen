@@ -2,7 +2,7 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sharedtest.database.FakeDatabase
+import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.UserTracking
@@ -23,7 +23,6 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RuntimeEnvironment.getApplication
 import java.io.IOException
 import java.time.*
 
@@ -42,7 +41,7 @@ class MainViewModelTest {
     private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
     private val mockUvService = mockk<EpaService>()
-    private val fakeDatabaseHolder = FakeDatabase()
+    private val fakeDatabaseHolder = FakeDatabaseWrapper()
     private lateinit var realRepository: SunscreenRepository
     private val mockRepository = mockk<SunscreenRepository>(relaxed = true)
     private val locationUtil = LocationUtil()
@@ -53,7 +52,7 @@ class MainViewModelTest {
     private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepo: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
         fakeDatabaseHolder.clearDatabase()
-        realRepository = SunscreenRepository(fakeDatabaseHolder.db, clock)
+        realRepository = SunscreenRepository(fakeDatabaseHolder.db)
         if (initDb) {
             realRepository.setLocation(FakeData.zip)
             coEvery { mockRepository.getLocation() } returns FakeData.zip

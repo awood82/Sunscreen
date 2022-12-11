@@ -8,9 +8,7 @@ import androidx.room.Room
 import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.network.EpaApi
 import com.androidandrew.sunscreen.repository.SunscreenRepository
-import com.androidandrew.sunscreen.service.DefaultNotificationHandler
-import com.androidandrew.sunscreen.service.INotificationHandler
-import com.androidandrew.sunscreen.service.SunTrackerServiceController
+import com.androidandrew.sunscreen.service.*
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.androidandrew.sunscreen.ui.init.InitViewModel
@@ -34,7 +32,7 @@ val appModule = module {
     single<Clock> { Clock.systemDefaultZone() }
     single { EpaApi.service }
     single { provideDatabase(androidContext()) }
-    single { SunscreenRepository(get(), get()) }
+    single { SunscreenRepository(get()) }
 
     // For Sun Exposure Tracking Service
     single { androidContext().applicationContext.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager }
@@ -44,6 +42,7 @@ val appModule = module {
 //    single { NotificationChannelHandler(get()) }
 //    single { NotificationBuilder(get()) }
     factory { SunTrackerServiceController(androidContext().applicationContext, get()) }
+    factory<ISunTracker> { SunTracker(get(), get()) }
 
     factory { LocationUtil() }
     factory { UvChartFormatter(androidContext()) }

@@ -144,12 +144,13 @@ class MainViewModel(
                 /* TODO: Could have service read these settings as a flow from the repository,
                 so they'd be able to update in real-time. Need to change the variable definitions here.
                 But since changes are infrequent, keep it simple and just relaunch the service if a setting changes. */
-                sunTrackerServiceController.bind(
+                sunTrackerServiceController.setSettings(
                     uvPrediction = _uvPrediction.value,
                     skinType = hardcodedSkinType,
                     spf = spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen,
                     isOnSnowOrWater = isOnSnowOrWater.value
                 )
+                sunTrackerServiceController.bind()
                 _isCurrentlyTracking.value = true
             }
         }

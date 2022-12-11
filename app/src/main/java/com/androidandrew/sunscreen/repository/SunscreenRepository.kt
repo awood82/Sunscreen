@@ -6,27 +6,26 @@ import com.androidandrew.sunscreen.database.UserSetting
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.flow.Flow
-import java.time.Clock
 
-class SunscreenRepository(private val database: SunscreenDatabase, private val clock: Clock) {
+class SunscreenRepository(private val database: SunscreenDatabase) : ISunscreenRepository {
 
-    fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
+    override fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
         return database.userTrackingDao.get(date)
     }
 
-    suspend fun getUserTrackingInfo(date: String): UserTracking? {
+    override suspend fun getUserTrackingInfo(date: String): UserTracking? {
         return database.userTrackingDao.getOnce(date)
     }
 
-    suspend fun setUserTrackingInfo(tracking: UserTracking) {
+    override suspend fun setUserTrackingInfo(tracking: UserTracking) {
         database.userTrackingDao.insert(tracking)
     }
 
-    suspend fun getLocation(): String? {
+    override suspend fun getLocation(): String? {
         return readStringSetting(UserSettingsDao.LOCATION)
     }
 
-    suspend fun setLocation(location: String) {
+    override suspend fun setLocation(location: String) {
         saveSetting(UserSettingsDao.LOCATION, location)
     }
 
