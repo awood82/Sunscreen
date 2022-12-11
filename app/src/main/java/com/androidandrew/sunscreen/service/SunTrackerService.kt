@@ -35,7 +35,8 @@ class SunTrackerService : Service(), DefaultLifecycleObserver {
         notificationHandler.createChannel(name = NOTIFICATION_NAME)
         val notification = notificationHandler.buildNotification(
             title = getString(R.string.notification_title),
-            text = getString(R.string.notification_text)
+            text = getString(R.string.notification_text),
+            smallIcon = R.drawable.ic_launcher_foreground
         )
         startForeground(NOTIFICATION_ID, notification)
 

@@ -26,16 +26,13 @@ class SunTracker(private val sunscreenRepository: SunscreenRepository, private v
     private val trackerJob = Job()
     private val trackerScope = CoroutineScope(Dispatchers.Main + trackerJob)
 
-    init {
-        initializeUserTrackingInfo()
-    }
-
     fun setSettings(sunTrackerSettings: SunTrackerSettings) {
         settings = sunTrackerSettings
     }
 
     override fun startTracking() {
         Timber.d("SunTrackerService - startTracking")
+        initializeUserTrackingInfo()
         trackingTimer?.cancel()
         trackingTimer = createTrackingTimer().also {
             it.start()
