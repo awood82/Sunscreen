@@ -5,13 +5,12 @@ import androidx.room.Room
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.SunscreenDatabase
-import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-val testModule = module {
+val testDatabaseModule = module {
     fun provideDatabase(context: Context): SunscreenDatabase {
 //        val context = ApplicationProvider.getApplicationContext<Context>()
         return Room.inMemoryDatabaseBuilder(context, SunscreenDatabase::class.java)
@@ -19,10 +18,18 @@ val testModule = module {
             .allowMainThreadQueries()
             .build()
     }
-    single { FakeData.clockDefaultNoon }
-    single { FakeEpaService }
-    factory { provideDatabase(androidContext()) }
-    single { SunscreenRepository(get()) }
 
+    factory { provideDatabase(androidContext()) }
+}
+
+val testNetworkModule = module {
+    single { FakeEpaService }
+}
+
+val testViewModelModule = module {
     viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get(), get()) }
+}
+
+val testModule = module {
+    single { FakeData.clockDefaultNoon }
 }

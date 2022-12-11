@@ -1,8 +1,7 @@
 package com.androidandrew.sunscreen
 
 import android.app.Application
-import com.androidandrew.sunscreen.di.appModule
-import com.androidandrew.sunscreen.di.testModule
+import com.androidandrew.sunscreen.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -13,7 +12,7 @@ class TestApplication : Application() {
         startKoin {
             androidContext(this@TestApplication)
             // Order matters! Overriding modules go last.
-            modules(appModule, testModule)
+            modules(testDatabaseModule, testNetworkModule, repositoryModule, serviceModule, viewModelModule, appModule, testViewModelModule, testModule)
         }
     }
 }

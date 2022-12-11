@@ -1,7 +1,7 @@
 package com.androidandrew.sunscreen
 
 import android.app.Application
-import com.androidandrew.sunscreen.di.appModule
+import com.androidandrew.sunscreen.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -18,7 +18,7 @@ class MainApplication : Application() {
             //inject Android context
             androidContext(this@MainApplication)
             // use modules
-            modules(appModule)
+            modules(databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
         }
 
         if (BuildConfig.DEBUG) {
