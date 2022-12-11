@@ -43,8 +43,8 @@ class SunTrackerTest {
         sunTracker.stopTracking()
     }
 
-    @Test(expected = IllegalStateException::class)
-    fun startTracking_withNoSettingsSet_throwsIllegalStateException() {
+    @Test
+    fun startTracking_withNoSettingsSet_allowsIt() {
         sunTracker.startTracking()
     }
 

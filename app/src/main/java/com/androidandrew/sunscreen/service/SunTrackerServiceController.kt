@@ -21,13 +21,11 @@ class SunTrackerServiceController(private val appContext: Context, private val c
             sunTracker = binder.getService()
             sunTracker?.let {
                 sendSettingsToSunTracker()
-                it.startTracking()
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             Timber.d("onServiceDisconnected")
-            sunTracker?.stopTracking()
         }
     }
 

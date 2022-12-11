@@ -36,10 +36,6 @@ class SunTracker(private val sunscreenRepository: SunscreenRepository, private v
 
     override fun startTracking() {
         Timber.d("SunTrackerService - startTracking")
-        if (!::settings.isInitialized) {
-            Timber.e("startTracking called before setSettings")
-            throw IllegalStateException()
-        }
         trackingTimer?.cancel()
         trackingTimer = createTrackingTimer().also {
             it.start()
