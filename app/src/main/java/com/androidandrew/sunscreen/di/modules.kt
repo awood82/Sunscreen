@@ -3,7 +3,6 @@ package com.androidandrew.sunscreen.di
 import android.app.NotificationManager
 import android.app.Service
 import androidx.core.app.NotificationCompat
-import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.service.*
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
@@ -15,10 +14,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.Clock
-
-val repositoryModule = module {
-    single { SunscreenRepository(get(), get()) }
-}
 
 val serviceModule = module {
     // For Sun Exposure Tracking Service

@@ -1,12 +1,12 @@
-package com.androidandrew.sunscreen.repository
+package com.androidandrew.sunscreen.data.repository
 
 import com.androidandrew.sunscreen.database.*
 import kotlinx.coroutines.flow.Flow
 
-class SunscreenRepository(
+class UserRepositoryImpl(
     private val userTrackingDao: UserTrackingDao,
     private val userSettingsDao: UserSettingsDao
-    ) : ISunscreenRepository {
+    ) : UserRepository {
 
     override fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
         return userTrackingDao.get(date)

@@ -2,7 +2,7 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
-    private val uvService: EpaService, private val repository: SunscreenRepository,
+    private val uvService: EpaService, private val repository: UserRepositoryImpl,
     private val locationUtil: LocationUtil, private val clock: Clock,
     private val sunTrackerServiceController: SunTrackerServiceController)
     : ViewModel(), DefaultLifecycleObserver {

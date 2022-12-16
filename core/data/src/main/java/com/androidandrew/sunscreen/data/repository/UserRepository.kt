@@ -1,9 +1,9 @@
-package com.androidandrew.sunscreen.repository
+package com.androidandrew.sunscreen.data.repository
 
 import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.flow.Flow
 
-interface ISunscreenRepository {
+interface UserRepository {
     fun getUserTrackingInfoSync(date: String): Flow<UserTracking?>
 
     suspend fun getUserTrackingInfo(date: String): UserTracking?

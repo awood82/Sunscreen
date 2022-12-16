@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationManager
 import android.app.Service
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.AppDatabase
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTrackingDao

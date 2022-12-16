@@ -50,6 +50,7 @@ dependencies {
     // Core dependencies. TODO: Features will depend on them instead of the app module
     implementation project(":core:database")
     implementation project(":core:network")
+    implementation project(":core:data")
 
     // Splash screen
     implementation "androidx.core:core-splashscreen:$splashScreenVersion"

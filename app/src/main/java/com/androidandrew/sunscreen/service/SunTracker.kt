@@ -1,7 +1,7 @@
 package com.androidandrew.sunscreen.service
 
 import com.androidandrew.sunscreen.database.UserTracking
-import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
@@ -18,7 +18,7 @@ import java.time.Clock
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class SunTracker(private val sunscreenRepository: SunscreenRepository, private val clock: Clock) : ISunTracker {
+class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private val clock: Clock) : ISunTracker {
 
     private lateinit var settings: SunTrackerSettings
     private var userTracking: UserTracking? = null

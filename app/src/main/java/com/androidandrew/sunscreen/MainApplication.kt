@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen
 
 import android.app.Application
+import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.di.databaseModule
 import com.androidandrew.sunscreen.di.*
 import com.androidandrew.sunscreen.network.di.networkModule
