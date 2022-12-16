@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen
 
 import android.app.Application
+import com.androidandrew.sunscreen.database.di.databaseModule
 import com.androidandrew.sunscreen.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger

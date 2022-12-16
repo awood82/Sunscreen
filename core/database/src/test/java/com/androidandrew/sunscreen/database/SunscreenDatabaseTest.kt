@@ -3,7 +3,6 @@ package com.androidandrew.sunscreen.database
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
-import com.androidandrew.sunscreen.util.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -40,7 +39,9 @@ class SunscreenDatabaseTest {
 
     @Test
     fun insert_thenGet_retrievesSetting() = runTest {
-        val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
+        val userSetting =
+            UserSetting(UserSettingsDao.LOCATION,
+                "12345")
         databaseHolder.db.userSettingsDao.insert(userSetting)
 
         val dbSetting = databaseHolder.db.userSettingsDao.getOnce(UserSettingsDao.LOCATION)
@@ -48,12 +49,14 @@ class SunscreenDatabaseTest {
     }
 
     @Test
-    fun getSync_thenInsert_getsUpdatedLiveDataSetting() = runTest {
-        val dbLive = databaseHolder.db.userSettingsDao.get(UserSettingsDao.LOCATION)
-
-        val userSetting = UserSetting(UserSettingsDao.LOCATION, "12345")
+    fun getSync_thenInsert_getsUpdatedFlowSetting() = runTest {
+        val userSetting =
+            UserSetting(UserSettingsDao.LOCATION,
+                "12345")
         databaseHolder.db.userSettingsDao.insert(userSetting)
 
-        assertEquals("12345", dbLive.getOrAwaitValue()?.value)
+        val dbSetting = databaseHolder.db.userSettingsDao.getOnce(UserSettingsDao.LOCATION)
+
+        assertEquals("12345", dbSetting?.value)
     }
 }

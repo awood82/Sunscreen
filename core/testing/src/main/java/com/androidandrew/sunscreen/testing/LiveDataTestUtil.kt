@@ -1,8 +1,9 @@
-package com.androidandrew.sunscreen.util
+package com.androidandrew.sunscreen.testing
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException

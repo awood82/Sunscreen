@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 rootProject.name = "Sunscreen"
 include ':app'
 include ':sharedTest'
+include ':core:database'
+include ':core:testing'

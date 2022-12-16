@@ -1,24 +1,23 @@
 package com.androidandrew.sunscreen.repository
 
-import androidx.lifecycle.LiveData
-import com.androidandrew.sunscreen.database.SunscreenDatabase
-import com.androidandrew.sunscreen.database.UserSetting
-import com.androidandrew.sunscreen.database.UserSettingsDao
-import com.androidandrew.sunscreen.database.UserTracking
+import com.androidandrew.sunscreen.database.*
 import kotlinx.coroutines.flow.Flow
 
-class SunscreenRepository(private val database: SunscreenDatabase) : ISunscreenRepository {
+class SunscreenRepository(
+    private val userTrackingDao: UserTrackingDao,
+    private val userSettingsDao: UserSettingsDao
+    ) : ISunscreenRepository {
 
     override fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
-        return database.userTrackingDao.get(date)
+        return userTrackingDao.get(date)
     }
 
     override suspend fun getUserTrackingInfo(date: String): UserTracking? {
-        return database.userTrackingDao.getOnce(date)
+        return userTrackingDao.getOnce(date)
     }
 
     override suspend fun setUserTrackingInfo(tracking: UserTracking) {
-        database.userTrackingDao.insert(tracking)
+        userTrackingDao.insert(tracking)
     }
 
     override suspend fun getLocation(): String? {
@@ -50,12 +49,12 @@ class SunscreenRepository(private val database: SunscreenDatabase) : ISunscreenR
     }
 
     private suspend fun saveSetting(setting: UserSetting) {
-        database.userSettingsDao.insert(setting)
+        userSettingsDao.insert(setting)
 //            Timber.d("Saved ${setting.id} = ${setting.value}")
     }
 
-    private fun readStringSettingSync(id: Long): LiveData<UserSetting?> {
-        return database.userSettingsDao.get(id)
+    private fun readStringSettingSync(id: Long): Flow<UserSetting?> {
+        return userSettingsDao.get(id)
     }
 
     private suspend fun readStringSetting(id: Long): String? {
@@ -71,6 +70,6 @@ class SunscreenRepository(private val database: SunscreenDatabase) : ISunscreenR
 //    }
 
     private suspend fun readSetting(id: Long): UserSetting? {
-        return database.userSettingsDao.getOnce(id)
+        return userSettingsDao.getOnce(id)
     }
 }

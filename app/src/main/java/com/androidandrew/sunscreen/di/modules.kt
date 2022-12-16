@@ -1,11 +1,8 @@
 package com.androidandrew.sunscreen.di
 
-import android.app.Application
 import android.app.NotificationManager
 import android.app.Service
 import androidx.core.app.NotificationCompat
-import androidx.room.Room
-import com.androidandrew.sunscreen.database.SunscreenDatabase
 import com.androidandrew.sunscreen.network.EpaApi
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.service.*
@@ -20,25 +17,12 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.Clock
 
-val databaseModule = module {
-    fun provideDatabase(application: Application): SunscreenDatabase {
-        return Room.databaseBuilder(
-            application,
-            SunscreenDatabase::class.java,
-            "sunscreen_database")
-            .fallbackToDestructiveMigration()
-            .build()
-    }
-
-    single { provideDatabase(androidApplication()) }
-}
-
 val networkModule = module {
     single { EpaApi.service }
 }
 
 val repositoryModule = module {
-    single { SunscreenRepository(get()) }
+    single { SunscreenRepository(get(), get()) }
 }
 
 val serviceModule = module {

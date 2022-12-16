@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.util
+package com.androidandrew.sunscreen.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

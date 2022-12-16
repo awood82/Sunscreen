@@ -1,10 +1,10 @@
 package com.androidandrew.sunscreen.database
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserSettingsDao {
@@ -20,7 +20,7 @@ interface UserSettingsDao {
     suspend fun getOnce(id: Long): UserSetting?
 
     @Query("SELECT * FROM user_settings_table WHERE id=:id")
-    fun get(id: Long): LiveData<UserSetting?>
+    fun get(id: Long): Flow<UserSetting?>
 
     @Query("DELETE FROM user_settings_table")
     suspend fun deleteAll()

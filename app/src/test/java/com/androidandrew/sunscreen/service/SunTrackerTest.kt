@@ -7,7 +7,7 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.tracker.uv.trim
-import com.androidandrew.sunscreen.util.MainDispatcherRule
+import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import com.androidandrew.sunscreen.util.toDateString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -28,7 +28,7 @@ class SunTrackerTest {
 
     private val clock = FakeData.clockDefaultNoon
     private val dbWrapper = FakeDatabaseWrapper()
-    private val repo = SunscreenRepository(dbWrapper.db)
+    private val repo = SunscreenRepository(dbWrapper.userTrackingDao, dbWrapper.userSettingsDao)
     private val sunTracker = SunTracker(repo, clock)
 
     private val settings = SunTrackerSettings(

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.androidandrew.sharedtest'
+    namespace 'com.androidandrew.sunscreen.testing'
     compileSdk 32
 
     defaultConfig {
@@ -31,13 +31,18 @@ android {
 }
 
 dependencies {
-
     implementation project(path: ':app')
-    implementation project(":core:testing")
 
-    implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+    api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
 
-    // Room Database
-    implementation "androidx.room:room-ktx:$roomVersion"
-    implementation project(":core:database")
+    // Unit testing
+    api "junit:junit:$junitVersion"
+    api "io.mockk:mockk:$mockkVersion"
+    api "androidx.arch.core:core-testing:$coreTestVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion"
+
+    // AndroidX Test - JVM testing
+    api "androidx.test.ext:junit-ktx:$junitTestExtVersion"
+    api "androidx.test:core-ktx:$testCoreVersion"
+    api "androidx.test:core:$testCoreVersion"
 }

@@ -9,9 +9,9 @@ import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
+import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
-import com.androidandrew.sunscreen.util.MainCoroutineRule
-import com.androidandrew.sunscreen.util.getOrAwaitValue
+import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -52,7 +52,7 @@ class MainViewModelTest {
     private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepo: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
         fakeDatabaseHolder.clearDatabase()
-        realRepository = SunscreenRepository(fakeDatabaseHolder.db)
+        realRepository = SunscreenRepository(fakeDatabaseHolder.userTrackingDao, fakeDatabaseHolder.userSettingsDao)
         if (initDb) {
             realRepository.setLocation(FakeData.zip)
             coEvery { mockRepository.getLocation() } returns FakeData.zip

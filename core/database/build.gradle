@@ -3,8 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'kotlin-kapt'
+
 android {
-    namespace 'com.androidandrew.sharedtest'
+    namespace 'com.androidandrew.sunscreen.database'
     compileSdk 32
 
     defaultConfig {
@@ -31,13 +33,15 @@ android {
 }
 
 dependencies {
-
-    implementation project(path: ':app')
-    implementation project(":core:testing")
-
-    implementation "io.insert-koin:koin-android:$koinAndroidVersion"
-
     // Room Database
     implementation "androidx.room:room-ktx:$roomVersion"
-    implementation project(":core:database")
+    kapt "androidx.room:room-compiler:$roomVersion"
+
+    // Koin for dependency injection
+    implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+
+    testImplementation project(":core:testing")
+    androidTestImplementation project(":core:testing")
+
+    testImplementation project(":sharedTest")
 }
