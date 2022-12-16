@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.tracker.uv
 
+import com.androidandrew.sunscreen.model.uv.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

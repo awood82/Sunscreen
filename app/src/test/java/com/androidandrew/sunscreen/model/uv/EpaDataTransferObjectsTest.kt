@@ -1,5 +1,6 @@
-package com.androidandrew.sunscreen.network
+package com.androidandrew.sunscreen.model.uv
 
+import com.androidandrew.sunscreen.network.HourlyUvIndexForecast
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalTime

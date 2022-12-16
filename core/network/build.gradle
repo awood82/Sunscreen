@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.androidandrew.sharedtest'
+    namespace 'com.androidandrew.sunscreen.network'
     compileSdk 32
 
     defaultConfig {
@@ -32,15 +32,17 @@ android {
 
 dependencies {
 
-    implementation project(path: ':app')
-    implementation project(":core:testing")
+    // Retrofit for networking
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
 
+    // Moshi
+    implementation "com.squareup.moshi:moshi:$moshiVersion"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
+
+    // Koin for dependency injection
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
 
-    // Room Database
-    implementation "androidx.room:room-ktx:$roomVersion"
-    implementation project(":core:database")
-
-    // Networking
-    implementation project(":core:network")
+    testImplementation project(":core:testing")
+    androidTestImplementation project(":core:testing")
 }

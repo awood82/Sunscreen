@@ -5,7 +5,7 @@ import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.UvFactor
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
-import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import com.androidandrew.sunscreen.model.uv.getUvNow
 import com.androidandrew.sunscreen.tracker.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.util.toDateString
 import com.androidandrew.sunscreen.util.toTime

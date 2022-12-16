@@ -1,8 +1,8 @@
 package com.androidandrew.sunscreen.tracker.sunburn
 
 import com.androidandrew.sunscreen.tracker.UvFactor
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
-import com.androidandrew.sunscreen.tracker.uv.getUvNow
+import com.androidandrew.sunscreen.model.uv.UvPrediction
+import com.androidandrew.sunscreen.model.uv.getUvNow
 import java.lang.Double.min
 import java.time.Duration
 import java.time.LocalTime

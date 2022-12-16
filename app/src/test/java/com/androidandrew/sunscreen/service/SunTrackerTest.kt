@@ -4,9 +4,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.network.asUvPrediction
+import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.repository.SunscreenRepository
-import com.androidandrew.sunscreen.tracker.uv.trim
+import com.androidandrew.sunscreen.model.uv.trim
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import com.androidandrew.sunscreen.util.toDateString
 import kotlinx.coroutines.ExperimentalCoroutinesApi

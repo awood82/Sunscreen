@@ -1,7 +1,6 @@
 package com.androidandrew.sunscreen.tracker.sunburn
 
-import com.androidandrew.sunscreen.tracker.uv.UvPredictionPoint
-import kotlinx.coroutines.test.runTest
+import com.androidandrew.sunscreen.model.uv.UvPredictionPoint
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

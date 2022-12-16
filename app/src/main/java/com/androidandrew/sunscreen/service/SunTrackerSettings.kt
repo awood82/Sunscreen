@@ -1,6 +1,6 @@
 package com.androidandrew.sunscreen.service
 
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
+import com.androidandrew.sunscreen.model.uv.UvPrediction
 
 data class SunTrackerSettings(
     val uvPrediction: UvPrediction,

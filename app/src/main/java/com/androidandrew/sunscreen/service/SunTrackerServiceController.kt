@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
+import com.androidandrew.sunscreen.model.uv.UvPrediction
 import timber.log.Timber
 import java.time.Clock
 

@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.tracker.uv
+package com.androidandrew.sunscreen.model.uv
 
 import java.time.Duration
 import java.time.LocalTime

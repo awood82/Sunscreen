@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sunscreen.database.AppDatabase
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTrackingDao
+import com.androidandrew.sunscreen.network.di.networkModule
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk

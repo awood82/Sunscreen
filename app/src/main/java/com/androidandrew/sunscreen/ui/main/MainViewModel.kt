@@ -2,13 +2,13 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.network.asUvPrediction
 import com.androidandrew.sunscreen.repository.SunscreenRepository
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.time.RepeatingTimer
 import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
-import com.androidandrew.sunscreen.tracker.uv.trim
+import com.androidandrew.sunscreen.model.uv.UvPrediction
+import com.androidandrew.sunscreen.model.uv.asUvPrediction
+import com.androidandrew.sunscreen.model.uv.trim
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
