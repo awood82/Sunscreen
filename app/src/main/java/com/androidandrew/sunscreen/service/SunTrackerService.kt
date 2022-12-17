@@ -23,11 +23,11 @@ class SunTrackerService : Service(), DefaultLifecycleObserver {
 
     inner class LocalBinder: Binder() {
 //        fun getService(): SunTrackerService = this@SunTrackerService
-        fun getService(): ISunTracker = sunTracker
+        fun getService(): SunTracker = sunTracker
     }
 
     private val notificationHandler: INotificationHandler by inject { parametersOf(CHANNEL_ID) }
-    private val sunTracker: ISunTracker by inject()
+    private val sunTracker: SunTracker by inject()
 
     override fun onCreate() {
         Timber.d("SunTrackerService - onCreate")

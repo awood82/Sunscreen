@@ -11,7 +11,7 @@ import java.time.Clock
 
 class SunTrackerServiceController(private val appContext: Context, private val clock: Clock) {
 
-    private var sunTracker: ISunTracker? = null
+    private var sunTracker: SunTracker? = null
     private lateinit var sunTrackerSettings: SunTrackerSettings
 
     private val connection = object : ServiceConnection {

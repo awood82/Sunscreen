@@ -18,7 +18,7 @@ import java.time.Clock
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private val clock: Clock) : ISunTracker {
+class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private val clock: Clock) {
 
     private lateinit var settings: SunTrackerSettings
     private var userTracking: UserTracking? = null
@@ -30,7 +30,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
         settings = sunTrackerSettings
     }
 
-    override fun startTracking() {
+    fun startTracking() {
         Timber.d("SunTrackerService - startTracking")
         initializeUserTrackingInfo()
         trackingTimer?.cancel()
@@ -39,7 +39,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
         }
     }
 
-    override fun stopTracking() {
+    fun stopTracking() {
         trackingTimer?.cancel()
     }
 

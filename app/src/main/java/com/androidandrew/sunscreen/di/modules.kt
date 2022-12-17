@@ -24,7 +24,7 @@ val serviceModule = module {
 //    single { NotificationChannelHandler(get()) }
 //    single { NotificationBuilder(get()) }
     factory { SunTrackerServiceController(androidApplication(), get()) }
-    factory<ISunTracker> { SunTracker(get(), get()) }
+    factory { SunTracker(get(), get()) }
 }
 
 val viewModelModule = module {
