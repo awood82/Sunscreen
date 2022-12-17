@@ -48,9 +48,14 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Core dependencies. TODO: Features will depend on them instead of the app module
+    implementation project(":core:common")
     implementation project(":core:database")
     implementation project(":core:network")
     implementation project(":core:data")
+    implementation project(":core:model")
+    implementation project(":core:uvcalculators")
+    implementation project(":feature:tracksunexposure")
+    //    testImplementation project(path: ':core:database')
 
     // Splash screen
     implementation "androidx.core:core-splashscreen:$splashScreenVersion"
@@ -69,8 +74,6 @@ dependencies {
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-    testImplementation project(path: ':core:database')
-    testImplementation project(path: ':core:database')
     androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
 
     // Logging
@@ -83,12 +86,16 @@ dependencies {
     // For tests clicking on screen coordinates
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomatorVersion"
 
-    androidTestImplementation "androidx.test.ext:junit:$junitTestExtVersion"
+//    androidTestImplementation "androidx.test.ext:junit:$junitTestExtVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+
+    testImplementation project(":core:testing")
+    androidTestImplementation project(":core:testing")
 
     testImplementation project(":sharedTest")
     androidTestImplementation project(":sharedTest")
 
-    testImplementation project(":core:testing")
-    androidTestImplementation project(":core:testing")
+    configurations.androidTestImplementation {
+        exclude group: 'org.robolectric'
+    }
 }

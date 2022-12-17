@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.model.uv.asUvPredictionPoint
+import com.androidandrew.sunscreen.tracksunexposure.SunTrackerSettings
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify

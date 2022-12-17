@@ -6,6 +6,7 @@ import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.DefaultLifecycleObserver
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.tracksunexposure.SunTracker
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber

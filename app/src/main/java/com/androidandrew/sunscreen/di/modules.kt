@@ -3,7 +3,10 @@ package com.androidandrew.sunscreen.di
 import android.app.NotificationManager
 import android.app.Service
 import androidx.core.app.NotificationCompat
-import com.androidandrew.sunscreen.service.*
+import com.androidandrew.sunscreen.service.DefaultNotificationHandler
+import com.androidandrew.sunscreen.service.INotificationHandler
+import com.androidandrew.sunscreen.tracksunexposure.SunTracker
+import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.androidandrew.sunscreen.ui.init.InitViewModel

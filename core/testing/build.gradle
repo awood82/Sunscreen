@@ -39,10 +39,17 @@ dependencies {
     api "junit:junit:$junitVersion"
     api "io.mockk:mockk:$mockkVersion"
     api "androidx.arch.core:core-testing:$coreTestVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion"
 
     // AndroidX Test - JVM testing
+    api "androidx.test.ext:junit:$junitTestExtVersion"
     api "androidx.test.ext:junit-ktx:$junitTestExtVersion"
-    api "androidx.test:core-ktx:$testCoreVersion"
     api "androidx.test:core:$testCoreVersion"
+    api "androidx.test:core-ktx:$testCoreVersion"
+
+    // You need to exclude this from androidTest imports w/ the following:
+    // configurations.androidTestImplementation {
+    //     exclude group: 'org.robolectric'
+    // }
+    api "org.robolectric:robolectric:$robolectricVersion"
 }

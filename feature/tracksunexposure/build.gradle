@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+apply plugin: 'kotlin-kapt'
+
+android {
+    namespace 'com.androidandrew.sunscreen.tracksunexposure'
+    compileSdk 32
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 32
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    // Logging
+    implementation "com.jakewharton.timber:timber:$timberVersion"
+
+    // Koin for dependency injection
+//    implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
+    implementation project(":core:common")
+    implementation project(":core:data")
+    implementation project(":core:database") // TODO: The Repository should expose a model, not the database's entities
+    implementation project(":core:model")
+    implementation project(":core:uvcalculators")
+
+    testImplementation project(":core:testing")
+
+    testImplementation project(":sharedTest")
+//    androidTestImplementation project(":sharedTest")
+}

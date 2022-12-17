@@ -1,5 +1,7 @@
 package com.androidandrew.sunscreen.model.uv
 
+import com.androidandrew.sunscreen.model.UvPrediction
+import com.androidandrew.sunscreen.model.UvPredictionPoint
 import com.androidandrew.sunscreen.network.DailyUvIndexForecast
 import com.androidandrew.sunscreen.network.HourlyUvIndexForecast
 import com.androidandrew.sunscreen.network.asLocalTime
