@@ -1,14 +1,14 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.network.asUvPrediction
-import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.model.UvPrediction
+import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
-import com.androidandrew.sunscreen.time.RepeatingTimer
-import com.androidandrew.sunscreen.tracker.sunburn.SunburnCalculator
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
-import com.androidandrew.sunscreen.tracker.uv.trim
+import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
@@ -24,9 +24,10 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
-    private val uvService: EpaService, private val repository: SunscreenRepository,
+    private val uvService: EpaService, private val repository: UserRepositoryImpl,
     private val locationUtil: LocationUtil, private val clock: Clock,
-    private val sunTrackerServiceController: SunTrackerServiceController)
+    private val sunTrackerServiceController: SunTrackerServiceController
+)
     : ViewModel(), DefaultLifecycleObserver {
 
     companion object {
@@ -111,17 +112,19 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), "Unknown")
 
-    private val updateTimer = RepeatingTimer(object : TimerTask() {
-        override fun run() {
-            _lastLocalTimeUsed.value = LocalTime.now(clock)
-        }
-    }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
+    private val updateTimer =
+        RepeatingTimer(object : TimerTask() {
+            override fun run() {
+                _lastLocalTimeUsed.value = LocalTime.now(clock)
+            }
+        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
-    private val dailyTrackingRefreshTimer = RepeatingTimer(object: TimerTask() {
-        override fun run() {
-            _lastDateUsed.value = getDateToday()
-        }
-    }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
+    private val dailyTrackingRefreshTimer =
+        RepeatingTimer(object : TimerTask() {
+            override fun run() {
+                _lastDateUsed.value = getDateToday()
+            }
+        }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
     init {
         viewModelScope.launch {

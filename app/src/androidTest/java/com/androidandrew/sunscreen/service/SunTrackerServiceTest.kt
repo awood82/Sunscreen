@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.repository.SunscreenRepository
+import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -22,7 +22,7 @@ class SunTrackerServiceTest {
 
     private val appContext: Context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
     private val sunTrackerIntent = Intent(appContext, SunTrackerService::class.java)
-    private val repo: SunscreenRepository by inject(SunscreenRepository::class.java)
+    private val repo: UserRepositoryImpl by inject(UserRepositoryImpl::class.java)
     private val fakeDate = LocalDate.now(FakeData.clockDefaultNoon).toString()
 
     @After

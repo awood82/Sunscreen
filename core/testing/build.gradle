@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.androidandrew.sunscreen.testing'
+    compileSdk 32
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 32
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation project(path: ':app')
+
+    api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
+
+    // Unit testing
+    api "junit:junit:$junitVersion"
+    api "io.mockk:mockk:$mockkVersion"
+    api "androidx.arch.core:core-testing:$coreTestVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion"
+
+    // AndroidX Test - JVM testing
+    api "androidx.test.ext:junit:$junitTestExtVersion"
+    api "androidx.test.ext:junit-ktx:$junitTestExtVersion"
+    api "androidx.test:core:$testCoreVersion"
+    api "androidx.test:core-ktx:$testCoreVersion"
+
+    // You need to exclude this from androidTest imports w/ the following:
+    // configurations.androidTestImplementation {
+    //     exclude group: 'org.robolectric'
+    // }
+    api "org.robolectric:robolectric:$robolectricVersion"
+}

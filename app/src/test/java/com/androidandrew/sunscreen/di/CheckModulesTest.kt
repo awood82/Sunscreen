@@ -4,8 +4,12 @@ import android.app.Application
 import android.app.NotificationManager
 import android.app.Service
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sunscreen.database.SunscreenDatabase
-import com.androidandrew.sunscreen.util.MainDispatcherRule
+import com.androidandrew.sunscreen.data.di.repositoryModule
+import com.androidandrew.sunscreen.database.AppDatabase
+import com.androidandrew.sunscreen.database.UserSettingsDao
+import com.androidandrew.sunscreen.database.UserTrackingDao
+import com.androidandrew.sunscreen.network.di.networkModule
+import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkClass
@@ -36,7 +40,9 @@ class CheckModulesTest : KoinTest {
     }
 
     private val mockDatabaseModule = module {
-        single { mockk<SunscreenDatabase>(relaxed = true) }
+        single { mockk<AppDatabase>(relaxed = true) }
+        single { mockk<UserSettingsDao>(relaxed = true) }
+        single { mockk<UserTrackingDao>(relaxed = true) }
     }
 
     private val context = mockk<Application>(relaxed = true)

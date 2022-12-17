@@ -5,19 +5,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.androidandrew.sunscreen.tracker.uv.UvPrediction
+import com.androidandrew.sunscreen.model.UvPrediction
+import com.androidandrew.sunscreen.tracksunexposure.SunTracker
+import com.androidandrew.sunscreen.tracksunexposure.SunTrackerSettings
 import timber.log.Timber
 import java.time.Clock
 
 class SunTrackerServiceController(private val appContext: Context, private val clock: Clock) {
 
-    private var sunTracker: ISunTracker? = null
+    private var sunTracker: SunTracker? = null
     private lateinit var sunTrackerSettings: SunTrackerSettings
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Timber.d("onServiceConnected")
-            val binder = service as SunTrackerService.LocalBinder
+            val binder = service as com.androidandrew.sunscreen.service.SunTrackerService.LocalBinder
             sunTracker = binder.getService()
             sunTracker?.let {
                 sendSettingsToSunTracker()
@@ -91,6 +93,6 @@ class SunTrackerServiceController(private val appContext: Context, private val c
     }
 
     private fun getServiceIntent(): Intent {
-        return Intent(appContext, SunTrackerService::class.java)
+        return Intent(appContext, com.androidandrew.sunscreen.service.SunTrackerService::class.java)
     }
 }
