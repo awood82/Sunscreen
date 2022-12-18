@@ -47,9 +47,9 @@ class InitFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                initViewModel.location.collect { destinationId ->
-                    if (destinationId > 0) {
-                        findNavController().navigate(destinationId)
+                initViewModel.navigationId.collect { id ->
+                    if (id > 0) {
+                        findNavController().navigate(id)
                     }
                 }
             }
