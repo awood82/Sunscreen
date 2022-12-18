@@ -1,8 +1,11 @@
 package com.androidandrew.sunscreen.di
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.androidandrew.sunscreen.MainActivity
 import com.androidandrew.sunscreen.service.DefaultNotificationHandler
 import com.androidandrew.sunscreen.service.INotificationHandler
 import com.androidandrew.sunscreen.tracksunexposure.SunTracker
@@ -19,13 +22,15 @@ import org.koin.dsl.module
 import java.time.Clock
 
 val serviceModule = module {
-    // For Sun Exposure Tracking Service
     single { androidApplication().getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager }
-//    factory { (channelId: String) -> NotificationCompat.Builder(androidContext().applicationContext, channelId) }
     factory { NotificationCompat.Builder(androidApplication()) }
-    factory<INotificationHandler> { (channelId: String) -> DefaultNotificationHandler(androidApplication(), channelId, get(), get()) }
-//    single { NotificationChannelHandler(get()) }
-//    single { NotificationBuilder(get()) }
+    factory {
+        val intentForNotification = Intent(androidApplication(), MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        PendingIntent.getActivity(androidApplication(), 0, intentForNotification, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+    factory<INotificationHandler> { (channelId: String) -> DefaultNotificationHandler(channelId, get(), get(), get()) }
     factory { SunTrackerServiceController(androidApplication(), get()) }
     factory { SunTracker(get(), get()) }
 }
