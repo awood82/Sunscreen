@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import com.androidandrew.sunscreen.MainActivity
 import com.androidandrew.sunscreen.service.DefaultNotificationHandler
 import com.androidandrew.sunscreen.service.INotificationHandler
+import com.androidandrew.sunscreen.service.SunTrackerService
 import com.androidandrew.sunscreen.tracksunexposure.SunTracker
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.ui.main.MainViewModel
@@ -25,12 +26,13 @@ val serviceModule = module {
     single { androidApplication().getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager }
     factory { NotificationCompat.Builder(androidApplication()) }
     factory {
-        val intentForNotification = Intent(androidApplication(), MainActivity::class.java).apply {
+        val resumeAppWhenClicked = Intent(androidApplication(), MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
-        PendingIntent.getActivity(androidApplication(), 0, intentForNotification, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        PendingIntent.getActivity(androidApplication(), 0, resumeAppWhenClicked, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
     factory<INotificationHandler> { (channelId: String) -> DefaultNotificationHandler(channelId, get(), get(), get()) }
+    factory { Intent(androidApplication(), SunTrackerService::class.java) }
     factory { SunTrackerServiceController(androidApplication(), get()) }
     factory { SunTracker(get(), get()) }
 }
