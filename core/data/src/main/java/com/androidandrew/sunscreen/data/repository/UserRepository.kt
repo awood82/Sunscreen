@@ -10,6 +10,8 @@ interface UserRepository {
 
     suspend fun setUserTrackingInfo(tracking: UserTracking)
 
+    fun getLocationSync(): Flow<String?>
+
     suspend fun getLocation(): String?
 
     suspend fun setLocation(location: String)

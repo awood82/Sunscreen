@@ -6,9 +6,11 @@ import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.util.LocationUtil
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -31,19 +33,24 @@ class InitViewModelTest {
 
     @Test
     fun init_whenRepoHasNoLocation_navigatesToLocationScreen() = runTest {
-        coEvery { mockRepository.getLocation() } returns null
+        setLocation(null)
 
         createViewModel()
 
-        assertEquals(R.id.action_initFragment_to_locationFragment, vm.navigate.first())
+        assertEquals(R.id.action_initFragment_to_locationFragment, vm.location.first())
     }
 
     @Test
     fun init_whenRepoHasALocation_navigatesToMainScreen() = runTest {
-        coEvery { mockRepository.getLocation() } returns "12345"
+        setLocation("12345")
 
         createViewModel()
 
-        assertEquals(R.id.action_initFragment_to_mainFragment, vm.navigate.first())
+        assertEquals(R.id.action_initFragment_to_mainFragment, vm.location.first())
+    }
+
+    private fun setLocation(location: String?) {
+        coEvery { mockRepository.getLocation() } returns location
+        every { mockRepository.getLocationSync() } returns flowOf(location)
     }
 }

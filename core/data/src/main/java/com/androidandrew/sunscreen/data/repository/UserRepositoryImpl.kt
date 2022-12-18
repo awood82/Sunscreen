@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.data.repository
 
 import com.androidandrew.sunscreen.database.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class UserRepositoryImpl(
     private val userTrackingDao: UserTrackingDao,
@@ -18,6 +19,10 @@ class UserRepositoryImpl(
 
     override suspend fun setUserTrackingInfo(tracking: UserTracking) {
         userTrackingDao.insert(tracking)
+    }
+
+    override fun getLocationSync(): Flow<String?> {
+        return readStringSettingSync(UserSettingsDao.LOCATION)
     }
 
     override suspend fun getLocation(): String? {
@@ -53,8 +58,10 @@ class UserRepositoryImpl(
 //            Timber.d("Saved ${setting.id} = ${setting.value}")
     }
 
-    private fun readStringSettingSync(id: Long): Flow<UserSetting?> {
-        return userSettingsDao.get(id)
+    private fun readStringSettingSync(id: Long): Flow<String?> {
+        return readSettingSync(id).map {
+            it?.value
+        }
     }
 
     private suspend fun readStringSetting(id: Long): String? {
@@ -68,6 +75,10 @@ class UserRepositoryImpl(
 //    private suspend fun readBooleanSetting(id: Long): Boolean? {
 //        return readSetting(id)?.value?.toBoolean()
 //    }
+
+    private fun readSettingSync(id: Long): Flow<UserSetting?> {
+        return userSettingsDao.get(id)
+    }
 
     private suspend fun readSetting(id: Long): UserSetting? {
         return userSettingsDao.getOnce(id)

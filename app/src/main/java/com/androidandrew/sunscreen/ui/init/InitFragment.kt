@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -21,23 +23,33 @@ class InitFragment : Fragment() {
     private lateinit var binding: FragmentInitBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(
+                              savedInstanceState: Bundle?): View {
+        binding = DataBindingUtil.inflate<FragmentInitBinding>(
             inflater,
             R.layout.fragment_init,
             container,
             false
-        )
+        ).apply {
+            composeView.apply {
+                setViewCompositionStrategy(
+                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                )
+                setContent {
+                    MaterialTheme {
+                        InitScreen(initViewModel)
+                    }
+                }
+            }
+        }
 
         binding.viewModel = initViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                initViewModel.navigate.collect { action ->
-                    if (action > 0) {
-                        findNavController().navigate(action)
-                        initViewModel.onNavigationComplete()
+                initViewModel.location.collect { destinationId ->
+                    if (destinationId > 0) {
+                        findNavController().navigate(destinationId)
                     }
                 }
             }

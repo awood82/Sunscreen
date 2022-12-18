@@ -5,27 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.util.LocationUtil
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
-class InitViewModel(private val repository: UserRepositoryImpl,
-                    private val locationUtil: LocationUtil) : ViewModel() {
+class InitViewModel(repository: UserRepositoryImpl, locationUtil: LocationUtil) : ViewModel() {
 
-    private val _navigate = MutableStateFlow(0)
-    val navigate = _navigate.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            val location = repository.getLocation()
-            _navigate.value = when (locationUtil.isValidZipCode(location ?: "")) {
-                true -> R.id.action_initFragment_to_mainFragment
-                false -> R.id.action_initFragment_to_locationFragment
-            }
+    private val _location = repository.getLocationSync()
+    val location = _location.map {
+        when (locationUtil.isValidZipCode(it ?: "")) {
+            true -> R.id.action_initFragment_to_mainFragment
+            false -> R.id.action_initFragment_to_locationFragment
         }
-    }
-
-    fun onNavigationComplete() {
-        _navigate.value = 0
-    }
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = 0)
 }

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
         <variable
@@ -10,9 +8,9 @@
             type="com.androidandrew.sunscreen.ui.init.InitViewModel" />
     </data>
 
-    <FrameLayout
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.init.InitFragment" />
+        android:layout_height="match_parent" />
 
 </layout>
