@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -21,22 +23,32 @@ class LocationFragment : Fragment() {
     private lateinit var binding: FragmentLocationBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(
+                              savedInstanceState: Bundle?): View {
+        binding = DataBindingUtil.inflate<FragmentLocationBinding>(
             inflater,
             R.layout.fragment_location,
             container,
             false
-        )
+        ).apply {
+            composeView.apply {
+                setViewCompositionStrategy(
+                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                )
+                setContent {
+                    MaterialTheme {
+                        LocationScreen(locationViewModel)
+                    }
+                }
+            }
+        }
 
-        binding.viewModel = locationViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                locationViewModel.navigate.collect { action ->
-                    if (action > 0) {
-                        findNavController().navigate(action)
+                locationViewModel.navigate.collect { destinationId ->
+                    if (destinationId > 0) {
+                        findNavController().navigate(destinationId)
                         locationViewModel.onNavigationComplete()
                     }
                 }

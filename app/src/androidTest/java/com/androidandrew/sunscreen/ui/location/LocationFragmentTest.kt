@@ -1,57 +1,57 @@
 package com.androidandrew.sunscreen.ui.location
 
-import androidx.fragment.app.testing.FragmentScenario
-import androidx.fragment.app.testing.withFragment
+import androidx.annotation.IntegerRes
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
+import androidx.navigation.NavController
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.*
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.MainActivity
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.util.BaseUiTest
-import org.junit.After
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 
-class LocationFragmentTest : BaseUiTest() {
+class LocationFragmentTest {
 
-    private lateinit var fragmentScenario: FragmentScenario<LocationFragment>
+    lateinit var navController: NavController
+
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Before
-    override fun setup() {
-        super.setup()
-        fragmentScenario = launchFragmentUnderTest(initialDestinationId = R.id.locationFragment)
-    }
-
-    @After
-    override fun tearDown() {
-        super.tearDown()
-        try {
-            fragmentScenario.withFragment { requireActivity().stopLockTask() }
-        } catch (e: Exception) {
+    fun startInLocationFragment() {
+        composeTestRule.activityRule.scenario.onActivity { mainActivity ->
+            navController = findNavController(mainActivity, R.id.myNavHostFragment).also {
+                it.navigate(R.id.locationFragment)
+            }
         }
-    }
-
-    private fun searchZip(zip: String) {
-        onView(withId(R.id.editCurrentLocation))
-            .perform(replaceText(zip))
-        onView(withId(R.id.searchButton)).perform(click())
     }
 
     @Test
     fun searchButtonClick_whenZipIsInvalid_doesNotNavigate() {
         searchZip(zip = "123")
 
-        assertEquals(R.id.locationFragment, navController.currentDestination?.id)
+        assertNavigationScreenIs(R.id.locationFragment)
     }
 
     @Test
     fun searchButtonClick_whenZipIsValid_navigatesToMainScreen() {
         searchZip(FakeData.zip)
 
-        assertEquals(R.id.mainFragment, navController.currentDestination?.id)
+        assertNavigationScreenIs(R.id.mainFragment)
     }
 
     // TODO
@@ -60,8 +60,18 @@ class LocationFragmentTest : BaseUiTest() {
     fun navigatingBack_toLocationFragment_isDisabled() {
         searchZip(FakeData.zip)
 
-        assertEquals(R.id.mainFragment, navController.currentDestination?.id)
+        assertNavigationScreenIs(R.id.mainFragment)
 
         assertFalse(navController.navigateUp())
+    }
+
+    private fun searchZip(zip: String) {
+        composeTestRule.onNodeWithText("").performTextReplacement(zip)
+        composeTestRule.onNodeWithContentDescription("Search").performClick()
+        runBlocking { delay(500) }   // TODO: Should use Idling Resource instead
+    }
+
+    private fun assertNavigationScreenIs(@IntegerRes screen: Int) {
+        assertEquals(screen, navController.currentBackStackEntry?.destination?.id)
     }
 }

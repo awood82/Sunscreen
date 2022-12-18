@@ -14,7 +14,6 @@ class LocationViewModel(private val locationUtil: LocationUtil,
                         private val repository: UserRepositoryImpl
 ) : ViewModel() {
 
-    val location = MutableStateFlow("")
     private val _navigate = MutableStateFlow(0)
     @NavigationRes val navigate = _navigate.asStateFlow()
 
@@ -22,10 +21,10 @@ class LocationViewModel(private val locationUtil: LocationUtil,
         _navigate.value = 0
     }
 
-    fun onSearchLocation() {
-        if (locationUtil.isValidZipCode(location.value)) {
+    fun onSearchLocation(zipLocation: String) {
+        if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
-                repository.setLocation(location.value)
+                repository.setLocation(zipLocation)
                 _navigate.value = R.id.action_locationFragment_to_mainFragment
             }
         }

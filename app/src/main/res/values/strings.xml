@@ -4,6 +4,7 @@
     <!-- Location screen -->
     <string name="current_location">Enter the ZIP code of your current location</string>
     <string name="skip">Skip</string>
+    <string name="search">Search</string>
 
     <!-- Main tracking screen -->
     <string name="start_tracking">Start Tracking</string>
