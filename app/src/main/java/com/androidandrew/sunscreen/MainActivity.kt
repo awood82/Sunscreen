@@ -7,7 +7,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Must be called before super.onCreate!
+        // Must be called before setContentView!
         val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)

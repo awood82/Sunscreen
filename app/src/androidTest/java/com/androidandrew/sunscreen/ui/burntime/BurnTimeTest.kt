@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.main.burntime
+package com.androidandrew.sunscreen.ui.burntime
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material.MaterialTheme

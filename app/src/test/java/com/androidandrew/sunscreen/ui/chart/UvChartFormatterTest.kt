@@ -1,9 +1,7 @@
-package com.androidandrew.sunscreen.chart
+package com.androidandrew.sunscreen.ui.chart
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sunscreen.ui.chart.TimeAxisFormatter
-import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet

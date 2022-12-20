@@ -42,7 +42,8 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         // Return to the app under test
         uiDevice.pressRecentApps()
         runBlocking { delay(100) }
-        uiDevice.pressRecentApps()
+        val middleOfScreen = getClickPosition(50f, 50f)
+        uiDevice.click(middleOfScreen.x, middleOfScreen.y)
 
         runBlocking { delay(2000) } // Give some time for UI to refresh
         val progressEnd = vitaminDProgressBar.progress

@@ -1,6 +1,5 @@
-package com.androidandrew.sunscreen.chart
+package com.androidandrew.sunscreen.ui.chart
 
-import com.androidandrew.sunscreen.ui.chart.TimeAxisFormatter
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
