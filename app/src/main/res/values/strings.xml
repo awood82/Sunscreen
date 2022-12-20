@@ -6,6 +6,12 @@
     <string name="skip">Skip</string>
     <string name="search">Search</string>
 
+    <!-- Burn Time section -->
+    <string name="could_burn">You could burn in</string>
+    <string name="minutes_to_burn">%d minutes</string>
+    <string name="unknown">Unknown</string>
+    <string name="unlikely">No burn expected</string>
+
     <!-- Main tracking screen -->
     <string name="start_tracking">Start Tracking</string>
     <string name="stop_tracking">Stop Tracking</string>
@@ -14,7 +20,6 @@
     <string name="vitamin_d">Vitamin D</string>
     <string name="vitamin_d_progress">%d IU</string>
     <string name="location">ZIP Code</string>
-    <string name="could_burn">You could burn in</string>
     <string name="spf">SPF</string>
     <string name="spf_hint">1</string>
     <string name="snow_or_water">On snow or water</string>

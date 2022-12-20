@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -15,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
+import com.androidandrew.sunscreen.ui.main.burntime.BurnTimeScreen
 import com.github.mikephil.charting.data.LineData
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -30,12 +33,23 @@ class MainFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         // Inflate view and obtain an instance of the binding class
-        binding = DataBindingUtil.inflate(
+        binding = DataBindingUtil.inflate<FragmentMainBinding>(
             inflater,
             R.layout.fragment_main,
             container,
             false
-        )
+        ).apply {
+            composeView.apply {
+                setViewCompositionStrategy(
+                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                )
+                setContent {
+                    MaterialTheme {
+                        BurnTimeScreen()
+                    }
+                }
+            }
+        }
 
         binding.viewModel = mainViewModel
         binding.lifecycleOwner = viewLifecycleOwner

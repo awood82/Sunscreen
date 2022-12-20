@@ -49,6 +49,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleComposeVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Core dependencies. TODO: Features will depend on them instead of the app module
@@ -88,6 +89,7 @@ dependencies {
 
     // Koin for dependency injection
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+    implementation "io.insert-koin:koin-androidx-compose:$koinAndroidVersion"
     implementation "io.insert-koin:koin-androidx-navigation:$koinAndroidVersion"
     testImplementation "io.insert-koin:koin-test-junit4:$koinVersion"
 

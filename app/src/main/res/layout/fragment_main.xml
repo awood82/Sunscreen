@@ -39,27 +39,12 @@
             app:layout_constraintTop_toTopOf="@id/editLocation"
             app:layout_constraintBottom_toBottomOf="@id/editLocation" />
 
-        <TextView
-            android:id="@+id/textYouCouldBurn"
-            android:layout_width="wrap_content"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/composeView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:text="@string/could_burn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/editLocation" />
-
-        <TextView
-            android:id="@+id/textTimeToBurn"
-            style="@android:style/TextAppearance.Large"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:text="@{viewModel.burnTimeString}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textYouCouldBurn"
-            tools:text="30 min" />
+            app:layout_constraintTop_toBottomOf="@id/editLocation"
+            />
 
         <Button
             android:id="@+id/trackingButton"
@@ -194,7 +179,7 @@
             app:layout_constraintDimensionRatio="1.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textTimeToBurn" />
+            app:layout_constraintTop_toBottomOf="@+id/composeView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

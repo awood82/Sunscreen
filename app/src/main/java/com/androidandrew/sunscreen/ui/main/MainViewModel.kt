@@ -22,9 +22,15 @@ import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+sealed interface BurnTimeUiState {
+    data class Known(val minutes: Long): BurnTimeUiState
+    object Unknown: BurnTimeUiState
+    object Unlikely: BurnTimeUiState
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
-    private val uvService: EpaService, private val repository: UserRepositoryImpl,
+    private val uvService: EpaService, private val userRepository: UserRepositoryImpl,
     private val locationUtil: LocationUtil, private val clock: Clock,
     private val sunTrackerServiceController: SunTrackerServiceController
 )
@@ -78,7 +84,7 @@ class MainViewModel(
 
     private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
         onSearchLocation() // Will only refresh if the ZIP code is valid
-        repository.getUserTrackingInfoSync(date)
+        userRepository.getUserTrackingInfoSync(date)
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
     val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
@@ -104,13 +110,13 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), UNKNOWN_BURN_TIME)
 
-    val burnTimeString = _minutesToBurn.map { minutes ->
+    val burnTimeUiState: StateFlow<BurnTimeUiState> = _minutesToBurn.map { minutes ->
         when (minutes) {
-            UNKNOWN_BURN_TIME -> "Unknown"
-            SunburnCalculator.NO_BURN_EXPECTED.toLong() -> "No burn expected"
-            else -> "$minutes min"
+            UNKNOWN_BURN_TIME -> BurnTimeUiState.Unknown
+            SunburnCalculator.NO_BURN_EXPECTED.toLong() -> BurnTimeUiState.Unlikely
+            else -> BurnTimeUiState.Known(minutes)
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), "Unknown")
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), BurnTimeUiState.Unknown)
 
     private val updateTimer =
         RepeatingTimer(object : TimerTask() {
@@ -128,7 +134,7 @@ class MainViewModel(
 
     init {
         viewModelScope.launch {
-            repository.getLocation()?.let {
+            userRepository.getLocation()?.let {
                 locationEditText.value = it
                 refreshNetwork(it)
             }
@@ -199,7 +205,7 @@ class MainViewModel(
             if (locationUtil.isValidZipCode(location)) {
                 refreshNetwork(location)
                 viewModelScope.launch {
-                    repository.setLocation(location)
+                    userRepository.setLocation(location)
                 }
             }
         }
