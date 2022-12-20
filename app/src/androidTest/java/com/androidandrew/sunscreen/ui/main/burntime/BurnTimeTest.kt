@@ -5,12 +5,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.main.MainViewModel
+import com.androidandrew.sunscreen.util.onNodeWithStringId
 import org.junit.Rule
 import org.junit.Test
 
-class BurnTimeScreenTest {
+class BurnTimeTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -23,7 +24,7 @@ class BurnTimeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("You could burn in").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.could_burn).assertIsDisplayed()
         composeTestRule.onNodeWithText("Burn time text").assertIsDisplayed()
     }
 
@@ -35,8 +36,8 @@ class BurnTimeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("You could burn in").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Unknown").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.could_burn).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.unknown).assertIsDisplayed()
     }
 
     @Test
@@ -47,8 +48,8 @@ class BurnTimeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("You could burn in").assertIsDisplayed()
-        composeTestRule.onNodeWithText("No burn expected").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.could_burn).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.unlikely).assertIsDisplayed()
     }
 
     @Test
@@ -59,7 +60,7 @@ class BurnTimeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("You could burn in").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.could_burn).assertIsDisplayed()
         composeTestRule.onNodeWithText("15 minutes").assertIsDisplayed()
     }
 }

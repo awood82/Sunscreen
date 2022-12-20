@@ -45,7 +45,5 @@ val viewModelModule = module {
 
 val appModule = module {
     single<Clock> { Clock.systemDefaultZone() }
-
     factory { LocationUtil() }
-    factory { UvChartFormatter(androidContext()) }
 }

@@ -88,38 +88,35 @@ class MainViewModelTest {
     }
 
     @Test
-    fun burnTimeString_ifBurnExpected_isSet() = runTest {
+    fun burnTimeState_ifBurnExpected_isKnown() = runTest {
         createViewModel()
 
         searchZip(FakeData.zip)
 
-        // Accept any "<number> min" string
-        val burnTimeString = vm.burnTimeString.first()
-        assertTrue(burnTimeString.endsWith("min"))
-        val firstChar = burnTimeString[0]
-        assertTrue(firstChar.isDigit())
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Known)
     }
 
     @Test
-    fun burnTimeString_ifNoBurnExpected_isNotSet() = runTest {
+    fun burnTimeState_ifNoBurnExpected_isBurnUnlikely() = runTest {
         val clock6pm = Clock.offset(FakeData.clockDefaultNoon, Duration.ofHours(6))
         createViewModel(clock = clock6pm)
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.first()
-        assertEquals("No burn expected", burnTimeString)
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Unlikely)
     }
 
     @Test
-    fun burnTimeString_ifNoNetworkConnection_isUnknown() = runTest {
+    fun burnTimeState_ifNoNetworkConnection_isUnknown() = runTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.value//getOrAwaitValue()
-        assertEquals("Unknown", burnTimeString)
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Unknown)
     }
 
     @Test
@@ -154,14 +151,14 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         // The box starts unchecked
-        val startingBurnTime = vm.burnTimeString.first()
+        val startingBurnTimeState = vm.burnTimeUiState.first()
 
         // Now it's checked
         vm.isOnSnowOrWater.value = true
         advanceUntilIdle()
 
-        val endingBurnTime = vm.burnTimeString.first()
-        assertNotEquals(startingBurnTime, endingBurnTime)
+        val endingBurnTimeState = vm.burnTimeUiState.first()
+        assertNotEquals(startingBurnTimeState, endingBurnTimeState)
     }
 
     @Test
