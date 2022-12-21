@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.androidandrew.sharedtest.model.FakeUvPredictions
-import com.androidandrew.sunscreen.ui.main.UvChartUiState
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import org.junit.Before
@@ -34,7 +33,7 @@ class UvChartTest {
     fun uvChart_withNoData_showsNoChartDataAvailable() {
         composeTestRule.setContent {
             MaterialTheme {
-                UvChartWithState(uiState = UvChartUiState.NoData)
+                UvChartWithState(uiState = UvChartState.NoData)
             }
         }
 

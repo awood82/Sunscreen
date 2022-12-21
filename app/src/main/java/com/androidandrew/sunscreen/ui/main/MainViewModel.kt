@@ -10,8 +10,9 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeState
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.util.LocationUtil
-import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -21,17 +22,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
-
-sealed interface BurnTimeUiState {
-    data class Known(val minutes: Long): BurnTimeUiState
-    object Unknown: BurnTimeUiState
-    object Unlikely: BurnTimeUiState
-}
-
-sealed interface UvChartUiState {
-    data class HasData(val data: LineDataSet, val highlight: Float): UvChartUiState
-    object NoData: UvChartUiState
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
@@ -97,25 +87,25 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), UNKNOWN_BURN_TIME)
 
-    val burnTimeUiState: StateFlow<BurnTimeUiState> = _minutesToBurn.map { minutes ->
+    val burnTimeState: StateFlow<BurnTimeState> = _minutesToBurn.map { minutes ->
         when (minutes) {
-            UNKNOWN_BURN_TIME -> BurnTimeUiState.Unknown
-            SunburnCalculator.NO_BURN_EXPECTED.toLong() -> BurnTimeUiState.Unlikely
-            else -> BurnTimeUiState.Known(minutes)
+            UNKNOWN_BURN_TIME -> BurnTimeState.Unknown
+            SunburnCalculator.NO_BURN_EXPECTED.toLong() -> BurnTimeState.Unlikely
+            else -> BurnTimeState.Known(minutes)
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), BurnTimeUiState.Unknown)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), BurnTimeState.Unknown)
 
-    val uvChartUiState: StateFlow<UvChartUiState> = combine(_uvPrediction, _lastLocalTimeUsed) { predictions, time ->
+    val uvChartState: StateFlow<UvChartState> = combine(_uvPrediction, _lastLocalTimeUsed) { predictions, time ->
         when (predictions.isEmpty()) {
             false -> {
                 val highlight = with (time) {
                     (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
                 }
-                UvChartUiState.HasData(predictions.toChartData(), highlight)
+                UvChartState.HasData(predictions.toChartData(), highlight)
             }
-            true -> UvChartUiState.NoData
+            true -> UvChartState.NoData
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartState.NoData)
 
     private val updateTimer =
         RepeatingTimer(object : TimerTask() {

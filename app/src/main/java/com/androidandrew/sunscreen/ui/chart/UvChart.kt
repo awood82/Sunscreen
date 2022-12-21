@@ -10,18 +10,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import com.androidandrew.sunscreen.ui.main.UvChartUiState
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 
 @Composable
 fun UvChartWithState(
-    uiState: UvChartUiState,
+    uiState: UvChartState,
     modifier: Modifier = Modifier
 ) {
     when (uiState) {
-        is UvChartUiState.NoData -> UvChart(modifier)
-        is UvChartUiState.HasData -> UvChart(modifier, uiState.data, uiState.highlight)
+        is UvChartState.NoData -> UvChart(modifier)
+        is UvChartState.HasData -> UvChart(modifier, uiState.data, uiState.highlight)
     }
 }
 
@@ -61,6 +60,6 @@ fun UvChart(
 @Composable
 fun UvChartNoDataPreview() {
     MaterialTheme {
-        UvChartWithState(UvChartUiState.NoData)
+        UvChartWithState(UvChartState.NoData)
     }
 }

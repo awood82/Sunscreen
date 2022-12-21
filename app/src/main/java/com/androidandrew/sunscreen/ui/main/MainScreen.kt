@@ -11,7 +11,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeState
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.chart.UvChartWithState
 import org.koin.androidx.compose.get
 
@@ -23,28 +25,28 @@ fun MainScreen(
 ) {
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
-    val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
-    val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
+    val burnTimeState: BurnTimeState by viewModel.burnTimeState.collectAsStateWithLifecycle()
+    val uvChartState: UvChartState by viewModel.uvChartState.collectAsStateWithLifecycle()
 
     MainScreenWithState(
-        burnTimeUiState = burnTimeUiState,
-        uvChartUiState = uvChartUiState,
+        burnTimeState = burnTimeState,
+        uvChartState = uvChartState,
         modifier = modifier
     )
 }
 
 @Composable
 private fun MainScreenWithState(
-    burnTimeUiState: BurnTimeUiState,
-    uvChartUiState: UvChartUiState,
+    burnTimeState: BurnTimeState,
+    uvChartState: UvChartState,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        BurnTimeWithState(uiState = burnTimeUiState)
-        UvChartWithState(uiState = uvChartUiState)
+        BurnTimeWithState(uiState = burnTimeState)
+        UvChartWithState(uiState = uvChartState)
     }
 }
 
@@ -53,8 +55,8 @@ private fun MainScreenWithState(
 fun MainScreenPreview() {
     MaterialTheme {
         MainScreenWithState(
-            burnTimeUiState = BurnTimeUiState.Unknown,
-            uvChartUiState = UvChartUiState.NoData
+            burnTimeState = BurnTimeState.Unknown,
+            uvChartState = UvChartState.NoData
         )
     }
 }

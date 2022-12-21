@@ -12,6 +12,7 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -93,8 +94,8 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        val burnTimeState = vm.burnTimeUiState.first()
-        assertTrue(burnTimeState is BurnTimeUiState.Known)
+        val burnTimeState = vm.burnTimeState.first()
+        assertTrue(burnTimeState is BurnTimeState.Known)
     }
 
     @Test
@@ -104,8 +105,8 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        val burnTimeState = vm.burnTimeUiState.first()
-        assertTrue(burnTimeState is BurnTimeUiState.Unlikely)
+        val burnTimeState = vm.burnTimeState.first()
+        assertTrue(burnTimeState is BurnTimeState.Unlikely)
     }
 
     @Test
@@ -115,8 +116,8 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        val burnTimeState = vm.burnTimeUiState.first()
-        assertTrue(burnTimeState is BurnTimeUiState.Unknown)
+        val burnTimeState = vm.burnTimeState.first()
+        assertTrue(burnTimeState is BurnTimeState.Unknown)
     }
 
     @Test
@@ -151,13 +152,13 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         // The box starts unchecked
-        val startingBurnTimeState = vm.burnTimeUiState.first()
+        val startingBurnTimeState = vm.burnTimeState.first()
 
         // Now it's checked
         vm.isOnSnowOrWater.value = true
         advanceUntilIdle()
 
-        val endingBurnTimeState = vm.burnTimeUiState.first()
+        val endingBurnTimeState = vm.burnTimeState.first()
         assertNotEquals(startingBurnTimeState, endingBurnTimeState)
     }
 

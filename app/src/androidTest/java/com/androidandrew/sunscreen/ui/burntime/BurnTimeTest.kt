@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +31,7 @@ class BurnTimeTest {
     fun uiState_whenUnknown_displaysUnknown() {
         composeTestRule.setContent {
             MaterialTheme {
-                BurnTimeWithState(BurnTimeUiState.Unknown)
+                BurnTimeWithState(BurnTimeState.Unknown)
             }
         }
 
@@ -44,7 +43,7 @@ class BurnTimeTest {
     fun uiState_whenUnlikely_displaysUnlikely() {
         composeTestRule.setContent {
             MaterialTheme {
-                BurnTimeWithState(BurnTimeUiState.Unlikely)
+                BurnTimeWithState(BurnTimeState.Unlikely)
             }
         }
 
@@ -56,7 +55,7 @@ class BurnTimeTest {
     fun uiState_whenKnown_displaysMinutes() {
         composeTestRule.setContent {
             MaterialTheme {
-                BurnTimeWithState(BurnTimeUiState.Known(15))
+                BurnTimeWithState(BurnTimeState.Known(15))
             }
         }
 

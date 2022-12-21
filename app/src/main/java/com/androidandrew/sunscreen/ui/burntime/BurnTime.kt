@@ -11,17 +11,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
 
 @Composable
 fun BurnTimeWithState(
-    uiState: BurnTimeUiState,
+    uiState: BurnTimeState,
     modifier: Modifier = Modifier
 ) {
     val burnTimeString = when (uiState) {
-        is BurnTimeUiState.Known -> { stringResource(R.string.minutes_to_burn, uiState.minutes) }
-        is BurnTimeUiState.Unknown -> { stringResource(R.string.unknown) }
-        is BurnTimeUiState.Unlikely -> { stringResource(R.string.unlikely) }
+        is BurnTimeState.Known -> { stringResource(R.string.minutes_to_burn, uiState.minutes) }
+        is BurnTimeState.Unknown -> { stringResource(R.string.unknown) }
+        is BurnTimeState.Unlikely -> { stringResource(R.string.unlikely) }
     }
 
     BurnTime(
@@ -57,7 +56,7 @@ fun BurnTime(
 fun BurnTimeKnownMinutesPreview() {
     MaterialTheme {
         BurnTimeWithState(
-            BurnTimeUiState.Known(35)
+            BurnTimeState.Known(35)
         )
     }
 }
@@ -67,7 +66,7 @@ fun BurnTimeKnownMinutesPreview() {
 fun BurnTimeUnknownPreview() {
     MaterialTheme {
         BurnTimeWithState(
-            BurnTimeUiState.Unknown
+            BurnTimeState.Unknown
         )
     }
 }
@@ -77,7 +76,7 @@ fun BurnTimeUnknownPreview() {
 fun BurnTimeUnlikelyPreview() {
     MaterialTheme {
         BurnTimeWithState(
-            BurnTimeUiState.Unlikely
+            BurnTimeState.Unlikely
         )
     }
 }
