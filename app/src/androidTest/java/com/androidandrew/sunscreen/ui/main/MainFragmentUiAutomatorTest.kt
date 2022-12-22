@@ -23,8 +23,7 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         onView(withId(R.id.editLocation)).perform(ViewActions.replaceText(zip))
         onView(withId(R.id.search)).perform(click())
     }
-
-    @FlakyTest
+    
     @LargeTest
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
@@ -42,9 +41,10 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         // Return to the app under test
         uiDevice.pressRecentApps()
         runBlocking { delay(100) }
-        uiDevice.pressRecentApps()
+        val middleOfScreen = getClickPosition(50f, 50f)
+        uiDevice.click(middleOfScreen.x, middleOfScreen.y)
 
-        runBlocking { delay(2000) } // Give some time for UI to refresh
+        runBlocking { delay(3000) } // Give some time for UI to refresh
         val progressEnd = vitaminDProgressBar.progress
 
         assertNotEquals(progressMid, progressEnd)
