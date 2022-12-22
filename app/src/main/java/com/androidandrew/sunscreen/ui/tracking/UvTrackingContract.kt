@@ -9,10 +9,10 @@ data class UvTrackingState(
     val buttonEnabled: Boolean,
     val spf: String,
     val isOnSnowOrWater: Boolean,
-//    val sunburnProgressLabelMinusUnits: Int,
-//    val sunburnProgress0to1: Float,
-//    val vitaminDProgressLabelMinusUnits: Int,
-//    val vitaminDProgress0to1: Float
+    val sunburnProgressLabelMinusUnits: Int,
+    val sunburnProgress0to1: Float,
+    val vitaminDProgressLabelMinusUnits: Int,
+    val vitaminDProgress0to1: Float
 ) {
     companion object {
         val initialState = UvTrackingState(
@@ -20,10 +20,10 @@ data class UvTrackingState(
             buttonEnabled = false,
             spf = "0",
             isOnSnowOrWater = false,
-//            sunburnProgressLabelMinusUnits = 0,
-//            sunburnProgress0to1 = 0.0f,
-//            vitaminDProgressLabelMinusUnits = 0,
-//            vitaminDProgress0to1 = 0.0f
+            sunburnProgressLabelMinusUnits = 0,
+            sunburnProgress0to1 = 0.0f,
+            vitaminDProgressLabelMinusUnits = 0,
+            vitaminDProgress0to1 = 0.0f
         )
     }
 }

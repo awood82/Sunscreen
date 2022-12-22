@@ -1,13 +1,11 @@
 package com.androidandrew.sunscreen.ui.main
 
-import android.widget.ProgressBar
-import androidx.fragment.app.testing.withFragment
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiSelector
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
@@ -28,13 +26,13 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
     @LargeTest
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
-        val vitaminDProgressBar: ProgressBar = fragmentScenario.withFragment { requireActivity().findViewById(R.id.progressVitaminD) }
         searchZip()
 
-        val progressStart = vitaminDProgressBar.progress
+        val vitaminDProgressBar = uiDevice.findObjects(By.res("progress"))[1]
+        val progressStart = vitaminDProgressBar.text.progressTextToInt()
         uiDevice.findObject(UiSelector().text("Start Tracking")).click()
         runBlocking { delay(5000) }
-        val progressMid = vitaminDProgressBar.progress
+        val progressMid = vitaminDProgressBar.text.progressTextToInt()
 
         uiDevice.pressHome()
         runBlocking { delay(3000) }
@@ -46,9 +44,15 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         uiDevice.click(middleOfScreen.x, middleOfScreen.y)
 
         runBlocking { delay(3000) } // Give some time for UI to refresh
-        val progressEnd = vitaminDProgressBar.progress
+        val progressEnd = vitaminDProgressBar.text.progressTextToInt()
 
         assertNotEquals(progressMid, progressEnd)
         assertTrue("start=$progressStart, mid=$progressMid, end=$progressEnd", progressEnd - progressMid >= progressMid - progressStart)
+    }
+
+    private fun String.progressTextToInt(): Int {
+        val spaceIndex = this.indexOf(' ')
+        val amount = this.substring(0, spaceIndex)
+        return amount.toInt()
     }
 }

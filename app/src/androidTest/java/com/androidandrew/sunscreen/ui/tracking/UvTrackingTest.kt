@@ -19,10 +19,10 @@ class UvTrackingTest {
         buttonEnabled = false,
         spf = "15",
         isOnSnowOrWater = true,
-//        sunburnProgressLabelMinusUnits = 10,
-//        sunburnProgress0to1 = 0.1f,
-//        vitaminDProgressLabelMinusUnits = 200,
-//        vitaminDProgress0to1 = 0.05f
+        sunburnProgressLabelMinusUnits = 10,
+        sunburnProgress0to1 = 0.1f,
+        vitaminDProgressLabelMinusUnits = 200,
+        vitaminDProgress0to1 = 0.05f
     )
 
     @Test
@@ -41,10 +41,10 @@ class UvTrackingTest {
         composeTestRule.onNodeWithText("15").assertIsDisplayed()
         composeTestRule.onNodeWithStringId(R.string.on_snow_or_water).assertIsDisplayed()
         composeTestRule.onNodeWithTag("checkOnSnowOrWater").assertIsOn()
-//        composeTestRule.onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
-//        composeTestRule.onNodeWithStringId(R.string.sunburn_progress, "10").assertIsDisplayed()
-//        composeTestRule.onNodeWithStringId(R.string.vitamin_d).assertIsDisplayed()
-//        composeTestRule.onNodeWithStringId(R.string.vitamin_d_progress, "200").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.sunburn_progress, "10").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.vitamin_d).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.vitamin_d_progress, "200").assertIsDisplayed()
     }
 
 }

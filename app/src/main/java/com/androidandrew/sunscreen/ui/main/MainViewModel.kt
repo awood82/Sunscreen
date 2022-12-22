@@ -15,13 +15,12 @@ import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
-import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import com.androidandrew.sunscreen.util.LocationUtil
+import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -55,11 +54,14 @@ class MainViewModel(
 
     private val _isCurrentlyTracking = MutableStateFlow(false)
 
-//    val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
-//        prediction.isNotEmpty()
-//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
+        onSearchLocation() // Will only refresh if the ZIP code is valid
+        userRepository.getUserTrackingInfoSync(date)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
-    val uvTrackingState: StateFlow<UvTrackingState> = combine(_isCurrentlyTracking, _uvPrediction, spf, isOnSnowOrWater) { isTracking, prediction, spf, isOnSnowOrWater ->
+    val uvTrackingState: StateFlow<UvTrackingState> = combine(
+        _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, spf, isOnSnowOrWater
+    ) { isTracking, prediction, trackingInfo, spf, isOnSnowOrWater ->
         UvTrackingState(
             buttonLabel = when (isTracking) {
                 true -> R.string.stop_tracking
@@ -67,7 +69,11 @@ class MainViewModel(
             },
             buttonEnabled = prediction.isNotEmpty(),
             spf = spf,
-            isOnSnowOrWater = isOnSnowOrWater
+            isOnSnowOrWater = isOnSnowOrWater,
+            sunburnProgressLabelMinusUnits = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
+            sunburnProgress0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.maxSunUnits).toFloat(),
+            vitaminDProgressLabelMinusUnits = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
+            vitaminDProgress0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(VitaminDCalculator.recommendedIU).toFloat()
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
@@ -88,11 +94,6 @@ class MainViewModel(
             }
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
-
-    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
-        onSearchLocation() // Will only refresh if the ZIP code is valid
-        userRepository.getUserTrackingInfoSync(date)
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
     val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
         tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
