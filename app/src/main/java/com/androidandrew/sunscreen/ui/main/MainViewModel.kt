@@ -9,9 +9,8 @@ import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
+import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.util.LocationUtil
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -62,11 +61,7 @@ class MainViewModel(
     val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
     val chartData = _uvPrediction.mapNotNull { predictionList ->
-        val entries = mutableListOf<Entry>()
-        for (point in predictionList) {
-            entries.add(Entry(point.time.hour.toFloat(), point.uvIndex.toFloat()))
-        }
-        LineDataSet(entries, "")
+        predictionList.toChartData()
     }
 
     val chartHighlightValue = combine(_lastLocalTimeUsed, _uvPrediction) { time, prediction ->
