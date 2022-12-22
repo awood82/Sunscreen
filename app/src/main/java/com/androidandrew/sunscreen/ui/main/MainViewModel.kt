@@ -47,8 +47,10 @@ class MainViewModel(
     private var networkJob: Job? = null
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
-    private val _isCurrentlyTracking = MutableLiveData(false)
-    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
+    private val _isCurrentlyTracking = MutableStateFlow(false)
+    val isCurrentlyTracking = _isCurrentlyTracking.mapLatest {
+        it
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
@@ -156,20 +158,20 @@ class MainViewModel(
     }
 
     fun onSpfChanged(s: CharSequence) {
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             sunTrackerServiceController.setSpf(s.toString().toIntOrNull() ?: SunburnCalculator.spfNoSunscreen)
         }
     }
 
     fun onIsSnowOrWaterChanged(isOn: Boolean) {
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             sunTrackerServiceController.setIsOnSnowOrWater(isOn)
         }
     }
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             // Start the service so it continues to run while the app is in the background
             sunTrackerServiceController.start()
         }
