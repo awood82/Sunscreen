@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.ui.chart.UvChart
-import com.androidandrew.sunscreen.ui.main.burntime.BurnTimeWithState
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
 import com.github.mikephil.charting.data.LineDataSet
 import org.koin.androidx.compose.get
 

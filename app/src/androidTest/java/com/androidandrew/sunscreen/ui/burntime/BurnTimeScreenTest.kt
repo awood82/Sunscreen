@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.main.burntime
+package com.androidandrew.sunscreen.ui.burntime
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material.MaterialTheme
@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.main.MainViewModel
 import org.junit.Rule
 import org.junit.Test
 

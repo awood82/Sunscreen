@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui.main.burntime
+package com.androidandrew.sunscreen.ui.burntime
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

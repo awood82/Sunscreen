@@ -2,7 +2,6 @@ package com.androidandrew.sunscreen.ui.main
 
 import android.content.Context
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,16 +10,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.databinding.FragmentMainBinding
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
-import com.androidandrew.sunscreen.ui.main.burntime.BurnTimeScreen
-import com.github.mikephil.charting.data.LineData
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
