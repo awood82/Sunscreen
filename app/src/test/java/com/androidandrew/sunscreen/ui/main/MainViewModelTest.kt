@@ -12,6 +12,7 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*

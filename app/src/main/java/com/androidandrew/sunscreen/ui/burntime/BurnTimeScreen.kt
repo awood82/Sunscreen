@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import org.koin.androidx.compose.get
 

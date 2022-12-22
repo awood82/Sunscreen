@@ -5,7 +5,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.androidandrew.sunscreen.ui.main.BurnTimeUiState
 import org.junit.Rule
 import org.junit.Test
 

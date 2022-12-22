@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChart
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
 import com.github.mikephil.charting.data.LineDataSet
@@ -18,7 +19,7 @@ import org.koin.androidx.compose.get
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel = get(),   //TODO: BurnTimeViewModel
+    viewModel: MainViewModel = get(),
     modifier: Modifier = Modifier
 ) {
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.

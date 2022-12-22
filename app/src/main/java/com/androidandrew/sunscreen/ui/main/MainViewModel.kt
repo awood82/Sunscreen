@@ -10,6 +10,7 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -20,12 +21,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
-
-sealed interface BurnTimeUiState {
-    data class Known(val minutes: Long): BurnTimeUiState
-    object Unknown: BurnTimeUiState
-    object Unlikely: BurnTimeUiState
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
