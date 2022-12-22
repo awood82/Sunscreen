@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
@@ -13,6 +14,8 @@ import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
+import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -134,7 +137,7 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
-        assertFalse(vm.isTrackingEnabled.value)//getOrAwaitValue())
+        assertFalse(vm.uvTrackingState.first().buttonEnabled)
     }
 
     @Test
@@ -143,7 +146,7 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        assertTrue(vm.isTrackingEnabled.first())
+        assertTrue(vm.uvTrackingState.first().buttonEnabled)
     }
 
     @Test
@@ -264,16 +267,23 @@ class MainViewModelTest {
     fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
         initDb = true
         createViewModel(useMockNetwork = false, useMockRepo = false)
+        val maxVitD = VitaminDCalculator.recommendedIU
 
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
-        assertEquals(10.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(20.0, vm.vitaminDUnitsToday.first(), delta)
+        var uvState = vm.uvTrackingState.first()
+        assertEquals(10, uvState.sunburnProgressLabelMinusUnits)
+        assertEquals(0.1f, uvState.sunburnProgress0to1)
+        assertEquals(20, uvState.vitaminDProgressLabelMinusUnits)
+        assertEquals((20.0 / maxVitD).toFloat(), uvState.vitaminDProgress0to1)
 
         updateTracking(11.0, 22.0)
         advanceUntilIdle()
-        assertEquals(11.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
+        uvState = vm.uvTrackingState.first()
+        assertEquals(11, uvState.sunburnProgressLabelMinusUnits)
+        assertEquals(0.11f, uvState.sunburnProgress0to1)
+        assertEquals(22, uvState.vitaminDProgressLabelMinusUnits)
+        assertEquals((22.0 / maxVitD).toFloat(), uvState.vitaminDProgress0to1)
     }
 
     @Test
@@ -312,6 +322,40 @@ class MainViewModelTest {
         vm.onIsSnowOrWaterChanged(true)
 
         verify { serviceController.setIsOnSnowOrWater(true) }
+    }
+
+    @Test
+    fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.buttonEnabled)
+        assertEquals(R.string.start_tracking, trackingState.buttonLabel)
+    }
+
+    @Test
+    fun whenTrackingStarted_stopIsEnabled() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.buttonEnabled)
+        assertEquals(R.string.stop_tracking, trackingState.buttonLabel)
+    }
+
+    @Test
+    fun afterSearch_ifNetworkError_trackingIsDisabled() = runTest {
+        fakeUvService.exception = IOException()
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertFalse(trackingState.buttonEnabled)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

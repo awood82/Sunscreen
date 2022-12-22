@@ -48,35 +48,4 @@ class MainFragmentTest: BaseUiTest() {
         }
     }*/
 
-    @Test
-    fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() {
-        searchZip()
-
-        onView(withId(R.id.trackingButton)).apply {
-            check(matches(isEnabled()))
-            check(matches(withText(R.string.start_tracking)))
-        }
-    }
-
-    @Test
-    fun whenTrackingStarted_stopIsEnabled() {
-        searchZip()
-
-        onView(withId(R.id.trackingButton)).perform(click())
-
-        onView(withId(R.id.trackingButton)).apply {
-            check(matches(isEnabled()))
-            check(matches(withText(R.string.stop_tracking)))
-        }
-    }
-
-    @Test
-    fun init_sunburnPercent_isDisplayed() {
-        onView(withId(R.id.textSunburnProgress)).check(matches(withText(containsString(" %"))))
-    }
-
-    @Test
-    fun init_vitaminD_IU_isDisplayed() {
-        onView(withId(R.id.textVitaminDProgress)).check(matches(withText(containsString(" IU"))))
-    }
 }

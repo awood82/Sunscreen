@@ -9,14 +9,18 @@ import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
+import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.model.UvPredictionPoint
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeState
 import com.androidandrew.sunscreen.ui.chart.UvChartState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
+import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -34,6 +38,8 @@ class MainViewModel(
         private val UNKNOWN_BURN_TIME = -1L
     }
 
+//    var exposedUvChartState: UvChartState by mutableStateOf(UvChartState.NoData)
+
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
     val locationEditText = MutableStateFlow("")
@@ -44,10 +50,11 @@ class MainViewModel(
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
     private var networkJob: Job? = null
-    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
+//    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
+    private var _uvPrediction: UvPrediction = emptyList()
+    private val _uvPredictionWasUpdated = MutableStateFlow(0.0)   // TODO: I've messed something up and _uvPrediction as a MutableStateFlow list is not updating anything. Temporary workaround so I can wrap up the other changes.
 
-    private val _isCurrentlyTracking = MutableLiveData(false)
-    val isCurrentlyTracking: LiveData<Boolean> = _isCurrentlyTracking
+    private val _isCurrentlyTracking = MutableStateFlow(false)
 
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
@@ -55,29 +62,20 @@ class MainViewModel(
     private val _closeKeyboard = MutableLiveData(false)
     val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
-    val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
-        prediction.isNotEmpty()
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
-
     private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
         onSearchLocation() // Will only refresh if the ZIP code is valid
         userRepository.getUserTrackingInfoSync(date)
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
-    val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-        tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
-
-    val vitaminDUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
-
-    private val _minutesToBurn = combine(_lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { time, forecast, snowOrWater, _ ->
-        when (forecast.isNotEmpty()) {
+    private val _minutesToBurn = combine(
+        _lastLocalTimeUsed, /*_uvPrediction,*/ _userTrackingInfo, isOnSnowOrWater, spf
+    ) { time, /*forecast,*/ userTrackingInfo, snowOrWater, spf ->
+        Timber.e("Updating minutes. Predictions = ${_uvPrediction.size}, spf = $spf")
+        when (_uvPrediction.isNotEmpty()) {
             true -> SunburnCalculator.computeMaxTime(
-                uvPrediction = forecast,
+                uvPrediction = _uvPrediction,
                 currentTime = time,
-                sunUnitsSoFar = sunUnitsToday.value, //_userTrackingInfo.value[0].burnProgress,
+                sunUnitsSoFar = userTrackingInfo?.burnProgress ?: 0.0,
                 skinType = hardcodedSkinType,
                 spf = getSpf(),
                 altitudeInKm = 0,
@@ -95,17 +93,46 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), BurnTimeState.Unknown)
 
-    val uvChartState: StateFlow<UvChartState> = combine(_uvPrediction, _lastLocalTimeUsed) { predictions, time ->
-        when (predictions.isEmpty()) {
+    val uvChartState: StateFlow<UvChartState> = combine(/*_uvPrediction,*/ _lastLocalTimeUsed, _uvPredictionWasUpdated) { /*prediction,*/ time, onePt ->
+        Timber.e("Updating chart state. Predictions = ${_uvPrediction.size}")
+        when (_uvPrediction.isEmpty()) {
             false -> {
                 val highlight = with (time) {
                     (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
                 }
-                UvChartState.HasData(predictions.toChartData(), highlight)
+                Timber.e("with data and highlight $highlight")
+                val pred: UvPrediction = listOf(
+                    //val time: LocalTime, val uvIndex: Double
+                    UvPredictionPoint(LocalTime.NOON.minusHours(2), 2.0),
+                    UvPredictionPoint(LocalTime.NOON.minusHours(1), 4.0 + onePt),
+                    UvPredictionPoint(LocalTime.NOON, 6.0),
+                    UvPredictionPoint(LocalTime.NOON.plusHours(1), 4.0),
+                    UvPredictionPoint(LocalTime.NOON.plusHours(2), 2.0)
+                )
+//                UvChartState.HasData(_uvPrediction.toChartData(), highlight)
+                UvChartState.HasData(pred.toChartData(), highlight)
             }
             true -> UvChartState.NoData
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartState.NoData)
+
+    val uvTrackingState: StateFlow<UvTrackingState> = combine(
+        /*_uvPrediction,*/ _uvPredictionWasUpdated, _isCurrentlyTracking, _userTrackingInfo, spf, isOnSnowOrWater
+    ) { prediction, isTrackingNow, trackingInfo, spf, isOnSnowOrWater ->
+        UvTrackingState(
+            buttonLabel = when(isTrackingNow) {
+                true -> R.string.stop_tracking
+                false -> R.string.start_tracking
+            },
+            buttonEnabled = _uvPrediction.isNotEmpty(),
+            spf = spf,
+            isOnSnowOrWater = isOnSnowOrWater,
+            sunburnProgressLabelMinusUnits = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
+            sunburnProgress0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.maxSunUnits).toFloat(),
+            vitaminDProgressLabelMinusUnits = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
+            vitaminDProgress0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(VitaminDCalculator.recommendedIU).toFloat()
+        )
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
     private val updateTimer =
         RepeatingTimer(object : TimerTask() {
@@ -132,6 +159,24 @@ class MainViewModel(
         dailyTrackingRefreshTimer.start()
     }
 
+    fun onUvTrackingEvent(event: UvTrackingEvent) {
+        when (event) {
+            is UvTrackingEvent.TrackingButtonClicked -> {
+                onTrackingClicked()
+            }
+            is UvTrackingEvent.SpfChanged -> {
+                spf.value = event.spf
+                onSpfChanged(event.spf)
+            }
+            is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                isOnSnowOrWater.value = event.isOnSnowOrWater
+                onIsSnowOrWaterChanged(event.isOnSnowOrWater)
+
+                _uvPredictionWasUpdated.value = _uvPredictionWasUpdated.value + 1.0
+            }
+        }
+    }
+
     fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
             true -> {
@@ -143,7 +188,7 @@ class MainViewModel(
                 so they'd be able to update in real-time. Need to change the variable definitions here.
                 But since changes are infrequent, keep it simple and just relaunch the service if a setting changes. */
                 sunTrackerServiceController.setSettings(
-                    uvPrediction = _uvPrediction.value,
+                    uvPrediction = _uvPrediction,
                     skinType = hardcodedSkinType,
                     spf = spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen,
                     isOnSnowOrWater = isOnSnowOrWater.value
@@ -155,20 +200,20 @@ class MainViewModel(
     }
 
     fun onSpfChanged(s: CharSequence) {
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             sunTrackerServiceController.setSpf(s.toString().toIntOrNull() ?: SunburnCalculator.spfNoSunscreen)
         }
     }
 
     fun onIsSnowOrWaterChanged(isOn: Boolean) {
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             sunTrackerServiceController.setIsOnSnowOrWater(isOn)
         }
     }
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
-        if (_isCurrentlyTracking.value == true) {
+        if (_isCurrentlyTracking.value) {
             // Start the service so it continues to run while the app is in the background
             sunTrackerServiceController.start()
         }
@@ -179,9 +224,14 @@ class MainViewModel(
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
-                _uvPrediction.value = response.asUvPrediction().trim()
+//                exposedUvChartState = UvChartState.HasData(response.asUvPrediction().trim().toChartData(), 0.0f)
+                Timber.e("Refreshed $zipCode, got ${response.asUvPrediction().trim().size} entries")
+                _uvPrediction = response.asUvPrediction().trim()
+                _uvPredictionWasUpdated.value = _uvPredictionWasUpdated.value - 3.0
             } catch (e: Exception) {
-//                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
+//                _uvPrediction.update { emptyList() } //TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least?
+                Timber.e("Oops, exception ${e.message ?: ""}")
+                _uvPrediction = emptyList()
                 _snackbarMessage.postValue(e.message)
             }
         }

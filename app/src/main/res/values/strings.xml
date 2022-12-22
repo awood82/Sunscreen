@@ -22,7 +22,7 @@
     <string name="location">ZIP Code</string>
     <string name="spf">SPF</string>
     <string name="spf_hint">1</string>
-    <string name="snow_or_water">On snow or water</string>
+    <string name="on_snow_or_water">On snow or water</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
