@@ -8,6 +8,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
+import androidx.test.uiautomator.UiSelector
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiAutomatorTest
@@ -31,7 +32,7 @@ class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
         searchZip()
 
         val progressStart = vitaminDProgressBar.progress
-        onView(withId(R.id.trackingButton)).perform(click())
+        uiDevice.findObject(UiSelector().text("Start Tracking")).click()
         runBlocking { delay(5000) }
         val progressMid = vitaminDProgressBar.progress
 

@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
@@ -12,11 +13,15 @@ import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -48,9 +53,20 @@ class MainViewModel(
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
     private val _isCurrentlyTracking = MutableStateFlow(false)
-    val isCurrentlyTracking = _isCurrentlyTracking.mapLatest {
-        it
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+
+//    val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
+//        prediction.isNotEmpty()
+//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+
+    val uvTrackingState: StateFlow<UvTrackingState> = combine(_isCurrentlyTracking, _uvPrediction) { isTracking, prediction ->
+        UvTrackingState(
+            buttonLabel = when(isTracking) {
+                true -> R.string.stop_tracking
+                false -> R.string.start_tracking
+            },
+            buttonEnabled = prediction.isNotEmpty(),
+        )
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
@@ -69,10 +85,6 @@ class MainViewModel(
             }
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
-
-    val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
-        prediction.isNotEmpty()
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
         onSearchLocation() // Will only refresh if the ZIP code is valid
@@ -133,6 +145,11 @@ class MainViewModel(
         }
         updateTimer.start()
         dailyTrackingRefreshTimer.start()
+    }
+
+    fun onUvTrackingEvent(event: UvTrackingEvent) {
+        Timber.e("Got a UV tracking event.")
+        onTrackingClicked()
     }
 
     fun onTrackingClicked() {

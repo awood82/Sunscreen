@@ -13,6 +13,8 @@ import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
+import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -135,7 +137,7 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
-        assertFalse(vm.isTrackingEnabled.value)//getOrAwaitValue())
+        assertFalse(vm.uvTrackingState.first().buttonEnabled)
     }
 
     @Test
@@ -144,7 +146,7 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        assertTrue(vm.isTrackingEnabled.first())
+        assertTrue(vm.uvTrackingState.first().buttonEnabled)
     }
 
     @Test
@@ -313,6 +315,40 @@ class MainViewModelTest {
         vm.onIsSnowOrWaterChanged(true)
 
         verify { serviceController.setIsOnSnowOrWater(true) }
+    }
+
+    @Test
+    fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.buttonEnabled)
+        assertEquals(R.string.start_tracking, trackingState.buttonLabel)
+    }
+
+    @Test
+    fun whenTrackingStarted_stopIsEnabled() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.buttonEnabled)
+        assertEquals(R.string.stop_tracking, trackingState.buttonLabel)
+    }
+
+    @Test
+    fun afterSearch_ifNetworkError_trackingIsDisabled() = runTest {
+        fakeUvService.exception = IOException()
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertFalse(trackingState.buttonEnabled)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

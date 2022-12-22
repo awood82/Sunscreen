@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.ui
+package com.androidandrew.sunscreen.ui.chart
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material.MaterialTheme

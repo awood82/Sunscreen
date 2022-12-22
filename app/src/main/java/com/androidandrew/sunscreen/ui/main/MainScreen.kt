@@ -15,6 +15,9 @@ import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartWithState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
@@ -27,10 +30,13 @@ fun MainScreen(
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
     val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
     val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
+    val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
 
     MainScreenWithState(
         burnTimeUiState = burnTimeUiState,
         uvChartUiState = uvChartUiState,
+        uvTrackingState = uvTrackingState,
+        onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
         modifier = modifier
     )
 }
@@ -39,6 +45,8 @@ fun MainScreen(
 private fun MainScreenWithState(
     burnTimeUiState: BurnTimeUiState,
     uvChartUiState: UvChartUiState,
+    uvTrackingState: UvTrackingState,
+    onUvTrackingEvent: (UvTrackingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -47,6 +55,7 @@ private fun MainScreenWithState(
     ) {
         BurnTimeWithState(uiState = burnTimeUiState)
         UvChartWithState(uvChartUiState)
+        UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
     }
 }
 
@@ -56,7 +65,9 @@ fun MainScreenPreview() {
     MaterialTheme {
         MainScreenWithState(
             burnTimeUiState = BurnTimeUiState.Unknown,
-            uvChartUiState = UvChartUiState.NoData
+            uvChartUiState = UvChartUiState.NoData,
+            uvTrackingState = UvTrackingState.initialState,
+            onUvTrackingEvent = {}
         )
     }
 }

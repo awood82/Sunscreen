@@ -52,14 +52,6 @@ class MainFragmentWithNetworkErrorTest : BaseUiTest() {
     }
 
     @Test
-    fun init_ifNetworkError_trackingIsDisabled() {
-        onView(withId(R.id.trackingButton)).apply {
-            check(matches(isNotEnabled()))
-            check(matches(withText(R.string.start_tracking)))
-        }
-    }
-
-    @Test
     fun init_ifNetworkError_showsErrorSnackbar() {
         onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(errorMessage)))
