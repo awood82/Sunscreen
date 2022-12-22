@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,31 +32,31 @@ fun UvTrackingWithState(
             Text(text = stringResource(uiState.buttonLabel))
         }
 
-//        Row(
-//            horizontalArrangement = Arrangement.SpaceBetween,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            // SPF TextField
-//            OutlinedTextField(
-//                label = { Text(stringResource(R.string.spf)) },
-//                singleLine = true,
-//                value = uiState.spf,
-//                onValueChange = { onEvent(UvTrackingEvent.SpfChanged(it)) },
-//                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-//                modifier = Modifier
-//                    .width(80.dp)
-//            )
-//            // On snow or water CheckBox
-//            Checkbox(
-//                checked = uiState.isOnSnowOrWater,
-//                onCheckedChange = { onEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(it)) },
-//                modifier = Modifier.testTag("checkOnSnowOrWater")
-//            )
-//            Text(
-//                text = stringResource(R.string.on_snow_or_water),
-//            )
-//        }
-//
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // SPF TextField
+            OutlinedTextField(
+                label = { Text(stringResource(R.string.spf)) },
+                singleLine = true,
+                value = uiState.spf,
+                onValueChange = { onEvent(UvTrackingEvent.SpfChanged(it)) },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .width(80.dp)
+            )
+            // On snow or water CheckBox
+            Checkbox(
+                checked = uiState.isOnSnowOrWater,
+                onCheckedChange = { onEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(it)) },
+                modifier = Modifier.testTag("checkOnSnowOrWater")
+            )
+            Text(
+                text = stringResource(R.string.on_snow_or_water),
+            )
+        }
+
 //        // Tracking Sunburn
 //        ProgressTracker(
 //            progress = uiState.sunburnProgress0to1,
@@ -87,8 +86,8 @@ fun UvTrackingWithStatePreview() {
             uiState = UvTrackingState(
                 buttonLabel = R.string.stop_tracking,
                 buttonEnabled = true,
-//                spf = "15",
-//                isOnSnowOrWater = true,
+                spf = "15",
+                isOnSnowOrWater = true,
 //                sunburnProgressLabelMinusUnits = 30,
 //                sunburnProgress0to1 = 0.3f,
 //                vitaminDProgressLabelMinusUnits = 1500,

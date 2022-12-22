@@ -150,7 +150,23 @@ class MainViewModelTest {
     }
 
     @Test
-    fun onSnowOrWaterChanged_changesBurnEstimate() = runTest {
+    fun spf_whenChanged_updatesBurnEstimate() = runTest {
+        createViewModel()
+        searchZip(FakeData.zip)
+
+        // The box starts with "1"
+        val startingSpfState  = vm.burnTimeUiState.first()
+
+        // Now it's changed to "15"
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("15"))
+        advanceUntilIdle()
+
+        val endingSpfState = vm.burnTimeUiState.first()
+        assertNotEquals(startingSpfState, endingSpfState)
+    }
+
+    @Test
+    fun onSnowOrWater_whenChanged_updatesBurnEstimate() = runTest {
         createViewModel()
         searchZip(FakeData.zip)
 
@@ -158,7 +174,7 @@ class MainViewModelTest {
         val startingBurnTimeState  = vm.burnTimeUiState.first()
 
         // Now it's checked
-        vm.isOnSnowOrWater.value = true
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
         advanceUntilIdle()
 
         val endingBurnTimeState = vm.burnTimeUiState.first()

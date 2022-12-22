@@ -43,8 +43,9 @@ class MainViewModel(
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
     val locationEditText = MutableStateFlow("")
-    val isOnSnowOrWater = MutableStateFlow(false)
-    val spf = MutableStateFlow("1")
+    // TODO: Move these into settings repository
+    private val isOnSnowOrWater = MutableStateFlow(false)
+    private val spf = MutableStateFlow("1")
 
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
@@ -58,13 +59,15 @@ class MainViewModel(
 //        prediction.isNotEmpty()
 //    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
-    val uvTrackingState: StateFlow<UvTrackingState> = combine(_isCurrentlyTracking, _uvPrediction) { isTracking, prediction ->
+    val uvTrackingState: StateFlow<UvTrackingState> = combine(_isCurrentlyTracking, _uvPrediction, spf, isOnSnowOrWater) { isTracking, prediction, spf, isOnSnowOrWater ->
         UvTrackingState(
-            buttonLabel = when(isTracking) {
+            buttonLabel = when (isTracking) {
                 true -> R.string.stop_tracking
                 false -> R.string.start_tracking
             },
             buttonEnabled = prediction.isNotEmpty(),
+            spf = spf,
+            isOnSnowOrWater = isOnSnowOrWater
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
@@ -148,8 +151,19 @@ class MainViewModel(
     }
 
     fun onUvTrackingEvent(event: UvTrackingEvent) {
-        Timber.e("Got a UV tracking event.")
-        onTrackingClicked()
+        when (event) {
+            is UvTrackingEvent.TrackingButtonClicked -> {
+                onTrackingClicked()
+            }
+            is UvTrackingEvent.SpfChanged -> {
+                spf.value = event.spf
+                onSpfChanged(event.spf)
+            }
+            is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                isOnSnowOrWater.value = event.isOnSnowOrWater
+                onIsSnowOrWaterChanged(event.isOnSnowOrWater)
+            }
+        }
     }
 
     fun onTrackingClicked() {

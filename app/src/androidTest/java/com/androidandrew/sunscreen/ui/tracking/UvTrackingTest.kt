@@ -17,8 +17,8 @@ class UvTrackingTest {
     val dummyState = UvTrackingState(
         buttonLabel = R.string.start_tracking,
         buttonEnabled = false,
-//        spf = "1",
-//        isOnSnowOrWater = true,
+        spf = "15",
+        isOnSnowOrWater = true,
 //        sunburnProgressLabelMinusUnits = 10,
 //        sunburnProgress0to1 = 0.1f,
 //        vitaminDProgressLabelMinusUnits = 200,
@@ -38,9 +38,9 @@ class UvTrackingTest {
 
         composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsDisplayed()
         composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsNotEnabled()
-//        composeTestRule.onNodeWithText("1").assertIsDisplayed()
-//        composeTestRule.onNodeWithStringId(R.string.on_snow_or_water).assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("checkOnSnowOrWater").assertIsOn()
+        composeTestRule.onNodeWithText("15").assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.snow_or_water).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("checkOnSnowOrWater").assertIsOn()
 //        composeTestRule.onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
 //        composeTestRule.onNodeWithStringId(R.string.sunburn_progress, "10").assertIsDisplayed()
 //        composeTestRule.onNodeWithStringId(R.string.vitamin_d).assertIsDisplayed()
