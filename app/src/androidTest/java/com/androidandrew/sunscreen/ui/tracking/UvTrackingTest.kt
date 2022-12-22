@@ -39,7 +39,7 @@ class UvTrackingTest {
         composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsDisplayed()
         composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsNotEnabled()
         composeTestRule.onNodeWithText("15").assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.snow_or_water).assertIsDisplayed()
+        composeTestRule.onNodeWithStringId(R.string.on_snow_or_water).assertIsDisplayed()
         composeTestRule.onNodeWithTag("checkOnSnowOrWater").assertIsOn()
 //        composeTestRule.onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
 //        composeTestRule.onNodeWithStringId(R.string.sunburn_progress, "10").assertIsDisplayed()
