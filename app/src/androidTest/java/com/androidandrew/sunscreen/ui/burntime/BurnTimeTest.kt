@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import org.junit.Rule
 import org.junit.Test
 
-class BurnTimeScreenTest {
+class BurnTimeTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
