@@ -11,6 +11,7 @@ import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -55,18 +56,17 @@ class MainViewModel(
     private val _closeKeyboard = MutableLiveData(false)
     val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
-    val chartData = _uvPrediction.mapNotNull { predictionList ->
-        predictionList.toChartData()
-    }
-
-    val chartHighlightValue = combine(_lastLocalTimeUsed, _uvPrediction) { time, prediction ->
-        when (prediction.isNotEmpty()) {
-            true -> with (time) {
+    val uvChartUiState: StateFlow<UvChartUiState> = combine(_uvPrediction, _lastLocalTimeUsed) { prediction, time ->
+        when (prediction.isEmpty()) {
+            true -> UvChartUiState.NoData
+            false -> {
+                val xHighlight = with (time) {
                     (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
                 }
-            false -> -1.0f
+                UvChartUiState.HasData(prediction.toChartData(), xHighlight)
+            }
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = -1.0f)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
     val isTrackingEnabled = _uvPrediction.mapLatest { prediction ->
         prediction.isNotEmpty()

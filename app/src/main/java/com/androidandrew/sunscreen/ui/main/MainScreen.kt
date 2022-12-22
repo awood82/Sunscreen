@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChart
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
-import com.github.mikephil.charting.data.LineDataSet
+import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
@@ -25,15 +24,11 @@ fun MainScreen(
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
     val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
-//    val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
-    val chartData by viewModel.chartData.collectAsStateWithLifecycle(initialValue = null, lifecycle = LocalLifecycleOwner.current.lifecycle)
-    val highlight by viewModel.chartHighlightValue.collectAsStateWithLifecycle()
+    val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
 
     MainScreenWithState(
         burnTimeUiState = burnTimeUiState,
-//        uvChartUiState = uvChartUiState,
-        chartData = chartData,
-        highlight = highlight,
+        uvChartUiState = uvChartUiState,
         modifier = modifier
     )
 }
@@ -41,9 +36,7 @@ fun MainScreen(
 @Composable
 private fun MainScreenWithState(
     burnTimeUiState: BurnTimeUiState,
-//    uvChartUiState: UvChartUiState,
-    chartData: LineDataSet?,
-    highlight: Float,
+    uvChartUiState: UvChartUiState,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -51,8 +44,11 @@ private fun MainScreenWithState(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         BurnTimeWithState(uiState = burnTimeUiState)
-//        UvChartWithState(uiState = uvChartUiState)
-        UvChart(dataSet = chartData, xHighlight = highlight)
+        if (uvChartUiState is UvChartUiState.HasData) {
+            UvChart(dataSet = uvChartUiState.data, xHighlight = uvChartUiState.xHighlight)
+        } else {
+            UvChart(dataSet = null, xHighlight = null)
+        }
     }
 }
 
