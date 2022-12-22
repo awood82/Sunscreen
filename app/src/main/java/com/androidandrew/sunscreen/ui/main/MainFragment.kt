@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
                 )
                 setContent {
                     MaterialTheme {
-                        BurnTimeScreen()
+                        MainScreen(mainViewModel)
                     }
                 }
             }
@@ -53,34 +53,6 @@ class MainFragment : Fragment() {
 
         binding.viewModel = mainViewModel
         binding.lifecycleOwner = viewLifecycleOwner
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.chartData.collect { lineDataSet ->
-                    if (lineDataSet.values.isNotEmpty()) {
-                        chartFormatter.formatDataSet(lineDataSet)
-                        binding.uvChart.apply {
-                            chartFormatter.formatChart(
-                                lineChart = this,
-                                use24HourTime = DateFormat.is24HourFormat(requireContext())
-                            )
-                            data = LineData(lineDataSet)
-                            invalidate()
-                        }
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.chartHighlightValue.collect { x ->
-                    if (x >= 0.0f) {
-                        binding.uvChart.highlightValue(x, 0)
-                    }
-                }
-            }
-        }
 
         mainViewModel.snackbarMessage.observe(viewLifecycleOwner) { message ->
             Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()

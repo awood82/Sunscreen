@@ -171,16 +171,6 @@
             app:layout_constraintBottom_toBottomOf="@id/progressVitaminD"
             app:layout_constraintEnd_toEndOf="@id/progressVitaminD" />
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/uvChart"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_margin="@dimen/default_margin"
-            app:layout_constraintDimensionRatio="1.5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/composeView" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
