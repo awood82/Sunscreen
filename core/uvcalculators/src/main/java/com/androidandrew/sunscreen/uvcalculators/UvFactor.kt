@@ -23,7 +23,7 @@ object UvFactor {
     }
 
     fun getSkinBlockFactor(type: Int): Int {
-        return when(type) {
+        return when (type) {
             1 -> 2
             2 -> 3
             3 -> 6
@@ -35,7 +35,7 @@ object UvFactor {
     }
 
     fun getReflectionFactor(isReflective: Boolean): Int {
-        return when(isReflective) {
+        return when (isReflective) {
             false -> 1
             true -> 2
         }

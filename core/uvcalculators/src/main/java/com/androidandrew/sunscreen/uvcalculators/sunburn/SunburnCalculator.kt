@@ -82,7 +82,7 @@ object SunburnCalculator {
             altitudeInKm = altitudeInKm,
             isOnSnowOrWater = isOnSnowOrWater
         )
-        return when(maxTime) {
+        return when (maxTime) {
             NO_BURN_EXPECTED -> 0.0
             else -> maxSunUnits / maxTime
         }
