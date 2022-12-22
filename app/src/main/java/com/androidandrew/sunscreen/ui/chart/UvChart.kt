@@ -12,16 +12,16 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import timber.log.Timber
 
-//@Composable
-//fun UvChartWithState(
-//    uiState: UvChartUiState,
-//    modifier: Modifier = Modifier
-//) {
-//    when (uiState) {
-//        is UvChartUiState.NoData -> UvChart(modifier)
-//        is UvChartUiState.HasData -> UvChart(modifier, uiState.data, uiState.highlight)
-//    }
-//}
+@Composable
+fun UvChartWithState(
+    uiState: UvChartUiState,
+    modifier: Modifier = Modifier
+) {
+    when (uiState) {
+        is UvChartUiState.NoData -> UvChart(modifier)
+        is UvChartUiState.HasData -> UvChart(modifier, uiState.data, uiState.xHighlight)
+    }
+}
 
 @Composable
 fun UvChart(

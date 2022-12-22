@@ -3,16 +3,18 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.chart.UvChart
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartWithState
 import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
@@ -44,21 +46,17 @@ private fun MainScreenWithState(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         BurnTimeWithState(uiState = burnTimeUiState)
-        if (uvChartUiState is UvChartUiState.HasData) {
-            UvChart(dataSet = uvChartUiState.data, xHighlight = uvChartUiState.xHighlight)
-        } else {
-            UvChart(dataSet = null, xHighlight = null)
-        }
+        UvChartWithState(uvChartUiState)
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun MainScreenPreview() {
-//    MaterialTheme {
-//        MainScreenWithState(
-//            burnTimeUiState = BurnTimeUiState.Unknown,
-//            uvChartUiState = UvChartUiState.NoData
-//        )
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    MaterialTheme {
+        MainScreenWithState(
+            burnTimeUiState = BurnTimeUiState.Unknown,
+            uvChartUiState = UvChartUiState.NoData
+        )
+    }
+}
