@@ -31,11 +31,12 @@ class UvChartTest {
     }
 
     @Test
-    fun uvChart_withNoData_showsNoChartDataAvailable() {
+    fun uvChartWithState_withNoData_showsNoChartDataAvailable() {
         composeTestRule.setContent {
             MaterialTheme {
-//                UvChartWithState(uiState = UvChartUiState.NoData)
-                UvChart(dataSet = null, xHighlight = null)
+                UvChartWithState(
+                    uiState = UvChartUiState.NoData
+                )
             }
         }
 
@@ -43,12 +44,14 @@ class UvChartTest {
     }
 
     @Test
-    fun uvChart_withDataSet_showsData() {
+    fun uvChartWithState_withDataSet_showsData() {
         composeTestRule.setContent {
             MaterialTheme {
-                UvChart(
-                    dataSet = fakeData,
-                    xHighlight = 10.0f
+                UvChartWithState(
+                    UvChartUiState.HasData(
+                        data = fakeData,
+                        xHighlight = 10.0f
+                    )
                 )
             }
         }
