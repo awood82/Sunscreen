@@ -1,14 +1,9 @@
 package com.androidandrew.sunscreen.ui.main
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiSelector
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.BaseUiAutomatorTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -19,8 +14,8 @@ import org.junit.Test
 class MainFragmentUiAutomatorTest : BaseUiAutomatorTest() {
 
     private fun searchZip(zip: String = FakeData.zip) {
-        onView(withId(R.id.editLocation)).perform(ViewActions.replaceText(zip))
-        onView(withId(R.id.search)).perform(click())
+        uiDevice.findObject(By.res("locationText")).text = zip
+        uiDevice.findObject(By.res("locationBarSearch")).click()
     }
     
     @LargeTest

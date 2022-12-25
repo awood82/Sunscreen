@@ -1,11 +1,9 @@
 package com.androidandrew.sunscreen.ui.main
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.databinding.DataBindingUtil
@@ -48,17 +46,6 @@ class MainFragment : Fragment() {
             Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()
         }
 
-        mainViewModel.closeKeyboard.observe(viewLifecycleOwner) {
-            closeKeyboard()
-        }
-
         return binding.root
-    }
-
-    private fun closeKeyboard() {
-        activity?.apply {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-        }
     }
 }

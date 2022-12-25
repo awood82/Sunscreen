@@ -14,6 +14,7 @@ import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,8 +83,8 @@ class MainViewModelTest {
     }
 
     private fun searchZip(zip: String) {
-        vm.locationEditText.value = zip
-        vm.onSearchLocation()
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
+        vm.onSearchLocation(zip)
     }
 
     private fun setLocationToRefreshNetworkOnInit() {
@@ -365,6 +366,52 @@ class MainViewModelTest {
 
         val trackingState = vm.uvTrackingState.first()
         assertFalse(trackingState.buttonEnabled)
+    }
+
+    @Test
+    fun init_ifLocationIsInRepo_itAppearsInTheLocationBar() = runTest {
+        every { mockRepository.getLocationSync() } returns flowOf(FakeData.zip)
+        createViewModel(useMockRepo = true)
+
+        val locationBarState = vm.locationBarState.first()
+
+        assertEquals(FakeData.zip, locationBarState.typedSoFar)
+    }
+
+    @Test
+    fun init_ifLocationIsInRepo_queriesNetworkOnlyOnce() = runTest {
+        every { mockRepository.getLocationSync() } returns flowOf(FakeData.zip)
+        createViewModel(useMockNetwork = true, useMockRepo = true)
+
+        coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
+    }
+
+    @Test
+    fun locationBarEvent_ifTextChanges_itIsUpdatedInViewModel() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged("10001"))
+
+        val locationBarState = vm.locationBarState.first()
+        assertEquals("10001", locationBarState.typedSoFar)
+    }
+
+    @Test
+    fun locationBarEvent_ifLocationSearched_andZipCodeIsValid_updatesRepository() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("10001"))
+
+        assertEquals("10001", realRepository.getLocation())
+    }
+
+    @Test
+    fun locationBarEvent_ifLocationSearched_andZipCodeIsInvalid_doesNotUpdateRepository() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("1"))
+
+        assertNotEquals("10001", realRepository.getLocation())
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

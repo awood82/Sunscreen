@@ -18,6 +18,9 @@ import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartWithState
+import com.androidandrew.sunscreen.ui.location.LocationBarEvent
+import com.androidandrew.sunscreen.ui.location.LocationBarState
+import com.androidandrew.sunscreen.ui.location.LocationBarWithState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
@@ -34,8 +37,11 @@ fun MainScreen(
     val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
     val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
     val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
+    val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
 
     MainScreenWithState(
+        locationBarState = locationBarState,
+        onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
         burnTimeUiState = burnTimeUiState,
         uvChartUiState = uvChartUiState,
         uvTrackingState = uvTrackingState,
@@ -46,6 +52,8 @@ fun MainScreen(
 
 @Composable
 private fun MainScreenWithState(
+    locationBarState: LocationBarState,
+    onLocationBarEvent: (LocationBarEvent) -> Unit,
     burnTimeUiState: BurnTimeUiState,
     uvChartUiState: UvChartUiState,
     uvTrackingState: UvTrackingState,
@@ -56,6 +64,7 @@ private fun MainScreenWithState(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
         BurnTimeWithState(uiState = burnTimeUiState)
         UvChartWithState(uvChartUiState)
         UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
@@ -67,6 +76,8 @@ private fun MainScreenWithState(
 fun MainScreenPreview() {
     MaterialTheme {
         MainScreenWithState(
+            locationBarState = LocationBarState("12345"),
+            onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,
             uvChartUiState = UvChartUiState.NoData,
             uvTrackingState = UvTrackingState.initialState,

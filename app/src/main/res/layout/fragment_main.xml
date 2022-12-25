@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -16,34 +15,10 @@
         android:layout_height="match_parent"
         tools:context=".ui.main.MainFragment">
 
-        <EditText
-            android:id="@+id/editLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_margin"
-            android:hint="@string/location"
-            android:inputType="textPostalAddress"
-            android:text="@={viewModel.locationEditText}"
-            app:layout_constraintEnd_toStartOf="@+id/search"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:onClick="@{() -> viewModel.onSearchLocation()}"
-            app:srcCompat="@android:drawable/ic_menu_search"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/editLocation"
-            app:layout_constraintBottom_toBottomOf="@id/editLocation" />
-
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/composeView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/editLocation" />
+            android:layout_height="match_parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

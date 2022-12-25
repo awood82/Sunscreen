@@ -13,6 +13,8 @@ import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.location.LocationBarEvent
+import com.androidandrew.sunscreen.ui.location.LocationBarState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
@@ -21,6 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
@@ -41,7 +44,6 @@ class MainViewModel(
 
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
-    val locationEditText = MutableStateFlow("")
     // TODO: Move these into settings repository
     private val isOnSnowOrWater = MutableStateFlow(false)
     private val spf = MutableStateFlow("1")
@@ -54,8 +56,14 @@ class MainViewModel(
 
     private val _isCurrentlyTracking = MutableStateFlow(false)
 
+    private val _locationBarState = MutableStateFlow(LocationBarState(typedSoFar = ""))
+    val locationBarState = _locationBarState
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), _locationBarState.value)
+
+//    private val _userTrackingInfo = userRepository.getUserTrackingInfoSync(_lastDateUsed.value)
+
     private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
-        onSearchLocation() // Will only refresh if the ZIP code is valid
+        onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
         userRepository.getUserTrackingInfoSync(date)
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
 
@@ -79,9 +87,6 @@ class MainViewModel(
 
     private val _snackbarMessage = MutableLiveData<String>()
     val snackbarMessage: LiveData<String> = _snackbarMessage
-
-    private val _closeKeyboard = MutableLiveData(false)
-    val closeKeyboard: LiveData<Boolean> = _closeKeyboard
 
     val uvChartUiState: StateFlow<UvChartUiState> = combine(_uvPrediction, _lastLocalTimeUsed) { prediction, time ->
         when (prediction.isEmpty()) {
@@ -140,15 +145,52 @@ class MainViewModel(
             }
         }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
-    init {
-        viewModelScope.launch {
-            userRepository.getLocation()?.let {
-                locationEditText.value = it
-                refreshNetwork(it)
+    val networkRefresher = viewModelScope.launch {
+        userRepository.getLocationSync()
+            .distinctUntilChanged()
+            .onEach { location ->
+                location?.let {
+                    _locationBarState.value = LocationBarState(location)
+                    refreshNetwork(location)
+                }
             }
-        }
+            .collect()
+    }
+
+    val dayRefresher = viewModelScope.launch {
+        _lastDateUsed
+            .onEach {
+                userRepository.getLocation()?.let {
+                    refreshNetwork(it)
+                }
+            }
+            .collect()
+    }
+//    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
+//        onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
+//        userRepository.getUserTrackingInfoSync(date)
+//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
+
+    init {
         updateTimer.start()
         dailyTrackingRefreshTimer.start()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        updateTimer.cancel()
+        dailyTrackingRefreshTimer.cancel()
+    }
+
+    fun onLocationBarEvent(event: LocationBarEvent) {
+        when (event) {
+            is LocationBarEvent.TextChanged -> {
+                _locationBarState.value = LocationBarState(typedSoFar = event.text)
+            }
+            is LocationBarEvent.LocationSearched -> {
+                onSearchLocation(event.location)
+            }
+        }
     }
 
     fun onUvTrackingEvent(event: UvTrackingEvent) {
@@ -211,6 +253,7 @@ class MainViewModel(
 
     private fun refreshNetwork(zipCode: String) {
         networkJob?.cancel()
+        Timber.i("Refreshing zip $zipCode")
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
@@ -222,15 +265,10 @@ class MainViewModel(
         }
     }
 
-    fun onSearchLocation() {
-        _closeKeyboard.postValue(true)
-        _closeKeyboard.postValue(false)
-        locationEditText.value.let { location ->
-            if (locationUtil.isValidZipCode(location)) {
-                refreshNetwork(location)
-                viewModelScope.launch {
-                    userRepository.setLocation(location)
-                }
+    fun onSearchLocation(location: String) {
+        if (locationUtil.isValidZipCode(location)) {
+            viewModelScope.launch {
+                userRepository.setLocation(location)
             }
         }
     }
@@ -241,10 +279,5 @@ class MainViewModel(
 
     private fun getSpf(): Int {
         return spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        updateTimer.cancel()
     }
 }

@@ -4,47 +4,56 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidandrew.sunscreen.R
 
+@Composable
+fun LocationBarWithState(
+    uiState: LocationBarState,
+    onEvent: (LocationBarEvent) -> Unit
+) {
+    LocationBar(
+        value = uiState.typedSoFar,
+        onValueChange = { onEvent(LocationBarEvent.TextChanged(it)) },
+        onLocationSearched = { onEvent(LocationBarEvent.LocationSearched(it)) }
+    )
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LocationBar(
+    value: String,
+    onValueChange: (String) -> Unit,
     onLocationSearched: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    initialText: String = ""
+    modifier: Modifier = Modifier
 ) {
-    var locationEntry by rememberSaveable { mutableStateOf(initialText) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TextField(
-        value = locationEntry,
-        onValueChange = { locationEntry = it },
+        value = value,
+        onValueChange = onValueChange,
         singleLine = true,
         label = { Text(stringResource(R.string.current_location)) },
         trailingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = stringResource(R.string.search),
-                modifier = modifier.clickable {
-                    onLocationSearched(locationEntry)
-                }
+                modifier = modifier
+                    .testTag("locationBarSearch")
+                    .clickable {
+                        onLocationSearched(value)
+                    }
             )
         },
         keyboardOptions = KeyboardOptions(
@@ -53,11 +62,16 @@ fun LocationBar(
         ),
         keyboardActions = KeyboardActions(
                 onSearch = {
-                    onLocationSearched(locationEntry)
+                    onLocationSearched(value)
                     keyboardController?.hide()
                 }
         ),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("locationText"),
+        colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = MaterialTheme.colors.background
+        )
     )
 }
 
@@ -65,6 +79,8 @@ fun LocationBar(
 @Composable
 fun LocationBarPreview() {
     LocationBar(
+        value = "",
+        onValueChange = {},
         onLocationSearched = {}
     )
 }
@@ -73,7 +89,8 @@ fun LocationBarPreview() {
 @Composable
 fun LocationBarPreviewWithText() {
     LocationBar(
-        onLocationSearched = {},
-        initialText = "12345"
+        value = "12345",
+        onValueChange = {},
+        onLocationSearched = {}
     )
 }
