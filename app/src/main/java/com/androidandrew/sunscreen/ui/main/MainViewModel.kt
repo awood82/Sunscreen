@@ -114,20 +114,11 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
-//    val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-//        tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
-//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = 0.0)
-//
-//    val vitaminDUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-//        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
-//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = 0.0)
-
     private val _minutesToBurn = combine(_userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { trackingSoFar, time, forecast, snowOrWater, _ ->
         when (forecast.isNotEmpty()) {
             true -> SunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
                 currentTime = time,
-//                sunUnitsSoFar = sunUnitsToday.value, //_userTrackingInfo.value[0].burnProgress,
                 sunUnitsSoFar = trackingSoFar?.burnProgress ?: 0.0,
                 skinType = hardcodedSkinType,
                 spf = getSpf(),
@@ -136,7 +127,7 @@ class MainViewModel(
             ).toLong()
             false -> UNKNOWN_BURN_TIME
         }
-    }//.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UNKNOWN_BURN_TIME)
+    }
 
     val burnTimeUiState: StateFlow<BurnTimeUiState> = _minutesToBurn.map { minutes ->
         when (minutes) {
@@ -245,13 +236,11 @@ class MainViewModel(
                 _isCurrentlyTracking.value = false
             }
             else -> {
-                /* TODO: Could have service read these settings as a flow from the repository,
-                so they'd be able to update in real-time. Need to change the variable definitions here.
-                But since changes are infrequent, keep it simple and just relaunch the service if a setting changes. */
+                /* TODO: Could have service read these settings as a flow from the repository */
                 sunTrackerServiceController.setSettings(
                     uvPrediction = _uvPrediction.value,
                     skinType = hardcodedSkinType,
-                    spf = spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen,
+                    spf = getSpf(),
                     isOnSnowOrWater = isOnSnowOrWater.value
                 )
                 sunTrackerServiceController.bind()
@@ -262,7 +251,7 @@ class MainViewModel(
 
     fun onSpfChanged(s: CharSequence) {
         if (_isCurrentlyTracking.value) {
-            sunTrackerServiceController.setSpf(s.toString().toIntOrNull() ?: SunburnCalculator.spfNoSunscreen)
+            sunTrackerServiceController.setSpf(getSpf(s.toString()))
         }
     }
 
@@ -282,7 +271,7 @@ class MainViewModel(
 
     private fun refreshNetwork(zipCode: String) {
         networkJob?.cancel()
-        Timber.i("(NOT) Refreshing zip $zipCode")
+        Timber.i("Refreshing zip $zipCode")
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
@@ -307,7 +296,7 @@ class MainViewModel(
         return LocalDate.now(clock).toString()
     }
 
-    private fun getSpf(): Int {
-        return spf.value.toIntOrNull() ?: SunburnCalculator.spfNoSunscreen
+    private fun getSpf(value: String = spf.value): Int {
+        return SunburnCalculator.getSpfClamped(value.toIntOrNull())
     }
 }
