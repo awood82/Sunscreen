@@ -39,6 +39,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion composeVersion
     }
+    namespace 'com.androidandrew.sunscreen'
 }
 
 dependencies {
