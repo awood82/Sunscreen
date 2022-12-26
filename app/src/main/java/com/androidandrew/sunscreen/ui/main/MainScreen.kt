@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,8 +72,10 @@ private fun MainScreenWithState(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
         BurnTimeWithState(uiState = burnTimeUiState)

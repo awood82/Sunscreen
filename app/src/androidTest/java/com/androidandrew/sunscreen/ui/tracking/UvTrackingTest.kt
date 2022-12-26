@@ -14,15 +14,15 @@ class UvTrackingTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    val dummyState = UvTrackingState(
-        buttonLabel = R.string.start_tracking,
-        buttonEnabled = false,
-        spf = "15",
+    private val dummyState = UvTrackingState(
+        isTracking = false,
+        isTrackingPossible = false,
+        spfOfSunscreenAppliedToSkin = "15",
         isOnSnowOrWater = true,
-        sunburnProgressLabelMinusUnits = 10,
-        sunburnProgress0to1 = 0.1f,
-        vitaminDProgressLabelMinusUnits = 200,
-        vitaminDProgress0to1 = 0.05f
+        sunburnProgressAmount = 10,
+        sunburnProgressPercent0to1 = 0.1f,
+        vitaminDProgressAmount = 200,
+        vitaminDProgressPercent0to1 = 0.05f
     )
 
     @Test

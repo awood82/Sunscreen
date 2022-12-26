@@ -1,7 +1,6 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
-import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
@@ -19,7 +18,6 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -88,17 +86,14 @@ class MainViewModel(
     ) { isTracking, prediction, trackingInfo, spf, isOnSnowOrWater ->
         Timber.d("Updating UvTrackingState")
         UvTrackingState(
-            buttonLabel = when (isTracking) {
-                true -> R.string.stop_tracking
-                false -> R.string.start_tracking
-            },
-            buttonEnabled = prediction.isNotEmpty(),
-            spf = spf,
+            isTrackingPossible = prediction.isNotEmpty(),
+            isTracking = isTracking,
+            spfOfSunscreenAppliedToSkin = spf,
             isOnSnowOrWater = isOnSnowOrWater,
-            sunburnProgressLabelMinusUnits = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
-            sunburnProgress0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.maxSunUnits).toFloat(),
-            vitaminDProgressLabelMinusUnits = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
-            vitaminDProgress0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(VitaminDCalculator.recommendedIU).toFloat()
+            sunburnProgressAmount = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
+            sunburnProgressPercent0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.maxSunUnits).toFloat(),
+            vitaminDProgressAmount = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
+            vitaminDProgressPercent0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(VitaminDCalculator.recommendedIU).toFloat()
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 

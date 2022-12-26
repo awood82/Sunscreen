@@ -138,7 +138,7 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
-        assertFalse(vm.uvTrackingState.first().buttonEnabled)
+        assertFalse(vm.uvTrackingState.first().isTrackingPossible)
     }
 
     @Test
@@ -147,7 +147,7 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        assertTrue(vm.uvTrackingState.first().buttonEnabled)
+        assertTrue(vm.uvTrackingState.first().isTrackingPossible)
     }
 
     @Test
@@ -288,14 +288,14 @@ class MainViewModelTest {
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
         var tracking = vm.uvTrackingState.first()
-        assertEquals(10, tracking.sunburnProgressLabelMinusUnits)
-        assertEquals(20, tracking.vitaminDProgressLabelMinusUnits)
+        assertEquals(10, tracking.sunburnProgressAmount)
+        assertEquals(20, tracking.vitaminDProgressAmount)
 
         updateTracking(11.0, 22.0)
         advanceUntilIdle()
         tracking = vm.uvTrackingState.first()
-        assertEquals(11, tracking.sunburnProgressLabelMinusUnits)
-        assertEquals(22, tracking.vitaminDProgressLabelMinusUnits)
+        assertEquals(11, tracking.sunburnProgressAmount)
+        assertEquals(22, tracking.vitaminDProgressAmount)
     }
 
     @Test
@@ -343,8 +343,8 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         val trackingState = vm.uvTrackingState.first()
-        assertTrue(trackingState.buttonEnabled)
-        assertEquals(R.string.start_tracking, trackingState.buttonLabel)
+        assertTrue(trackingState.isTrackingPossible)
+        assertFalse(trackingState.isTracking)
     }
 
     @Test
@@ -355,8 +355,8 @@ class MainViewModelTest {
         vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
 
         val trackingState = vm.uvTrackingState.first()
-        assertTrue(trackingState.buttonEnabled)
-        assertEquals(R.string.stop_tracking, trackingState.buttonLabel)
+        assertTrue(trackingState.isTrackingPossible)
+        assertTrue(trackingState.isTracking)
     }
 
     @Test
@@ -367,7 +367,7 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         val trackingState = vm.uvTrackingState.first()
-        assertFalse(trackingState.buttonEnabled)
+        assertFalse(trackingState.isTrackingPossible)
     }
 
     @Test

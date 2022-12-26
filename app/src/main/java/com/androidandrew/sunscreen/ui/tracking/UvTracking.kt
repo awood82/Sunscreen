@@ -2,6 +2,7 @@
 
 package com.androidandrew.sunscreen.ui.tracking
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -28,56 +29,57 @@ fun UvTrackingWithState(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxWidth()
     ) {
-        // Tracking Button
-        Button(
-            enabled = uiState.buttonEnabled,
-            onClick = { onEvent(UvTrackingEvent.TrackingButtonClicked) }
-        ) {
-            Text(text = stringResource(uiState.buttonLabel))
-        }
+        LabeledProgressTracker(
+            progress = uiState.sunburnProgressPercent0to1,
+            progressColor = colorResource(R.color.progress_burn_end),
+            trackColor = colorResource(R.color.progress_background_end),
+            label = stringResource(R.string.sunburn),
+            progressText = stringResource(R.string.sunburn_progress, uiState.sunburnProgressAmount)
+        )
+
+        LabeledProgressTracker(
+            progress = uiState.vitaminDProgressPercent0to1,
+            progressColor = colorResource(R.color.progress_vitamin_d_end),
+            trackColor = colorResource(R.color.progress_background_end),
+            label = stringResource(R.string.vitamin_d),
+            progressText = stringResource(R.string.vitamin_d_progress, uiState.vitaminDProgressAmount)
+        )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // SPF TextField
             OutlinedTextField(
                 label = { Text(stringResource(R.string.spf)) },
                 singleLine = true,
-                value = uiState.spf,
+                value = uiState.spfOfSunscreenAppliedToSkin,
                 onValueChange = { onEvent(UvTrackingEvent.SpfChanged(it)) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .width(80.dp)
             )
-            // On snow or water CheckBox
+
             Checkbox(
                 checked = uiState.isOnSnowOrWater,
                 onCheckedChange = { onEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(it)) },
                 modifier = Modifier.testTag("checkOnSnowOrWater")
             )
+
             Text(
                 text = stringResource(R.string.on_snow_or_water),
             )
         }
 
-        // Tracking Sunburn
-        LabeledProgressTracker(
-            progress = uiState.sunburnProgress0to1,
-            progressColor = colorResource(R.color.progress_burn_end),
-            trackColor = colorResource(R.color.progress_background_end),
-            label = stringResource(R.string.sunburn),
-            progressText = stringResource(R.string.sunburn_progress, uiState.sunburnProgressLabelMinusUnits)
-        )
-
-        // Tracking Vitamin D
-        LabeledProgressTracker(
-            progress = uiState.vitaminDProgress0to1,
-            progressColor = colorResource(R.color.progress_vitamin_d_end),
-            trackColor = colorResource(R.color.progress_background_end),
-            label = stringResource(R.string.vitamin_d),
-            progressText = stringResource(R.string.vitamin_d_progress, uiState.vitaminDProgressLabelMinusUnits)
-        )
+        Button(
+            enabled = uiState.isTrackingPossible,
+            onClick = { onEvent(UvTrackingEvent.TrackingButtonClicked) }
+        ) {
+            @StringRes val buttonTextId = when (uiState.isTracking) {
+                true -> R.string.stop_tracking
+                false -> R.string.start_tracking
+            }
+            Text(text = stringResource(buttonTextId))
+        }
     }
 }
 
@@ -88,14 +90,14 @@ fun UvTrackingWithStatePreview() {
     MaterialTheme {
         UvTrackingWithState(
             uiState = UvTrackingState(
-                buttonLabel = R.string.stop_tracking,
-                buttonEnabled = true,
-                spf = "15",
+                isTrackingPossible = true,
+                isTracking = true,
+                spfOfSunscreenAppliedToSkin = "15",
                 isOnSnowOrWater = true,
-                sunburnProgressLabelMinusUnits = 30,
-                sunburnProgress0to1 = 0.3f,
-                vitaminDProgressLabelMinusUnits = 1500,
-                vitaminDProgress0to1 = 0.8f
+                sunburnProgressAmount = 30,
+                sunburnProgressPercent0to1 = 0.3f,
+                vitaminDProgressAmount = 1500,
+                vitaminDProgressPercent0to1 = 0.8f
             ),
             onEvent = {}
         )
