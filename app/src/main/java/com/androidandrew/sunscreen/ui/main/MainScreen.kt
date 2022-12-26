@@ -47,17 +47,15 @@ fun MainScreen(
             }
         }
         AppState.Onboarded -> {
-            SunscreenTheme {
-                MainScreenWithState(
-                    locationBarState = locationBarState,
-                    onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
-                    burnTimeUiState = burnTimeUiState,
-                    uvChartUiState = uvChartUiState,
-                    uvTrackingState = uvTrackingState,
-                    onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
-                    modifier = modifier
-                )
-            }
+            MainScreenWithState(
+                locationBarState = locationBarState,
+                onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
+                burnTimeUiState = burnTimeUiState,
+                uvChartUiState = uvChartUiState,
+                uvTrackingState = uvTrackingState,
+                onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
+                modifier = modifier
+            )
         }
     }
 }

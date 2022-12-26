@@ -42,7 +42,7 @@ fun SunscreenApp(
                 .padding(innerPadding)
         ) {
             Timber.d("Loading AppNavHost")
-            AppNavHost(navController = navController)
+            AppNavHost(navController = navController, modifier = modifier)
         }
     }
 }

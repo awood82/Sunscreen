@@ -27,6 +27,7 @@ class LocationBarTest {
         }
 
         composeTestRule.onNodeWithContentDescription("Search").performClick()
+
         assertEquals("123", search)
     }
 
@@ -42,6 +43,7 @@ class LocationBarTest {
         }
 
         composeTestRule.onNodeWithText("123").performImeAction()
+
         assertEquals("123", search)
     }
 
@@ -67,8 +69,11 @@ class LocationBarTest {
             )
         }
 
-        composeTestRule.onNodeWithText("1").performTextReplacement("123")
-        composeTestRule.onNodeWithText("123").performImeAction()
+        composeTestRule.apply {
+            onNodeWithText("1").performTextReplacement("123")
+            onNodeWithText("123").performImeAction()
+        }
+
         assertEquals("123", search.value)
         assertEquals("123", textEntry.value)
     }

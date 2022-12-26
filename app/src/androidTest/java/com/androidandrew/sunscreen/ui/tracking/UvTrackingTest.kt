@@ -1,10 +1,10 @@
 package com.androidandrew.sunscreen.ui.tracking
 
 import androidx.activity.ComponentActivity
-import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +28,7 @@ class UvTrackingTest {
     @Test
     fun uvTrackingWithState_withSomeDefaultValues_displaysStrings() {
         composeTestRule.setContent {
-            MaterialTheme {
+            SunscreenTheme {
                 UvTrackingWithState(
                     uiState = dummyState,
                     onEvent = {}
@@ -36,15 +36,16 @@ class UvTrackingTest {
             }
         }
 
-        composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.start_tracking).assertIsNotEnabled()
-        composeTestRule.onNodeWithText("15").assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.on_snow_or_water).assertIsDisplayed()
-        composeTestRule.onNodeWithTag("checkOnSnowOrWater").assertIsOn()
-        composeTestRule.onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.sunburn_progress, 10).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.vitamin_d).assertIsDisplayed()
-        composeTestRule.onNodeWithStringId(R.string.vitamin_d_progress, 200).assertIsDisplayed()
+        composeTestRule.apply {
+            onNodeWithStringId(R.string.start_tracking).assertIsDisplayed()
+            onNodeWithStringId(R.string.start_tracking).assertIsNotEnabled()
+            onNodeWithText("15").assertIsDisplayed()
+            onNodeWithStringId(R.string.on_snow_or_water).assertIsDisplayed()
+            onNodeWithTag("checkOnSnowOrWater").assertIsOn()
+            onNodeWithStringId(R.string.sunburn).assertIsDisplayed()
+            onNodeWithStringId(R.string.sunburn_progress, 10).assertIsDisplayed()
+            onNodeWithStringId(R.string.vitamin_d).assertIsDisplayed()
+            onNodeWithStringId(R.string.vitamin_d_progress, 200).assertIsDisplayed()
+        }
     }
-
 }

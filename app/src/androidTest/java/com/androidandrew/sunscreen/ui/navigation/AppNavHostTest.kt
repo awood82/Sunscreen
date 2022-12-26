@@ -1,9 +1,10 @@
-package com.androidandrew.sunscreen.navigation
+package com.androidandrew.sunscreen.ui.navigation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.androidandrew.sharedtest.util.FakeData
@@ -19,7 +20,7 @@ import org.koin.androidx.compose.get
 class AppNavHostTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     private lateinit var navController: TestNavHostController
 

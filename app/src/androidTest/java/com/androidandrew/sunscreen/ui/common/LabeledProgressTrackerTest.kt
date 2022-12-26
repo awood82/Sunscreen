@@ -21,7 +21,9 @@ class ProgressTrackerTest {
             )
         }
 
-        composeTestRule.onNodeWithText("the label").assertIsDisplayed()
-        composeTestRule.onNodeWithText("80%").assertIsDisplayed()
+        composeTestRule.apply {
+            onNodeWithText("the label").assertIsDisplayed()
+            onNodeWithText("80%").assertIsDisplayed()
+        }
     }
 }
