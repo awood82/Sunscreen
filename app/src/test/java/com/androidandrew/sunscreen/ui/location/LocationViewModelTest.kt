@@ -2,7 +2,6 @@ package com.androidandrew.sunscreen.ui.location
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.util.LocationUtil
 import io.mockk.coVerify
@@ -10,7 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +34,7 @@ class LocationViewModelTest {
 
         vm.onSearchLocation("10001")
 
-        assertEquals(R.id.action_locationFragment_to_mainFragment, vm.navigationId.first())
+        assertTrue(vm.isLocationValid.first())
         coVerify { mockRepository.setLocation("10001") }
     }
 
@@ -45,6 +44,6 @@ class LocationViewModelTest {
 
         vm.onSearchLocation("1")
 
-        assertEquals(0, vm.navigationId.first())
+        assertFalse(vm.isLocationValid.first())
     }
 }

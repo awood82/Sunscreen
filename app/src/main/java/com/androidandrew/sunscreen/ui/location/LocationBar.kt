@@ -4,9 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -21,16 +21,18 @@ import com.androidandrew.sunscreen.R
 @Composable
 fun LocationBarWithState(
     uiState: LocationBarState,
-    onEvent: (LocationBarEvent) -> Unit
+    onEvent: (LocationBarEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LocationBar(
         value = uiState.typedSoFar,
         onValueChange = { onEvent(LocationBarEvent.TextChanged(it)) },
-        onLocationSearched = { onEvent(LocationBarEvent.LocationSearched(it)) }
+        onLocationSearched = { onEvent(LocationBarEvent.LocationSearched(it)) },
+        modifier = modifier
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LocationBar(
     value: String,
@@ -52,6 +54,7 @@ fun LocationBar(
                 modifier = modifier
                     .testTag("locationBarSearch")
                     .clickable {
+                        keyboardController?.hide()
                         onLocationSearched(value)
                     }
             )
@@ -62,15 +65,15 @@ fun LocationBar(
         ),
         keyboardActions = KeyboardActions(
                 onSearch = {
-                    onLocationSearched(value)
                     keyboardController?.hide()
+                    onLocationSearched(value)
                 }
         ),
         modifier = modifier
             .fillMaxWidth()
             .testTag("locationText"),
         colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = MaterialTheme.colors.background
+            containerColor = MaterialTheme.colorScheme.background
         )
     )
 }

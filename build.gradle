@@ -25,7 +25,6 @@ ext {
     lifecycleVersion = '2.5.1'
     lifecycleComposeVersion = '2.6.0-alpha03'
     locationVersion = '21.0.0'
-    materialVersion = '1.6.1'
     mockkVersion = '1.10.0'
     moshiVersion = '1.14.0'
     navigationVersion = '2.5.2'

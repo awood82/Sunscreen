@@ -1,8 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.androidandrew.sunscreen.ui.tracking
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +65,7 @@ fun UvTrackingWithState(
         LabeledProgressTracker(
             progress = uiState.sunburnProgress0to1,
             progressColor = colorResource(R.color.progress_burn_end),
-            backgroundColor = colorResource(R.color.progress_background_end),
+            trackColor = colorResource(R.color.progress_background_end),
             label = stringResource(R.string.sunburn),
             progressText = stringResource(R.string.sunburn_progress, uiState.sunburnProgressLabelMinusUnits)
         )
@@ -72,7 +74,7 @@ fun UvTrackingWithState(
         LabeledProgressTracker(
             progress = uiState.vitaminDProgress0to1,
             progressColor = colorResource(R.color.progress_vitamin_d_end),
-            backgroundColor = colorResource(R.color.progress_background_end),
+            trackColor = colorResource(R.color.progress_background_end),
             label = stringResource(R.string.vitamin_d),
             progressText = stringResource(R.string.vitamin_d_progress, uiState.vitaminDProgressLabelMinusUnits)
         )

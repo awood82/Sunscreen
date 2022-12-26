@@ -2,8 +2,8 @@ package com.androidandrew.sunscreen.ui.burntime
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,12 +40,12 @@ fun BurnTime(
         Text(
             text = stringResource(R.string.could_burn),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.bodyLarge
         )
         Text(
             text = burnTimeString,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.headlineSmall
         )
     }
 }

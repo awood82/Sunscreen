@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.androidandrew.sunscreen.R
 
 // TODO: Consider breaking this down into sub-components. It has a lot of arguments.
+// TODO: Also consider making this a sealed interface w/ one state, so initialState might not be needed.
 data class UvTrackingState(
     @StringRes val buttonLabel: Int,
     val buttonEnabled: Boolean,

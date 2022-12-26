@@ -3,13 +3,10 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
@@ -21,33 +18,48 @@ import com.androidandrew.sunscreen.ui.chart.UvChartWithState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.location.LocationBarState
 import com.androidandrew.sunscreen.ui.location.LocationBarWithState
+import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import org.koin.androidx.compose.get
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainScreen(
+    modifier: Modifier = Modifier,
     viewModel: MainViewModel = get(),
-    modifier: Modifier = Modifier.semantics { testTagsAsResourceId = true }
+    onNotOnboarded: () -> Unit
 ) {
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
+    val appState: AppState by viewModel.appState.collectAsStateWithLifecycle()
     val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
     val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
     val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
 
-    MainScreenWithState(
-        locationBarState = locationBarState,
-        onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
-        burnTimeUiState = burnTimeUiState,
-        uvChartUiState = uvChartUiState,
-        uvTrackingState = uvTrackingState,
-        onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
-        modifier = modifier
-    )
+    when (appState) {
+        AppState.Loading -> {}
+        AppState.NotOnboarded -> {
+            LaunchedEffect(appState) {
+                onNotOnboarded()
+            }
+        }
+        AppState.Onboarded -> {
+            SunscreenTheme {
+                MainScreenWithState(
+                    locationBarState = locationBarState,
+                    onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
+                    burnTimeUiState = burnTimeUiState,
+                    uvChartUiState = uvChartUiState,
+                    uvTrackingState = uvTrackingState,
+                    onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
+                    modifier = modifier
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -74,7 +86,7 @@ private fun MainScreenWithState(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MaterialTheme {
+    SunscreenTheme {
         MainScreenWithState(
             locationBarState = LocationBarState("12345"),
             onLocationBarEvent = {},

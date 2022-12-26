@@ -1,10 +1,10 @@
 package com.androidandrew.sunscreen.ui.common
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProgressIndicatorDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 fun LabeledProgressTracker(
     progress: Float,
     modifier: Modifier = Modifier,
-    progressColor: Color = MaterialTheme.colors.primary,
-    backgroundColor: Color = progressColor.copy(alpha = ProgressIndicatorDefaults.IndicatorBackgroundOpacity),
+    progressColor: Color = ProgressIndicatorDefaults.linearTrackColor,
+    trackColor: Color = ProgressIndicatorDefaults.linearTrackColor,
     label: String = "",
     progressText: String = ""
 ) {
@@ -30,7 +30,7 @@ fun LabeledProgressTracker(
         LinearProgressIndicator(
             progress = progress,
             color = progressColor,
-            backgroundColor = backgroundColor,
+            trackColor = trackColor,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
@@ -56,7 +56,7 @@ fun ProgressTrackerPreview() {
         LabeledProgressTracker(
             progress = 0.6f,
             progressColor = Color.Red,
-            backgroundColor = Color.Gray,
+            trackColor = Color.Gray,
             label = "Sunburn",
             progressText = "60%"
         )

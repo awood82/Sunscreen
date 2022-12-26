@@ -1,12 +1,11 @@
 package com.androidandrew.sunscreen.ui.chart
 
 import androidx.activity.ComponentActivity
-import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.androidandrew.sharedtest.model.FakeUvPredictions
-import com.androidandrew.sunscreen.ui.chart.UvChart
+import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import org.junit.Before
@@ -33,7 +32,7 @@ class UvChartTest {
     @Test
     fun uvChartWithState_withNoData_showsNoChartDataAvailable() {
         composeTestRule.setContent {
-            MaterialTheme {
+            SunscreenTheme {
                 UvChartWithState(
                     uiState = UvChartUiState.NoData
                 )
@@ -46,7 +45,7 @@ class UvChartTest {
     @Test
     fun uvChartWithState_withDataSet_showsData() {
         composeTestRule.setContent {
-            MaterialTheme {
+            SunscreenTheme {
                 UvChartWithState(
                     UvChartUiState.HasData(
                         data = fakeData,

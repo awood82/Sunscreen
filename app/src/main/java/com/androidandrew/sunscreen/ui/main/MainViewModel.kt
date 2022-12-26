@@ -30,23 +30,22 @@ import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
     private val uvService: EpaService, private val userRepository: UserRepositoryImpl,
     private val locationUtil: LocationUtil, private val clock: Clock,
     private val sunTrackerServiceController: SunTrackerServiceController
-)
-    : ViewModel(), DefaultLifecycleObserver {
+) : ViewModel(), DefaultLifecycleObserver {
 
     companion object {
-        private val UNKNOWN_BURN_TIME = -1L
+        private const val UNKNOWN_BURN_TIME = -1L
     }
-
-    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
     // TODO: Move these into settings repository
     private val isOnSnowOrWater = MutableStateFlow(false)
     private val spf = MutableStateFlow("1")
+    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
+
+    private val _isCurrentlyTracking = MutableStateFlow(false)
 
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
@@ -54,22 +53,40 @@ class MainViewModel(
     private var networkJob: Job? = null
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
-    private val _isCurrentlyTracking = MutableStateFlow(false)
+
+    private val _hasSetupRun = userRepository.getLocationSync().map {
+        Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
+        !it.isNullOrEmpty()
+    }
+
+    val appState = _hasSetupRun
+        .distinctUntilChanged()
+        .map { hasSetupRun ->
+            when (hasSetupRun) {
+                true -> {
+                    Timber.d("Setup completed")
+                    startTimers()
+                    AppState.Onboarded
+                }
+                false -> AppState.NotOnboarded
+            }
+        }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = AppState.Loading)
 
     private val _locationBarState = MutableStateFlow(LocationBarState(typedSoFar = ""))
     val locationBarState = _locationBarState
-        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), _locationBarState.value)
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = _locationBarState.value)
 
-//    private val _userTrackingInfo = userRepository.getUserTrackingInfoSync(_lastDateUsed.value)
+    private val _userTrackingInfo = userRepository.getUserTrackingInfoSync(_lastDateUsed.value)
 
-    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
-        onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
-        userRepository.getUserTrackingInfoSync(date)
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
+//    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
+//// TODO: Add back?       onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
+//        userRepository.getUserTrackingInfoSync(date)
+//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     val uvTrackingState: StateFlow<UvTrackingState> = combine(
         _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, spf, isOnSnowOrWater
     ) { isTracking, prediction, trackingInfo, spf, isOnSnowOrWater ->
+        Timber.d("Updating UvTrackingState")
         UvTrackingState(
             buttonLabel = when (isTracking) {
                 true -> R.string.stop_tracking
@@ -85,9 +102,6 @@ class MainViewModel(
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
-    private val _snackbarMessage = MutableLiveData<String>()
-    val snackbarMessage: LiveData<String> = _snackbarMessage
-
     val uvChartUiState: StateFlow<UvChartUiState> = combine(_uvPrediction, _lastLocalTimeUsed) { prediction, time ->
         when (prediction.isEmpty()) {
             true -> UvChartUiState.NoData
@@ -100,20 +114,21 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
-    val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-        tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
+//    val sunUnitsToday = _userTrackingInfo.mapLatest { tracking ->
+//        tracking?.burnProgress ?: 0.0 // ~100.0 means almost-certain sunburn
+//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = 0.0)
+//
+//    val vitaminDUnitsToday = _userTrackingInfo.mapLatest { tracking ->
+//        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
+//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = 0.0)
 
-    val vitaminDUnitsToday = _userTrackingInfo.mapLatest { tracking ->
-        tracking?.vitaminDProgress ?: 0.0 // in IU. Studies recommend 400-1000-4000 IU.
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), 0.0)
-
-    private val _minutesToBurn = combine(_lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { time, forecast, snowOrWater, _ ->
+    private val _minutesToBurn = combine(_userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { trackingSoFar, time, forecast, snowOrWater, _ ->
         when (forecast.isNotEmpty()) {
             true -> SunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
                 currentTime = time,
-                sunUnitsSoFar = sunUnitsToday.value, //_userTrackingInfo.value[0].burnProgress,
+//                sunUnitsSoFar = sunUnitsToday.value, //_userTrackingInfo.value[0].burnProgress,
+                sunUnitsSoFar = trackingSoFar?.burnProgress ?: 0.0,
                 skinType = hardcodedSkinType,
                 spf = getSpf(),
                 altitudeInKm = 0,
@@ -121,7 +136,7 @@ class MainViewModel(
             ).toLong()
             false -> UNKNOWN_BURN_TIME
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), UNKNOWN_BURN_TIME)
+    }//.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UNKNOWN_BURN_TIME)
 
     val burnTimeUiState: StateFlow<BurnTimeUiState> = _minutesToBurn.map { minutes ->
         when (minutes) {
@@ -129,11 +144,17 @@ class MainViewModel(
             SunburnCalculator.NO_BURN_EXPECTED.toLong() -> BurnTimeUiState.Unlikely
             else -> BurnTimeUiState.Known(minutes)
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), BurnTimeUiState.Unknown)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = BurnTimeUiState.Unknown)
 
+    private val _snackbarMessage = MutableLiveData<String>()
+    val snackbarMessage: LiveData<String> = _snackbarMessage
+    // TODO: Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()
+
+    // TODO: Could move these Timers elsewhere like in TickHandler: https://developer.android.com/kotlin/flow/stateflow-and-sharedflow
     private val updateTimer =
         RepeatingTimer(object : TimerTask() {
             override fun run() {
+                Timber.d("Update timer is running")
                 _lastLocalTimeUsed.value = LocalTime.now(clock)
             }
         }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
@@ -145,11 +166,23 @@ class MainViewModel(
             }
         }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
+    // TODO: Same thing, refactor w/ the timers
+//    val dayRefresher = viewModelScope.launch {
+//        _lastDateUsed
+//            .onEach {
+//                userRepository.getLocation()?.let {
+//                    refreshNetwork(it)
+//                }
+//            }
+//            .collect()
+//    }
+
     val networkRefresher = viewModelScope.launch {
         userRepository.getLocationSync()
             .distinctUntilChanged()
             .onEach { location ->
                 location?.let {
+                    Timber.d("network refresher is refreshing for $location")
                     _locationBarState.value = LocationBarState(location)
                     refreshNetwork(location)
                 }
@@ -157,27 +190,23 @@ class MainViewModel(
             .collect()
     }
 
-    val dayRefresher = viewModelScope.launch {
-        _lastDateUsed
-            .onEach {
-                userRepository.getLocation()?.let {
-                    refreshNetwork(it)
-                }
-            }
-            .collect()
-    }
-//    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
-//        onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
-//        userRepository.getUserTrackingInfoSync(date)
-//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), null)
-
     init {
+        Timber.d("Initializing MainViewModel")
+    }
+
+    private fun startTimers() {
+        Timber.d("Starting timers")
         updateTimer.start()
         dailyTrackingRefreshTimer.start()
     }
 
     override fun onCleared() {
         super.onCleared()
+        stopTimers()
+    }
+
+    private fun stopTimers() {
+        Timber.d("Stopping timers")
         updateTimer.cancel()
         dailyTrackingRefreshTimer.cancel()
     }
@@ -253,7 +282,7 @@ class MainViewModel(
 
     private fun refreshNetwork(zipCode: String) {
         networkJob?.cancel()
-        Timber.i("Refreshing zip $zipCode")
+        Timber.i("(NOT) Refreshing zip $zipCode")
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
@@ -268,6 +297,7 @@ class MainViewModel(
     fun onSearchLocation(location: String) {
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
+                Timber.d("Updating location ($location) in repo")
                 userRepository.setLocation(location)
             }
         }

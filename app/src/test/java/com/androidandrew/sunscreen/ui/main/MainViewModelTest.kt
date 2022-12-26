@@ -287,13 +287,15 @@ class MainViewModelTest {
 
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
-        assertEquals(10.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(20.0, vm.vitaminDUnitsToday.first(), delta)
+        var tracking = vm.uvTrackingState.first()
+        assertEquals(10, tracking.sunburnProgressLabelMinusUnits)
+        assertEquals(20, tracking.vitaminDProgressLabelMinusUnits)
 
         updateTracking(11.0, 22.0)
         advanceUntilIdle()
-        assertEquals(11.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
+        tracking = vm.uvTrackingState.first()
+        assertEquals(11, tracking.sunburnProgressLabelMinusUnits)
+        assertEquals(22, tracking.vitaminDProgressLabelMinusUnits)
     }
 
     @Test
@@ -369,8 +371,8 @@ class MainViewModelTest {
     }
 
     @Test
-    fun init_ifLocationIsInRepo_itAppearsInTheLocationBar() = runTest {
-        every { mockRepository.getLocationSync() } returns flowOf(FakeData.zip)
+    fun init_ifLocationExistsInRepo_itAppearsInTheLocationBar() = runTest {
+        setLocationInMockRepo(FakeData.zip)
         createViewModel(useMockRepo = true)
 
         val locationBarState = vm.locationBarState.first()
@@ -379,11 +381,20 @@ class MainViewModelTest {
     }
 
     @Test
-    fun init_ifLocationIsInRepo_queriesNetworkOnlyOnce() = runTest {
-        every { mockRepository.getLocationSync() } returns flowOf(FakeData.zip)
+    fun init_ifLocationExistsInRepo_queriesNetworkOnlyOnce() = runTest {
+        setLocationInMockRepo(FakeData.zip)
         createViewModel(useMockNetwork = true, useMockRepo = true)
 
         coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
+    }
+
+    @Test
+    fun init_ifLocationDoesNotExistInRepo_navigatesToLocationScreen() = runTest {
+        setLocationInMockRepo(null)
+
+        createViewModel(useMockRepo = true)
+
+        assertEquals(AppState.NotOnboarded, vm.appState.first())
     }
 
     @Test
@@ -412,6 +423,12 @@ class MainViewModelTest {
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched("1"))
 
         assertNotEquals("10001", realRepository.getLocation())
+    }
+
+
+    private fun setLocationInMockRepo(location: String?) {
+        coEvery { mockRepository.getLocation() } returns location
+        every { mockRepository.getLocationSync() } returns flowOf(location)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

@@ -13,7 +13,6 @@ import com.androidandrew.sunscreen.tracksunexposure.SunTracker
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
-import com.androidandrew.sunscreen.ui.init.InitViewModel
 import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.util.LocationUtil
 import org.koin.android.ext.koin.androidApplication
@@ -38,7 +37,6 @@ val serviceModule = module {
 }
 
 val viewModelModule = module {
-    viewModel { InitViewModel(get(), get()) }
     viewModel { LocationViewModel(get(), get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 }
