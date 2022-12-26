@@ -46,6 +46,7 @@ dependencies {
     api "androidx.test.ext:junit-ktx:$junitTestExtVersion"
     api "androidx.test:core:$testCoreVersion"
     api "androidx.test:core-ktx:$testCoreVersion"
+    api "androidx.test:runner:$testCoreVersion"
 
     // You need to exclude this from androidTest imports w/ the following:
     // configurations.androidTestImplementation {

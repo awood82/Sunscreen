@@ -3,7 +3,6 @@ package com.androidandrew.sunscreen.ui.main
 import android.graphics.Point
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -20,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.androidx.compose.get
 
-class MainFragmentUiAutomatorTest {
+class MainScreenUiAutomatorTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -44,7 +43,7 @@ class MainFragmentUiAutomatorTest {
     }
 
     // TODO: UI State is never updated w/ the Compose version of the test. I assert w/ the Repo instead of the UI, but it should be able to do both.
-    @LargeTest
+//    @LargeTest
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
         runBlocking {

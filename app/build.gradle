@@ -81,7 +81,7 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     // Compose Navigation
-//    implementation "androidx.navigation:navigation-compose"
+    implementation "androidx.navigation:navigation-compose"
 
 
     // Splash screen
@@ -89,7 +89,7 @@ dependencies {
 
     // Koin for dependency injection
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
-    implementation "io.insert-koin:koin-androidx-compose:$koinAndroidVersion"
+    implementation "io.insert-koin:koin-androidx-compose:$koinComposeVersion"
     implementation "io.insert-koin:koin-androidx-navigation:$koinAndroidVersion"
     testImplementation "io.insert-koin:koin-test-junit4:$koinVersion"
 
@@ -100,22 +100,13 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$locationVersion"
 
     // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
     androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
 
     // Logging
     implementation "com.jakewharton.timber:timber:$timberVersion"
 
-    // For testing fragments
-    debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-
     // For tests clicking on screen coordinates
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomatorVersion"
-
-//    androidTestImplementation "androidx.test.ext:junit:$junitTestExtVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 
     testImplementation project(":core:testing")
     androidTestImplementation project(":core:testing")
