@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.androidandrew.sunscreen"
@@ -34,17 +34,22 @@ android {
     }
     buildFeatures {
         dataBinding true
+        compose true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion composeVersion
+    }
+    namespace 'com.androidandrew.sunscreen'
 }
 
 dependencies {
 
     implementation "androidx.core:core-ktx:$coreVersion"
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
-    implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleComposeVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Core dependencies. TODO: Features will depend on them instead of the app module
@@ -57,11 +62,34 @@ dependencies {
     implementation project(":feature:tracksunexposure")
     //    testImplementation project(path: ':core:database')
 
+    // Compose
+    def composeBom = platform("androidx.compose:compose-bom:$composeBomVersion")
+    implementation composeBom
+    androidTestImplementation composeBom
+    implementation "androidx.compose.runtime:runtime"
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.foundation:foundation"
+    implementation "androidx.compose.foundation:foundation-layout"
+    implementation "androidx.compose.material3:material3"
+    implementation "androidx.compose.runtime:runtime-livedata"
+    implementation "androidx.compose.ui:ui-tooling"
+    implementation "com.google.android.material:compose-theme-adapter:$composeThemeAdapterVersion"
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    // Compose Navigation
+    implementation "androidx.navigation:navigation-compose"
+
+
     // Splash screen
     implementation "androidx.core:core-splashscreen:$splashScreenVersion"
 
     // Koin for dependency injection
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+    implementation "io.insert-koin:koin-androidx-compose:$koinComposeVersion"
     implementation "io.insert-koin:koin-androidx-navigation:$koinAndroidVersion"
     testImplementation "io.insert-koin:koin-test-junit4:$koinVersion"
 
@@ -72,22 +100,13 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$locationVersion"
 
     // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
     androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
 
     // Logging
     implementation "com.jakewharton.timber:timber:$timberVersion"
 
-    // For testing fragments
-    debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-
     // For tests clicking on screen coordinates
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomatorVersion"
-
-//    androidTestImplementation "androidx.test.ext:junit:$junitTestExtVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 
     testImplementation project(":core:testing")
     androidTestImplementation project(":core:testing")

@@ -9,9 +9,8 @@ import com.androidandrew.sunscreen.model.UvPrediction
 import com.androidandrew.sunscreen.tracksunexposure.SunTracker
 import com.androidandrew.sunscreen.tracksunexposure.SunTrackerSettings
 import timber.log.Timber
-import java.time.Clock
 
-class SunTrackerServiceController(private val appContext: Context, private val clock: Clock) {
+class SunTrackerServiceController(private val appContext: Context, private val serviceIntent: Intent) {
 
     private var sunTracker: SunTracker? = null
     private lateinit var sunTrackerSettings: SunTrackerSettings
@@ -19,7 +18,7 @@ class SunTrackerServiceController(private val appContext: Context, private val c
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Timber.d("onServiceConnected")
-            val binder = service as com.androidandrew.sunscreen.service.SunTrackerService.LocalBinder
+            val binder = service as SunTrackerService.LocalBinder
             sunTracker = binder.getService()
             sunTracker?.let {
                 sendSettingsToSunTracker()
@@ -71,9 +70,7 @@ class SunTrackerServiceController(private val appContext: Context, private val c
 
     fun bind() {
         Timber.d("Trying to bind to SunTrackerService")
-        getServiceIntent().also { intent ->
-            appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        }
+        appContext.bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
     }
 
     fun unbind() {
@@ -84,15 +81,11 @@ class SunTrackerServiceController(private val appContext: Context, private val c
 
     fun start() {
         Timber.d("Trying to start SunTrackerService")
-        appContext.startForegroundService(getServiceIntent())
+        appContext.startForegroundService(serviceIntent)
     }
 
     fun stop() {
         Timber.d("Trying to stop SunTrackerService")
-        appContext.stopService(getServiceIntent())
-    }
-
-    private fun getServiceIntent(): Intent {
-        return Intent(appContext, com.androidandrew.sunscreen.service.SunTrackerService::class.java)
+        appContext.stopService(serviceIntent)
     }
 }

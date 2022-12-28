@@ -434,10 +434,13 @@ class SunburnCalculatorTest {
 
     @Test
     fun getSpfClamped_clampsBetween1and50() {
-        assertEquals(1, SunburnCalculator.getSpfClamped(0))
-        assertEquals(1, SunburnCalculator.getSpfClamped(1))
-        assertEquals(1, SunburnCalculator.getSpfClamped(-1))
-        assertEquals(50, SunburnCalculator.getSpfClamped(50))
-        assertEquals(50, SunburnCalculator.getSpfClamped(51))
+        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen))
+        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen - 1))
+        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen - 2))
+
+        assertEquals(SunburnCalculator.spfMaxSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfMaxSunscreen))
+        assertEquals(SunburnCalculator.spfMaxSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfMaxSunscreen + 1))
+
+        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(null))
     }
 }

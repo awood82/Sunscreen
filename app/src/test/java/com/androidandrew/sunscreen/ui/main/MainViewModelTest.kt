@@ -12,6 +12,10 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
+import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
+import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.location.LocationBarEvent
+import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -79,8 +83,8 @@ class MainViewModelTest {
     }
 
     private fun searchZip(zip: String) {
-        vm.locationEditText.value = zip
-        vm.onSearchLocation()
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
     }
 
     private fun setLocationToRefreshNetworkOnInit() {
@@ -88,38 +92,36 @@ class MainViewModelTest {
     }
 
     @Test
-    fun burnTimeString_ifBurnExpected_isSet() = runTest {
+    fun burnTimeString_ifBurnExpected_isKnown() = runTest {
         createViewModel()
 
         searchZip(FakeData.zip)
 
         // Accept any "<number> min" string
-        val burnTimeString = vm.burnTimeString.first()
-        assertTrue(burnTimeString.endsWith("min"))
-        val firstChar = burnTimeString[0]
-        assertTrue(firstChar.isDigit())
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Known)
     }
 
     @Test
-    fun burnTimeString_ifNoBurnExpected_isNotSet() = runTest {
+    fun burnTimeState_ifNoBurnExpected_isBurnUnlikely() = runTest {
         val clock6pm = Clock.offset(FakeData.clockDefaultNoon, Duration.ofHours(6))
         createViewModel(clock = clock6pm)
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.first()
-        assertEquals("No burn expected", burnTimeString)
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Unlikely)
     }
 
     @Test
-    fun burnTimeString_ifNoNetworkConnection_isUnknown() = runTest {
+    fun burnTimeState_ifNoNetworkConnection_isUnknown() = runTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
         searchZip(FakeData.zip)
 
-        val burnTimeString = vm.burnTimeString.value//getOrAwaitValue()
-        assertEquals("Unknown", burnTimeString)
+        val burnTimeState = vm.burnTimeUiState.first()
+        assertTrue(burnTimeState is BurnTimeUiState.Unknown)
     }
 
     @Test
@@ -136,7 +138,7 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         createViewModel()
 
-        assertFalse(vm.isTrackingEnabled.value)//getOrAwaitValue())
+        assertFalse(vm.uvTrackingState.first().isTrackingPossible)
     }
 
     @Test
@@ -145,23 +147,39 @@ class MainViewModelTest {
 
         searchZip(FakeData.zip)
 
-        assertTrue(vm.isTrackingEnabled.first())
+        assertTrue(vm.uvTrackingState.first().isTrackingPossible)
     }
 
     @Test
-    fun onSnowOrWaterChanged_changesBurnEstimate() = runTest {
+    fun spf_whenChanged_updatesBurnEstimate() = runTest {
+        createViewModel()
+        searchZip(FakeData.zip)
+
+        // The box starts with "1"
+        val startingSpfState  = vm.burnTimeUiState.first()
+
+        // Now it's changed to "15"
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("15"))
+        advanceUntilIdle()
+
+        val endingSpfState = vm.burnTimeUiState.first()
+        assertNotEquals(startingSpfState, endingSpfState)
+    }
+
+    @Test
+    fun onSnowOrWater_whenChanged_updatesBurnEstimate() = runTest {
         createViewModel()
         searchZip(FakeData.zip)
 
         // The box starts unchecked
-        val startingBurnTime = vm.burnTimeString.first()
+        val startingBurnTimeState  = vm.burnTimeUiState.first()
 
         // Now it's checked
-        vm.isOnSnowOrWater.value = true
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
         advanceUntilIdle()
 
-        val endingBurnTime = vm.burnTimeString.first()
-        assertNotEquals(startingBurnTime, endingBurnTime)
+        val endingBurnTimeState = vm.burnTimeUiState.first()
+        assertNotEquals(startingBurnTimeState, endingBurnTimeState)
     }
 
     @Test
@@ -269,20 +287,22 @@ class MainViewModelTest {
 
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
-        assertEquals(10.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(20.0, vm.vitaminDUnitsToday.first(), delta)
+        var tracking = vm.uvTrackingState.first()
+        assertEquals(10, tracking.sunburnProgressAmount)
+        assertEquals(20, tracking.vitaminDProgressAmount)
 
         updateTracking(11.0, 22.0)
         advanceUntilIdle()
-        assertEquals(11.0, vm.sunUnitsToday.first(), delta)
-        assertEquals(22.0, vm.vitaminDUnitsToday.first(), delta)
+        tracking = vm.uvTrackingState.first()
+        assertEquals(11, tracking.sunburnProgressAmount)
+        assertEquals(22, tracking.vitaminDProgressAmount)
     }
 
     @Test
     fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
         createViewModel()
 
-        vm.onSpfChanged("5")
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
 
       verify(exactly = 0) { serviceController.setSpf(5) }
     }
@@ -292,7 +312,7 @@ class MainViewModelTest {
         createViewModel()
         vm.onTrackingClicked()
 
-        vm.onSpfChanged("5")
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
 
         verify { serviceController.setSpf(5) }
     }
@@ -301,7 +321,7 @@ class MainViewModelTest {
     fun onIsSnowOrWaterChanged_whileNotTracking_doesNotUpdateController() = runTest {
         createViewModel()
 
-        vm.onIsSnowOrWaterChanged(true)
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         verify(exactly = 0) { serviceController.setIsOnSnowOrWater(true) }
     }
@@ -311,9 +331,104 @@ class MainViewModelTest {
         createViewModel()
         vm.onTrackingClicked()
 
-        vm.onIsSnowOrWaterChanged(true)
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         verify { serviceController.setIsOnSnowOrWater(true) }
+    }
+
+    @Test
+    fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.isTrackingPossible)
+        assertFalse(trackingState.isTracking)
+    }
+
+    @Test
+    fun whenTrackingStarted_stopIsEnabled() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertTrue(trackingState.isTrackingPossible)
+        assertTrue(trackingState.isTracking)
+    }
+
+    @Test
+    fun afterSearch_ifNetworkError_trackingIsDisabled() = runTest {
+        fakeUvService.exception = IOException()
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        val trackingState = vm.uvTrackingState.first()
+        assertFalse(trackingState.isTrackingPossible)
+    }
+
+    @Test
+    fun init_ifLocationExistsInRepo_itAppearsInTheLocationBar() = runTest {
+        setLocationInMockRepo(FakeData.zip)
+        createViewModel(useMockRepo = true)
+
+        val locationBarState = vm.locationBarState.first()
+
+        assertEquals(FakeData.zip, locationBarState.typedSoFar)
+    }
+
+    @Test
+    fun init_ifLocationExistsInRepo_queriesNetworkOnlyOnce() = runTest {
+        setLocationInMockRepo(FakeData.zip)
+        createViewModel(useMockNetwork = true, useMockRepo = true)
+
+        coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
+    }
+
+    @Test
+    fun init_ifLocationDoesNotExistInRepo_navigatesToLocationScreen() = runTest {
+        setLocationInMockRepo(null)
+
+        createViewModel(useMockRepo = true)
+
+        assertEquals(AppState.NotOnboarded, vm.appState.first())
+    }
+
+    @Test
+    fun locationBarEvent_ifTextChanges_itIsUpdatedInViewModel() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged("10001"))
+
+        val locationBarState = vm.locationBarState.first()
+        assertEquals("10001", locationBarState.typedSoFar)
+    }
+
+    @Test
+    fun locationBarEvent_ifLocationSearched_andZipCodeIsValid_updatesRepository() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("10001"))
+
+        assertEquals("10001", realRepository.getLocation())
+    }
+
+    @Test
+    fun locationBarEvent_ifLocationSearched_andZipCodeIsInvalid_doesNotUpdateRepository() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("1"))
+
+        assertNotEquals("10001", realRepository.getLocation())
+    }
+
+
+    private fun setLocationInMockRepo(location: String?) {
+        coEvery { mockRepository.getLocation() } returns location
+        every { mockRepository.getLocationSync() } returns flowOf(location)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

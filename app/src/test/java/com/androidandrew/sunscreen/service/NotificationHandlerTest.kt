@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.service
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import io.mockk.mockk
@@ -12,10 +13,10 @@ import org.junit.Test
 class NotificationHandlerTest {
 
     private val testChannelId = "Test Channel ID"
-    private val mockContext = mockk<Context>(relaxed = true)
     private val mockManager = mockk<NotificationManager>(relaxed = true)
     private val mockBuilder = mockk<NotificationCompat.Builder>(relaxed = true)
-    private val notificationHandler = DefaultNotificationHandler(mockContext, testChannelId, mockManager, mockBuilder)
+    private val mockPendingIntent = mockk<PendingIntent>(relaxed = true)
+    private val notificationHandler = DefaultNotificationHandler(testChannelId, mockManager, mockBuilder, mockPendingIntent)
 
     @Test
     fun createChannel_delegates() {

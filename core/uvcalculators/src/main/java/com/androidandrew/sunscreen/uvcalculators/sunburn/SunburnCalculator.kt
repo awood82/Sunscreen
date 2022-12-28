@@ -17,6 +17,7 @@ object SunburnCalculator {
 
     const val maxSunUnits = 100.0
     const val spfNoSunscreen = 1
+    const val spfMaxSunscreen = 50
     val NO_BURN_EXPECTED = TimeUnit.DAYS.toMinutes(1).toDouble()
 
     private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
@@ -82,16 +83,17 @@ object SunburnCalculator {
             altitudeInKm = altitudeInKm,
             isOnSnowOrWater = isOnSnowOrWater
         )
-        return when(maxTime) {
+        return when (maxTime) {
             NO_BURN_EXPECTED -> 0.0
             else -> maxSunUnits / maxTime
         }
     }
 
-    fun getSpfClamped(spf: Int): Int {
+    fun getSpfClamped(spf: Int?): Int {
         return when {
-            spf > 50 -> 50
-            spf < 1 -> 1
+            spf == null -> spfNoSunscreen
+            spf > spfMaxSunscreen -> spfMaxSunscreen
+            spf <= spfNoSunscreen -> spfNoSunscreen
             else -> spf
         }
     }

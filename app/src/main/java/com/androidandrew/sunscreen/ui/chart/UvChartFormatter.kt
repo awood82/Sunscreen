@@ -71,7 +71,7 @@ class UvChartFormatter(context: Context) {
     private fun setupColors(lineDataSet: LineDataSet) {
         lineDataSet.color = plotLineColor
         lineDataSet.valueTextColor = primaryTextColor
-        val maxUv = lineDataSet.yMax.toInt() + 1
+        val maxUv = Integer.max(lineDataSet.yMax.toInt(), 1) + 1
         val upperColorIndex = Integer.min(maxUv, uvColors.size - 1)
         val dynamicGradient = GradientDrawable(
             GradientDrawable.Orientation.BOTTOM_TOP,

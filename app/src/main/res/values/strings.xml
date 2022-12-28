@@ -4,21 +4,27 @@
     <!-- Location screen -->
     <string name="current_location">Enter the ZIP code of your current location</string>
     <string name="skip">Skip</string>
+    <string name="search">Search</string>
 
-    <!-- Main tracking screen -->
+    <!-- Burn Time section -->
+    <string name="could_burn">You could burn in</string>
+    <string name="minutes_to_burn">%d minutes</string>
+    <string name="unknown">Unknown</string>
+    <string name="unlikely">No burn expected</string>
+
+    <!-- UV Tracking section -->
     <string name="start_tracking">Start Tracking</string>
     <string name="stop_tracking">Stop Tracking</string>
+    <string name="spf">SPF</string>
+    <string name="spf_hint">1</string>
+    <string name="on_snow_or_water">On snow or water</string>
+
+    <!-- Main tracking screen -->
     <string name="sunburn">Sunburn</string>
     <string name="sunburn_progress">%d %%</string>
     <string name="vitamin_d">Vitamin D</string>
     <string name="vitamin_d_progress">%d IU</string>
     <string name="location">ZIP Code</string>
-    <string name="could_burn">You could burn in</string>
-    <string name="spf">SPF</string>
-    <string name="spf_hint">1</string>
-    <string name="snow_or_water">On snow or water</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!-- Notification for sun tracking service -->
     <string name="notification_title">@string/app_name</string>
