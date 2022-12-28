@@ -33,7 +33,7 @@ class SunTrackerServiceTest {
     @Test
     fun startService_startsTrackingSunExposure() {
         runBlocking {
-            val info = repo.getUserTrackingInfo(fakeDate)
+            val info = repo.getUserTracking(fakeDate)
             assertNull(info?.vitaminDProgress)
             assertNull(info?.burnProgress)
         }
@@ -42,7 +42,7 @@ class SunTrackerServiceTest {
 
         runBlocking {
             delay(1_000)
-            val info = repo.getUserTrackingInfo(fakeDate)
+            val info = repo.getUserTracking(fakeDate)
             assertNotEquals(0.0, info?.vitaminDProgress)
             assertNotEquals(0.0, info?.burnProgress)
         }

@@ -10,7 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface UserSettingsDao {
 
     companion object {
+//        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
         const val LOCATION = 1L
+        const val SPF = 10L
+        const val IS_ON_SNOW_OR_WATER = 11L
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -20,7 +23,7 @@ interface UserSettingsDao {
     suspend fun getOnce(id: Long): UserSetting?
 
     @Query("SELECT * FROM user_settings_table WHERE id=:id")
-    fun get(id: Long): Flow<UserSetting?>
+    fun getFlow(id: Long): Flow<UserSetting?>
 
     @Query("DELETE FROM user_settings_table")
     suspend fun deleteAll()

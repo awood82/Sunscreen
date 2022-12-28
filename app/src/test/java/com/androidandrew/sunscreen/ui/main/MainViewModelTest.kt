@@ -13,7 +13,6 @@ import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
@@ -259,23 +258,23 @@ class MainViewModelTest {
 
     @Test
     fun forceTrackingRefresh_withNoPreviousTrackingInfo_triggersRepositoryUpdate() = runTest {
-        coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
+        coEvery { mockRepository.getUserTracking(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
         updateTracking(0.0, 0.0)
 
-        coVerify { mockRepository.setUserTrackingInfo(any()) }
+        coVerify { mockRepository.setUserTracking(any()) }
     }
 
     @Test
     fun forceTrackingRefresh_withArguments_updatesRepositoryValues() = runTest {
-        coEvery { mockRepository.getUserTrackingInfo(any()) } returns null
+        coEvery { mockRepository.getUserTracking(any()) } returns null
         createViewModel(useMockNetwork = false, useMockRepo = true)
 
         updateTracking(1.0, 2.0)
 
         val slot = slot<UserTracking>()
-        coVerify { mockRepository.setUserTrackingInfo(capture(slot)) }
+        coVerify { mockRepository.setUserTracking(capture(slot)) }
         assertEquals(1.0, slot.captured.burnProgress, delta)
         assertEquals(2.0, slot.captured.vitaminDProgress, delta)
     }
@@ -428,7 +427,7 @@ class MainViewModelTest {
 
     private fun setLocationInMockRepo(location: String?) {
         coEvery { mockRepository.getLocation() } returns location
-        every { mockRepository.getLocationSync() } returns flowOf(location)
+        every { mockRepository.getLocationFlow() } returns flowOf(location)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
@@ -437,7 +436,7 @@ class MainViewModelTest {
             burnProgress = burnProgress,
             vitaminDProgress = vitaminDProgress
         )
-        mockRepository.setUserTrackingInfo(userTracking)
-        realRepository.setUserTrackingInfo(userTracking)
+        mockRepository.setUserTracking(userTracking)
+        realRepository.setUserTracking(userTracking)
     }
 }

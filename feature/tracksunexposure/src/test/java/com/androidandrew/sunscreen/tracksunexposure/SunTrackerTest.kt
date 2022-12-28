@@ -3,7 +3,6 @@ package com.androidandrew.sunscreen.tracksunexposure
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.model.FakeUvPredictions
-import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.common.toDateString
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
@@ -52,7 +51,7 @@ class SunTrackerTest {
     fun setSettings_databaseStarts_withEmptyValues() = runTest {
         sunTracker.setSettings(settings)
 
-        val info = repo.getUserTrackingInfo(clock.toDateString())
+        val info = repo.getUserTracking(clock.toDateString())
         assertNull(info)
     }
 
@@ -63,7 +62,7 @@ class SunTrackerTest {
         sunTracker.startTracking()
         doShortDelay()
 
-        val info = repo.getUserTrackingInfo(clock.toDateString())
+        val info = repo.getUserTracking(clock.toDateString())
         assertNotNull(info)
         assertTrue(info!!.vitaminDProgress > 0.0)
         assertTrue(info.burnProgress > 0.0)
@@ -76,10 +75,10 @@ class SunTrackerTest {
         doShortDelay()
 
         sunTracker.stopTracking()
-        val info = repo.getUserTrackingInfo(clock.toDateString())
+        val info = repo.getUserTracking(clock.toDateString())
         doShortDelay()
 
-        val newInfo = repo.getUserTrackingInfo(clock.toDateString())
+        val newInfo = repo.getUserTracking(clock.toDateString())
         assertEquals(info, newInfo)
     }
 
@@ -92,10 +91,10 @@ class SunTrackerTest {
         sunTracker.setSettings(
             settings.copy(uvPrediction = emptyList())
         )
-        val info = repo.getUserTrackingInfo(clock.toDateString())
+        val info = repo.getUserTracking(clock.toDateString())
         doShortDelay()
 
-        val newInfo = repo.getUserTrackingInfo(clock.toDateString())
+        val newInfo = repo.getUserTracking(clock.toDateString())
         assertEquals(info, newInfo)
     }
     

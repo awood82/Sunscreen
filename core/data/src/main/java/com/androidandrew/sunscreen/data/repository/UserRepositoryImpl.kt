@@ -9,77 +9,83 @@ class UserRepositoryImpl(
     private val userSettingsDao: UserSettingsDao
     ) : UserRepository {
 
-    override fun getUserTrackingInfoSync(date: String): Flow<UserTracking?> {
-        return userTrackingDao.get(date)
+    override fun getUserTrackingFlow(date: String): Flow<UserTracking?> {
+        return userTrackingDao.getFlow(date)
     }
-
-    override suspend fun getUserTrackingInfo(date: String): UserTracking? {
+    override suspend fun getUserTracking(date: String): UserTracking? {
         return userTrackingDao.getOnce(date)
     }
-
-    override suspend fun setUserTrackingInfo(tracking: UserTracking) {
+    override suspend fun setUserTracking(tracking: UserTracking) {
         userTrackingDao.insert(tracking)
     }
 
-    override fun getLocationSync(): Flow<String?> {
-        return readStringSettingSync(UserSettingsDao.LOCATION)
+    override fun getLocationFlow(): Flow<String?> {
+        return readStringSettingFlow(UserSettingsDao.LOCATION)
     }
-
     override suspend fun getLocation(): String? {
         return readStringSetting(UserSettingsDao.LOCATION)
     }
-
     override suspend fun setLocation(location: String) {
-        saveSetting(UserSettingsDao.LOCATION, location)
+        writeSetting(UserSettingsDao.LOCATION, location)
     }
 
-//    suspend fun getSpf(): Int? {
-//        return readIntSetting(UserSettingsDao.SPF)
-//    }
-//
-//    suspend fun setSpf(spf: Int) {
-//        saveSetting(UserSettingsDao.SPF, spf.toString())
-//    }
-//
-//    suspend fun getOnSnowOrWater(): Boolean? {
-//        return readBooleanSetting(UserSettingsDao.ON_SNOW_OR_WATER)
-//    }
-//
-//    suspend fun setOnSnowOrWater(isOnSnowOrWater: Boolean) {
-//        saveSetting(UserSettingsDao.ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
-//    }
-
-    private suspend fun saveSetting(id: Long, value: String) {
-        saveSetting(UserSetting(id, value))
+    override fun getSpfFlow(): Flow<Int?> {
+        return readIntSettingFlow(UserSettingsDao.SPF)
+    }
+    override suspend fun getSpf(): Int? {
+        return readIntSetting(UserSettingsDao.SPF)
+    }
+    override suspend fun setSpf(spf: Int) {
+        writeSetting(UserSettingsDao.SPF, spf.toString())
     }
 
-    private suspend fun saveSetting(setting: UserSetting) {
+    override fun getIsOnSnowOrWaterFlow(): Flow<Boolean?> {
+        return readBooleanSettingFlow(UserSettingsDao.IS_ON_SNOW_OR_WATER)
+    }
+    override suspend fun getIsOnSnowOrWater(): Boolean? {
+        return readBooleanSetting(UserSettingsDao.IS_ON_SNOW_OR_WATER)
+    }
+    override suspend fun setIsOnSnowOrWater(isOnSnowOrWater: Boolean) {
+        writeSetting(UserSettingsDao.IS_ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
+    }
+
+    private suspend fun writeSetting(id: Long, value: String) {
+        writeSetting(UserSetting(id, value))
+    }
+    private suspend fun writeSetting(setting: UserSetting) {
         userSettingsDao.insert(setting)
-//            Timber.d("Saved ${setting.id} = ${setting.value}")
     }
 
-    private fun readStringSettingSync(id: Long): Flow<String?> {
-        return readSettingSync(id).map {
+    private fun readStringSettingFlow(id: Long): Flow<String?> {
+        return readSettingFlow(id).map {
             it?.value
         }
     }
-
     private suspend fun readStringSetting(id: Long): String? {
         return readSetting(id)?.value
     }
 
-//    private suspend fun readIntSetting(id: Long): Int? {
-//        return readSetting(id)?.value?.toInt()
-//    }
-//
-//    private suspend fun readBooleanSetting(id: Long): Boolean? {
-//        return readSetting(id)?.value?.toBoolean()
-//    }
-
-    private fun readSettingSync(id: Long): Flow<UserSetting?> {
-        return userSettingsDao.get(id)
+    private fun readIntSettingFlow(id: Long): Flow<Int?> {
+        return readSettingFlow(id).map {
+            it?.value?.toIntOrNull()
+        }
+    }
+    private suspend fun readIntSetting(id: Long): Int? {
+        return readSetting(id)?.value?.toIntOrNull()
     }
 
+    private fun readBooleanSettingFlow(id: Long): Flow<Boolean?> {
+        return readSettingFlow(id).map {
+            it?.value?.toBooleanStrictOrNull()
+        }
+    }
+    private suspend fun readBooleanSetting(id: Long): Boolean? {
+        return readSetting(id)?.value?.toBooleanStrictOrNull()
+    }
+
+    private fun readSettingFlow(id: Long): Flow<UserSetting?> {
+        return userSettingsDao.getFlow(id)
+    }
     private suspend fun readSetting(id: Long): UserSetting? {
         return userSettingsDao.getOnce(id)
     }

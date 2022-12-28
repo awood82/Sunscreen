@@ -4,23 +4,19 @@ import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-    fun getUserTrackingInfoSync(date: String): Flow<UserTracking?>
+    fun getUserTrackingFlow(date: String): Flow<UserTracking?>
+    suspend fun getUserTracking(date: String): UserTracking?
+    suspend fun setUserTracking(tracking: UserTracking)
 
-    suspend fun getUserTrackingInfo(date: String): UserTracking?
-
-    suspend fun setUserTrackingInfo(tracking: UserTracking)
-
-    fun getLocationSync(): Flow<String?>
-
+    fun getLocationFlow(): Flow<String?>
     suspend fun getLocation(): String?
-
     suspend fun setLocation(location: String)
 
-//    suspend fun getSpf(): Int?
-//
-//    suspend fun setSpf(spf: Int)
-//
-//    suspend fun getOnSnowOrWater(): Boolean?
-//
-//    suspend fun setOnSnowOrWater(isOnSnowOrWater: Boolean)
+    fun getSpfFlow(): Flow<Int?>
+    suspend fun getSpf(): Int?
+    suspend fun setSpf(spf: Int)
+
+    fun getIsOnSnowOrWaterFlow(): Flow<Boolean?>
+    suspend fun getIsOnSnowOrWater(): Boolean?
+    suspend fun setIsOnSnowOrWater(isOnSnowOrWater: Boolean)
 }

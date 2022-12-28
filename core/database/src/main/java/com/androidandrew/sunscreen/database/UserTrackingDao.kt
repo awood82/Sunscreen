@@ -16,7 +16,7 @@ interface UserTrackingDao {
     suspend fun getOnce(date: String): UserTracking?
 
     @Query("SELECT * FROM user_tracking_table WHERE date>=:date ORDER BY date DESC LIMIT 1")
-    fun get(date: String): Flow<UserTracking?>
+    fun getFlow(date: String): Flow<UserTracking?>
 
     @Query("DELETE FROM user_tracking_table")
     suspend fun deleteAll()

@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -23,10 +24,13 @@ class SunscreenDatabaseTest {
 
     private lateinit var databaseHolder: FakeDatabaseWrapper
 
+    private val string = "12345"
+    private val int = "15"
+    private val boolean = "true"
+
     @Before
     fun setup() {
         databaseHolder = FakeDatabaseWrapper()
-//        databaseHolder.clearDatabase()
     }
 
     @After
@@ -39,24 +43,43 @@ class SunscreenDatabaseTest {
 
     @Test
     fun insert_thenGet_retrievesSetting() = runTest {
-        val userSetting =
-            UserSetting(UserSettingsDao.LOCATION,
-                "12345")
-        databaseHolder.db.userSettingsDao.insert(userSetting)
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 1, value = string)
+        )
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 2, value = int)
+        )
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 3, value = boolean)
+        )
 
-        val dbSetting = databaseHolder.db.userSettingsDao.getOnce(UserSettingsDao.LOCATION)
-        assertEquals("12345", dbSetting?.value)
+        val stringSetting = databaseHolder.db.userSettingsDao.getOnce(1)
+        val intSetting = databaseHolder.db.userSettingsDao.getOnce(2)
+        val booleanSetting = databaseHolder.db.userSettingsDao.getOnce(3)
+
+        assertEquals(string, stringSetting?.value)
+        assertEquals(int, intSetting?.value)
+        assertEquals(boolean, booleanSetting?.value)
     }
 
     @Test
-    fun getSync_thenInsert_getsUpdatedFlowSetting() = runTest {
-        val userSetting =
-            UserSetting(UserSettingsDao.LOCATION,
-                "12345")
-        databaseHolder.db.userSettingsDao.insert(userSetting)
+    fun getFlow_thenInsert_getsUpdatedFlowSetting() = runTest {
+        val stringFlow = databaseHolder.db.userSettingsDao.getFlow(1)
+        val intFlow = databaseHolder.db.userSettingsDao.getFlow(2)
+        val booleanFlow = databaseHolder.db.userSettingsDao.getFlow(3)
 
-        val dbSetting = databaseHolder.db.userSettingsDao.getOnce(UserSettingsDao.LOCATION)
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 1, value = string)
+        )
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 2, value = int)
+        )
+        databaseHolder.db.userSettingsDao.insert(
+            UserSetting(id = 3, value = boolean)
+        )
 
-        assertEquals("12345", dbSetting?.value)
+        assertEquals(string, stringFlow.first()?.value)
+        assertEquals(int, intFlow.first()?.value)
+        assertEquals(boolean, booleanFlow.first()?.value)
     }
 }

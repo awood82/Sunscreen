@@ -37,4 +37,8 @@ dependencies {
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
 
     implementation project(":core:database")
+
+    testImplementation project(":core:testing")
+
+    testImplementation project(":sharedTest")
 }

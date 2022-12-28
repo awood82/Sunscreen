@@ -47,7 +47,7 @@ class MainScreenUiAutomatorTest {
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
         runBlocking {
-            val trackingInfo = userRepo.getUserTrackingInfo(FakeData.localDate.toString())
+            val trackingInfo = userRepo.getUserTracking(FakeData.localDate.toString())
             assertNull(trackingInfo)
         }
 
@@ -70,7 +70,7 @@ class MainScreenUiAutomatorTest {
         val progressEnd = vitaminDProgressBar.text.progressTextToInt()
 
         runBlocking {
-            val trackingInfo = userRepo.getUserTrackingInfo(FakeData.localDate.toString())
+            val trackingInfo = userRepo.getUserTracking(FakeData.localDate.toString())
             assertNotEquals(0.0, trackingInfo?.vitaminDProgress)
             assertNotEquals(0.0, trackingInfo?.burnProgress)
         }

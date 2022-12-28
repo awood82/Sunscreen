@@ -52,7 +52,7 @@ class MainViewModel(
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
 
-    private val _hasSetupRun = userRepository.getLocationSync().map {
+    private val _hasSetupRun = userRepository.getLocationFlow().map {
         Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
         !it.isNullOrEmpty()
     }
@@ -74,7 +74,7 @@ class MainViewModel(
     val locationBarState = _locationBarState
         .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = _locationBarState.value)
 
-    private val _userTrackingInfo = userRepository.getUserTrackingInfoSync(_lastDateUsed.value)
+    private val _userTrackingInfo = userRepository.getUserTrackingFlow(_lastDateUsed.value)
 
 //    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
 //// TODO: Add back?       onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
@@ -164,7 +164,7 @@ class MainViewModel(
 //    }
 
     val networkRefresher = viewModelScope.launch {
-        userRepository.getLocationSync()
+        userRepository.getLocationFlow()
             .distinctUntilChanged()
             .onEach { location ->
                 location?.let {

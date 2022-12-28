@@ -45,7 +45,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
 
     private fun initializeUserTrackingInfo() {
         trackerScope.launch {
-            userTracking = sunscreenRepository.getUserTrackingInfo(clock.toDateString())
+            userTracking = sunscreenRepository.getUserTracking(clock.toDateString())
             if (userTracking == null) {
                 userTracking = UserTracking(
                     date = clock.toDateString(),
@@ -75,7 +75,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
             burnProgress = (userTracking?.burnProgress ?: 0.0).plus(burnDelta),
             vitaminDProgress = (userTracking?.vitaminDProgress ?: 0.0).plus(vitaminDDelta)
         )
-        sunscreenRepository.setUserTrackingInfo(userTracking!!)
+        sunscreenRepository.setUserTracking(userTracking!!)
     }
 
     private fun getBurnProgress(): Double {
