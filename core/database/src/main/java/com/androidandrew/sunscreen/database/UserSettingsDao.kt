@@ -9,13 +9,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface UserSettingsDao {
 
-    companion object {
-//        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
-        const val LOCATION = 1L
-        const val SPF = 10L
-        const val IS_ON_SNOW_OR_WATER = 11L
-    }
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(setting: UserSetting)
 

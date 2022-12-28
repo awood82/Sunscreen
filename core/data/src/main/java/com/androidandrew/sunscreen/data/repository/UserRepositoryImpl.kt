@@ -7,7 +7,14 @@ import kotlinx.coroutines.flow.map
 class UserRepositoryImpl(
     private val userTrackingDao: UserTrackingDao,
     private val userSettingsDao: UserSettingsDao
-    ) : UserRepository {
+) : UserRepository {
+
+    companion object {
+        //        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
+        const val LOCATION = 1L
+        const val SPF = 10L
+        const val IS_ON_SNOW_OR_WATER = 11L
+    }
 
     override fun getUserTrackingFlow(date: String): Flow<UserTracking?> {
         return userTrackingDao.getFlow(date)
@@ -20,33 +27,33 @@ class UserRepositoryImpl(
     }
 
     override fun getLocationFlow(): Flow<String?> {
-        return readStringSettingFlow(UserSettingsDao.LOCATION)
+        return readStringSettingFlow(LOCATION)
     }
     override suspend fun getLocation(): String? {
-        return readStringSetting(UserSettingsDao.LOCATION)
+        return readStringSetting(LOCATION)
     }
     override suspend fun setLocation(location: String) {
-        writeSetting(UserSettingsDao.LOCATION, location)
+        writeSetting(LOCATION, location)
     }
 
     override fun getSpfFlow(): Flow<Int?> {
-        return readIntSettingFlow(UserSettingsDao.SPF)
+        return readIntSettingFlow(SPF)
     }
     override suspend fun getSpf(): Int? {
-        return readIntSetting(UserSettingsDao.SPF)
+        return readIntSetting(SPF)
     }
     override suspend fun setSpf(spf: Int) {
-        writeSetting(UserSettingsDao.SPF, spf.toString())
+        writeSetting(SPF, spf.toString())
     }
 
     override fun getIsOnSnowOrWaterFlow(): Flow<Boolean?> {
-        return readBooleanSettingFlow(UserSettingsDao.IS_ON_SNOW_OR_WATER)
+        return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER)
     }
     override suspend fun getIsOnSnowOrWater(): Boolean? {
-        return readBooleanSetting(UserSettingsDao.IS_ON_SNOW_OR_WATER)
+        return readBooleanSetting(IS_ON_SNOW_OR_WATER)
     }
     override suspend fun setIsOnSnowOrWater(isOnSnowOrWater: Boolean) {
-        writeSetting(UserSettingsDao.IS_ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
+        writeSetting(IS_ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
     }
 
     private suspend fun writeSetting(id: Long, value: String) {
