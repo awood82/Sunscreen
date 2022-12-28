@@ -8,6 +8,7 @@ import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.AppDatabase
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTrackingDao
+import com.androidandrew.sunscreen.domain.di.domainModule
 import com.androidandrew.sunscreen.network.di.networkModule
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import io.mockk.every
@@ -57,14 +58,14 @@ class CheckModulesTest : KoinTest {
     @Test
     fun checkAllModules() = checkModules {
         androidContext(context)
-        modules(mockDatabaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
+        modules(domainModule, mockDatabaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
     }
 
     @Test
     fun verifyKoinApp() = runTest {
         koinApplication {
             androidContext(context)
-            modules(mockDatabaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
+            modules(domainModule, mockDatabaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
             checkModules()
         }
     }

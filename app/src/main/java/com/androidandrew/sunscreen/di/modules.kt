@@ -6,6 +6,10 @@ import android.app.Service
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.androidandrew.sunscreen.MainActivity
+import com.androidandrew.sunscreen.data.di.repositoryModule
+import com.androidandrew.sunscreen.database.di.databaseModule
+import com.androidandrew.sunscreen.domain.di.domainModule
+import com.androidandrew.sunscreen.network.di.networkModule
 import com.androidandrew.sunscreen.service.DefaultNotificationHandler
 import com.androidandrew.sunscreen.service.INotificationHandler
 import com.androidandrew.sunscreen.service.SunTrackerService
@@ -47,3 +51,5 @@ val appModule = module {
     factory { LocationUtil() }
     factory { UvChartFormatter(androidContext()) }
 }
+
+val allModules = listOf(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
