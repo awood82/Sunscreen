@@ -210,16 +210,26 @@ class MainViewModel(
 
     fun onUvTrackingEvent(event: UvTrackingEvent) {
         when (event) {
-            is UvTrackingEvent.TrackingButtonClicked -> {
-                onTrackingClicked()
-            }
-            is UvTrackingEvent.SpfChanged -> {
-                spf.value = event.spf
-                onSpfChanged(event.spf)
-            }
-            is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
-                isOnSnowOrWater.value = event.isOnSnowOrWater
-                onIsSnowOrWaterChanged(event.isOnSnowOrWater)
+            is UvTrackingEvent.TrackingButtonClicked -> onTrackingClicked()
+            is UvTrackingEvent.SpfChanged -> spf.value = event.spf
+            is UvTrackingEvent.IsOnSnowOrWaterChanged -> isOnSnowOrWater.value = event.isOnSnowOrWater
+        }
+
+        forwardTrackingEventToServiceController(event)
+    }
+
+    private fun forwardTrackingEventToServiceController(event: UvTrackingEvent) {
+        if (_isCurrentlyTracking.value) {
+            when (event) {
+                is UvTrackingEvent.SpfChanged -> {
+                    val spf = getSpf(event.spf)
+                    sunTrackerServiceController.setSpf(spf)
+                }
+                is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                    val isOn = event.isOnSnowOrWater
+                    sunTrackerServiceController.setIsOnSnowOrWater(isOn)
+                }
+                else -> { /* Do nothing */ }
             }
         }
     }
@@ -228,6 +238,7 @@ class MainViewModel(
         when (_isCurrentlyTracking.value) {
             true -> {
                 sunTrackerServiceController.unbind()
+                sunTrackerServiceController.stop()
                 _isCurrentlyTracking.value = false
             }
             else -> {
@@ -241,18 +252,6 @@ class MainViewModel(
                 sunTrackerServiceController.bind()
                 _isCurrentlyTracking.value = true
             }
-        }
-    }
-
-    fun onSpfChanged(s: CharSequence) {
-        if (_isCurrentlyTracking.value) {
-            sunTrackerServiceController.setSpf(getSpf(s.toString()))
-        }
-    }
-
-    fun onIsSnowOrWaterChanged(isOn: Boolean) {
-        if (_isCurrentlyTracking.value) {
-            sunTrackerServiceController.setIsOnSnowOrWater(isOn)
         }
     }
 
@@ -278,7 +277,7 @@ class MainViewModel(
         }
     }
 
-    fun onSearchLocation(location: String) {
+    private fun onSearchLocation(location: String) {
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 Timber.d("Updating location ($location) in repo")

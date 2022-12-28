@@ -84,7 +84,7 @@ class MainViewModelTest {
 
     private fun searchZip(zip: String) {
         vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
-        vm.onSearchLocation(zip)
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
     }
 
     private fun setLocationToRefreshNetworkOnInit() {
@@ -302,7 +302,7 @@ class MainViewModelTest {
     fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
         createViewModel()
 
-        vm.onSpfChanged("5")
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
 
       verify(exactly = 0) { serviceController.setSpf(5) }
     }
@@ -312,7 +312,7 @@ class MainViewModelTest {
         createViewModel()
         vm.onTrackingClicked()
 
-        vm.onSpfChanged("5")
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
 
         verify { serviceController.setSpf(5) }
     }
@@ -321,7 +321,7 @@ class MainViewModelTest {
     fun onIsSnowOrWaterChanged_whileNotTracking_doesNotUpdateController() = runTest {
         createViewModel()
 
-        vm.onIsSnowOrWaterChanged(true)
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         verify(exactly = 0) { serviceController.setIsOnSnowOrWater(true) }
     }
@@ -331,7 +331,7 @@ class MainViewModelTest {
         createViewModel()
         vm.onTrackingClicked()
 
-        vm.onIsSnowOrWaterChanged(true)
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         verify { serviceController.setIsOnSnowOrWater(true) }
     }
