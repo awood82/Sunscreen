@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.uvcalculators
+package com.androidandrew.sunscreen.domain
 
 object UvFactor {
 

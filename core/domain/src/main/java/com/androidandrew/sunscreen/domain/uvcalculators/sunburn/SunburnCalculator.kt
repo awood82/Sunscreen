@@ -1,8 +1,9 @@
-package com.androidandrew.sunscreen.uvcalculators.sunburn
+package com.androidandrew.sunscreen.domain.uvcalculators.sunburn
 
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPrediction
 import com.androidandrew.sunscreen.model.getUvNow
-import com.androidandrew.sunscreen.uvcalculators.UvFactor
+import com.androidandrew.sunscreen.domain.UvFactor
 import java.lang.Double.min
 import java.time.Duration
 import java.time.LocalTime
@@ -13,14 +14,14 @@ import java.util.concurrent.TimeUnit
  * Skin type, sunscreen SPF, UV index, altitude, and water/snow reflection.
  * Reference: https://www.omnicalculator.com/other/sunscreen
  */
-object SunburnCalculator {
+class SunburnCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
 
-    const val maxSunUnits = 100.0
-    const val spfNoSunscreen = 1
-    const val spfMaxSunscreen = 50
-    val NO_BURN_EXPECTED = TimeUnit.DAYS.toMinutes(1).toDouble()
+    companion object {
+        val MAX_SUN_UNITS = 100.0
+        val NO_BURN_EXPECTED = TimeUnit.DAYS.toMinutes(1).toDouble()
+    }
 
-    private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
+    private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
     private val lastMinuteInDay = LocalTime.MIDNIGHT.minusMinutes(1).minusNanos(1)
 
     /**
@@ -28,12 +29,12 @@ object SunburnCalculator {
      * This assumes a constant UV factor, so isn't a perfect estimate.
      */
     fun computeMaxTime(uvIndex: Double, sunUnitsSoFar: Double = 0.0, skinType: Int,
-                       spf: Int = spfNoSunscreen, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * getSpfClamped(spf) /
+                       spf: Int = ConvertSpfUseCase.MIN_SPF, altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
+        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * convertSpfUseCase.forCalculations(spf) /
                 (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm) * UvFactor.getReflectionFactor(
                     isOnSnowOrWater))
 
-        return min(maxMinutes * (maxSunUnits - sunUnitsSoFar) / maxSunUnits, NO_BURN_EXPECTED)
+        return min(maxMinutes * (MAX_SUN_UNITS - sunUnitsSoFar) / MAX_SUN_UNITS, NO_BURN_EXPECTED)
     }
 
     /**
@@ -41,9 +42,9 @@ object SunburnCalculator {
      * This takes into account changing UV factors each hour, so is a more accurate estimate.
      */
     fun computeMaxTime(uvPrediction: UvPrediction, currentTime: LocalTime = LocalTime.now(),
-                       sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int = spfNoSunscreen,
+                       sunUnitsSoFar: Double = 0.0, skinType: Int, spf: Int? = ConvertSpfUseCase.MIN_SPF,
                        altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
-        var sunUnitsRemaining = maxSunUnits - sunUnitsSoFar
+        var sunUnitsRemaining = MAX_SUN_UNITS - sunUnitsSoFar
         val minutesLeftInDay = Duration.between(currentTime, lastMinuteInDay)
         var maxMinutes = 0.0
 
@@ -56,7 +57,7 @@ object SunburnCalculator {
             val sunUnits = computeSunUnitsInOneMinute(
                 uvIndex = uvPrediction.getUvNow(simulatedTime),
                 skinType = skinType,
-                spf = getSpfClamped(spf),
+                spf = convertSpfUseCase.forCalculations(spf),
                 altitudeInKm = altitudeInKm,
                 isOnSnowOrWater = isOnSnowOrWater
             )
@@ -73,28 +74,19 @@ object SunburnCalculator {
     /**
      * Returns the % of maximum sun exposure experienced by a person in one minute.
      */
-    fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int = spfNoSunscreen,
+    fun computeSunUnitsInOneMinute(uvIndex: Double, skinType: Int, spf: Int = ConvertSpfUseCase.MIN_SPF,
                                    altitudeInKm: Int = 0, isOnSnowOrWater: Boolean = false): Double {
         val maxTime = computeMaxTime(
             uvIndex = uvIndex,
             sunUnitsSoFar = 0.0,
             skinType = skinType,
-            spf = getSpfClamped(spf),
+            spf = convertSpfUseCase.forCalculations(spf),
             altitudeInKm = altitudeInKm,
             isOnSnowOrWater = isOnSnowOrWater
         )
         return when (maxTime) {
             NO_BURN_EXPECTED -> 0.0
-            else -> maxSunUnits / maxTime
-        }
-    }
-
-    fun getSpfClamped(spf: Int?): Int {
-        return when {
-            spf == null -> spfNoSunscreen
-            spf > spfMaxSunscreen -> spfMaxSunscreen
-            spf <= spfNoSunscreen -> spfNoSunscreen
-            else -> spf
+            else -> MAX_SUN_UNITS / maxTime
         }
     }
 }

@@ -5,10 +5,11 @@ import com.androidandrew.sunscreen.common.toDateString
 import com.androidandrew.sunscreen.common.toTime
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.database.UserTracking
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.getUvNow
-import com.androidandrew.sunscreen.uvcalculators.UvFactor
-import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
-import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
+import com.androidandrew.sunscreen.domain.UvFactor
+import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,6 +21,9 @@ import java.util.concurrent.TimeUnit
 
 class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private val clock: Clock) {
 
+    private val spfUseCase = ConvertSpfUseCase()
+    private val sunburnCalculator = SunburnCalculator(spfUseCase)
+    private val vitaminDCalculator = VitaminDCalculator(spfUseCase)
     private lateinit var settings: SunTrackerSettings
     private var userTracking: UserTracking? = null
     private var trackingTimer: RepeatingTimer? = null
@@ -79,7 +83,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
     }
 
     private fun getBurnProgress(): Double {
-        return SunburnCalculator.computeSunUnitsInOneMinute(
+        return sunburnCalculator.computeSunUnitsInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
             skinType = settings.hardcodedSkinType,
             spf = settings.spf,
@@ -89,7 +93,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
     }
 
     private fun getVitaminDProgress(): Double {
-        return VitaminDCalculator.computeIUVitaminDInOneMinute(
+        return vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
             skinType = settings.hardcodedSkinType,
             clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,

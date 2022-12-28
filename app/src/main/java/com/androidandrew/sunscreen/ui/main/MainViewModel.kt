@@ -4,10 +4,11 @@ import androidx.lifecycle.*
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPrediction
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
-import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
@@ -17,7 +18,7 @@ import com.androidandrew.sunscreen.ui.location.LocationBarState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
-import com.androidandrew.sunscreen.uvcalculators.vitamind.VitaminDCalculator
+import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,7 +31,9 @@ import java.util.concurrent.TimeUnit
 
 class MainViewModel(
     private val uvService: EpaService, private val userRepository: UserRepositoryImpl,
-    private val locationUtil: LocationUtil, private val clock: Clock,
+    private val convertSpfUseCase: ConvertSpfUseCase, private val sunburnCalculator: SunburnCalculator,
+    private val locationUtil: LocationUtil,
+    private val clock: Clock,
     private val sunTrackerServiceController: SunTrackerServiceController
 ) : ViewModel(), DefaultLifecycleObserver {
 
@@ -40,8 +43,10 @@ class MainViewModel(
 
     // TODO: Move these into settings repository
     private val isOnSnowOrWater = MutableStateFlow(false)
-    private val spf = MutableStateFlow("1")
     private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
+
+    private val _spf = userRepository.getSpfFlow()
+    private val _spfToDisplay = MutableStateFlow("")
 
     private val _isCurrentlyTracking = MutableStateFlow(false)
 
@@ -82,18 +87,20 @@ class MainViewModel(
 //    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     val uvTrackingState: StateFlow<UvTrackingState> = combine(
-        _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, spf, isOnSnowOrWater
+        _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, _spfToDisplay, isOnSnowOrWater
     ) { isTracking, prediction, trackingInfo, spf, isOnSnowOrWater ->
         Timber.d("Updating UvTrackingState")
+        Timber.d("spf = $spf")
         UvTrackingState(
             isTrackingPossible = prediction.isNotEmpty(),
             isTracking = isTracking,
             spfOfSunscreenAppliedToSkin = spf,
             isOnSnowOrWater = isOnSnowOrWater,
             sunburnProgressAmount = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
-            sunburnProgressPercent0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.maxSunUnits).toFloat(),
+            sunburnProgressPercent0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.MAX_SUN_UNITS).toFloat(),
             vitaminDProgressAmount = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
-            vitaminDProgressPercent0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(VitaminDCalculator.recommendedIU).toFloat()
+            vitaminDProgressPercent0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(
+                VitaminDCalculator.RECOMMENDED_IU).toFloat()
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
@@ -109,14 +116,16 @@ class MainViewModel(
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
-    private val _minutesToBurn = combine(_userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, spf) { trackingSoFar, time, forecast, snowOrWater, _ ->
+    private val _minutesToBurn = combine(
+        _userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, _spfToDisplay)
+    { trackingSoFar, time, forecast, snowOrWater, spf ->
         when (forecast.isNotEmpty()) {
-            true -> SunburnCalculator.computeMaxTime(
+            true -> sunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
                 currentTime = time,
                 sunUnitsSoFar = trackingSoFar?.burnProgress ?: 0.0,
                 skinType = hardcodedSkinType,
-                spf = getSpf(),
+                spf = convertSpfUseCase.forCalculations(spf.toIntOrNull()),
                 altitudeInKm = 0,
                 isOnSnowOrWater = snowOrWater
             ).toLong()
@@ -178,6 +187,9 @@ class MainViewModel(
 
     init {
         Timber.d("Initializing MainViewModel")
+        viewModelScope.launch {
+            _spfToDisplay.value = convertSpfUseCase.forDisplay(userRepository.getSpf())
+        }
     }
 
     private fun startTimers() {
@@ -198,6 +210,7 @@ class MainViewModel(
     }
 
     fun onLocationBarEvent(event: LocationBarEvent) {
+        Timber.d("onLocationBarEvent: $event")
         when (event) {
             is LocationBarEvent.TextChanged -> {
                 _locationBarState.value = LocationBarState(typedSoFar = event.text)
@@ -209,9 +222,17 @@ class MainViewModel(
     }
 
     fun onUvTrackingEvent(event: UvTrackingEvent) {
+        Timber.d("onUvTrackingEvent: $event")
         when (event) {
             is UvTrackingEvent.TrackingButtonClicked -> onTrackingClicked()
-            is UvTrackingEvent.SpfChanged -> spf.value = event.spf
+            is UvTrackingEvent.SpfChanged -> {
+                _spfToDisplay.value = event.spf
+                event.spf.toIntOrNull()?.let {
+                    viewModelScope.launch {
+                        userRepository.setSpf(it)
+                    }
+                }
+            }
             is UvTrackingEvent.IsOnSnowOrWaterChanged -> isOnSnowOrWater.value = event.isOnSnowOrWater
         }
 
@@ -222,8 +243,9 @@ class MainViewModel(
         if (_isCurrentlyTracking.value) {
             when (event) {
                 is UvTrackingEvent.SpfChanged -> {
-                    val spf = getSpf(event.spf)
-                    sunTrackerServiceController.setSpf(spf)
+                    event.spf.toIntOrNull()?.let {
+                        sunTrackerServiceController.setSpf(it)
+                    }
                 }
                 is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
                     val isOn = event.isOnSnowOrWater
@@ -242,15 +264,17 @@ class MainViewModel(
                 _isCurrentlyTracking.value = false
             }
             else -> {
-                /* TODO: Could have service read these settings as a flow from the repository */
-                sunTrackerServiceController.setSettings(
-                    uvPrediction = _uvPrediction.value,
-                    skinType = hardcodedSkinType,
-                    spf = getSpf(),
-                    isOnSnowOrWater = isOnSnowOrWater.value
-                )
-                sunTrackerServiceController.bind()
-                _isCurrentlyTracking.value = true
+                viewModelScope.launch {
+                    /* TODO: Could have service read these settings as a flow from the repository */
+                    sunTrackerServiceController.setSettings(
+                        uvPrediction = _uvPrediction.value,
+                        skinType = hardcodedSkinType,
+                        spf = convertSpfUseCase.forCalculations(_spf.first()),
+                        isOnSnowOrWater = isOnSnowOrWater.value
+                    )
+                    sunTrackerServiceController.bind()
+                    _isCurrentlyTracking.value = true
+                }
             }
         }
     }
@@ -288,9 +312,5 @@ class MainViewModel(
 
     private fun getDateToday(): String {
         return LocalDate.now(clock).toString()
-    }
-
-    private fun getSpf(value: String = spf.value): Int {
-        return SunburnCalculator.getSpfClamped(value.toIntOrNull())
     }
 }

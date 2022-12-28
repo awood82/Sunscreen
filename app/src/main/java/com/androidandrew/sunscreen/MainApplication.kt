@@ -4,6 +4,7 @@ import android.app.Application
 import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.di.databaseModule
 import com.androidandrew.sunscreen.di.*
+import com.androidandrew.sunscreen.domain.di.domainModule
 import com.androidandrew.sunscreen.network.di.networkModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -21,7 +22,7 @@ class MainApplication : Application() {
             //inject Android context
             androidContext(this@MainApplication)
             // use modules
-            modules(databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
+            modules(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
         }
 
         if (BuildConfig.DEBUG) {

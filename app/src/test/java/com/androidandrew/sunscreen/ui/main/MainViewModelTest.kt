@@ -8,6 +8,8 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
+import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
@@ -41,6 +43,8 @@ class MainViewModelTest {
     val mainCoroutineRule = MainCoroutineRule()
 
     private lateinit var vm: MainViewModel
+    private val spfUseCase = ConvertSpfUseCase()
+    private val sunburnCalculator = SunburnCalculator(spfUseCase)
     private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
     private val mockUvService = mockk<EpaService>()
@@ -56,6 +60,7 @@ class MainViewModelTest {
         this.clock = clock
         fakeDatabaseHolder.clearDatabase()
         realRepository = UserRepositoryImpl(fakeDatabaseHolder.userTrackingDao, fakeDatabaseHolder.userSettingsDao)
+        coEvery { mockRepository.getSpf() } returns null
         if (initDb) {
             realRepository.setLocation(FakeData.zip)
             coEvery { mockRepository.getLocation() } returns FakeData.zip
@@ -70,7 +75,7 @@ class MainViewModelTest {
             true -> mockRepository
             false -> realRepository
         }
-        vm = MainViewModel(networkToUse, repositoryToUse, locationUtil, clock, serviceController)
+        vm = MainViewModel(networkToUse, repositoryToUse, spfUseCase, sunburnCalculator, locationUtil, clock, serviceController)
     }
 
     @After
@@ -163,6 +168,13 @@ class MainViewModelTest {
 
         val endingSpfState = vm.burnTimeUiState.first()
         assertNotEquals(startingSpfState, endingSpfState)
+
+        // It should update based on no sunscreen when the SPF box is cleared
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
+        advanceUntilIdle()
+
+        val emptySpfState = vm.burnTimeUiState.first()
+        assertEquals(startingSpfState, emptySpfState)
     }
 
     @Test
@@ -298,12 +310,49 @@ class MainViewModelTest {
     }
 
     @Test
+    fun onSpfTextChanged_toEmptyString_doesNotSaveToRepo() = runTest {
+        createViewModel(useMockRepo = true)
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
+
+        coVerify(exactly = 0) { mockRepository.setSpf(any()) }
+    }
+
+    @Test
+    fun onSpfTextChanged_toValidSpf_savesToRepo() = runTest {
+        createViewModel(useMockRepo = true)
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("10"))
+
+        coVerify(exactly = 1) { mockRepository.setSpf(10) }
+    }
+
+    @Test
+    fun onSpfTextChanged_toTooHighSpf_stillSavesToRepo() = runTest {
+        createViewModel(useMockRepo = true)
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("1000"))
+
+        coVerify(exactly = 1) { mockRepository.setSpf(1000) }
+    }
+
+    @Test
     fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
         createViewModel()
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
 
-      verify(exactly = 0) { serviceController.setSpf(5) }
+        verify(exactly = 0) { serviceController.setSpf(5) }
+    }
+
+    @Test
+    fun onSpfChanged_toInvalidValue_whileTracking_doesNotUpdateController() = runTest {
+        createViewModel()
+        vm.onTrackingClicked()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
+
+        verify(exactly = 0) { serviceController.setSpf(any()) }
     }
 
     @Test

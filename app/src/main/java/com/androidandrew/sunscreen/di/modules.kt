@@ -38,7 +38,7 @@ val serviceModule = module {
 
 val viewModelModule = module {
     viewModel { LocationViewModel(get(), get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val appModule = module {

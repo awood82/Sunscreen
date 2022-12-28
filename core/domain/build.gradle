@@ -32,6 +32,9 @@ android {
 
 dependencies {
 
+    // Koin for dependency injection
+    implementation "io.insert-koin:koin-android:$koinAndroidVersion"
+
     implementation project(":core:model")
 
     testImplementation project(":core:testing")

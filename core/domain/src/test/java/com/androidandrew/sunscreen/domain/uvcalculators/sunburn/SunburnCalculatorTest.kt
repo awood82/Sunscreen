@@ -1,21 +1,22 @@
-package com.androidandrew.sunscreen.uvcalculators.sunburn
+package com.androidandrew.sunscreen.domain.uvcalculators.sunburn
 
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPredictionPoint
-import com.androidandrew.sunscreen.uvcalculators.sunburn.SunburnCalculator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalTime
 
 class SunburnCalculatorTest {
-    
+
+    private val sunburnCalculator = SunburnCalculator(ConvertSpfUseCase())
     private val delta = 0.1
     private val maxTimeDelta = 0.99
 
     // A baseline test to compare to the omni calculator website
     @Test
     fun computeMaxTime_withSkinType4_andUV5_is60Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 4,
             spf = 1,
@@ -29,7 +30,7 @@ class SunburnCalculatorTest {
     // Being on snow or in the water half the maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType4_andUV5_andReflectiveSurface_is30Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 4,
             spf = 1,
@@ -43,7 +44,7 @@ class SunburnCalculatorTest {
     // Higher UV index reduces the maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType4_andUV10_is30Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 10.0,
             skinType = 4,
             spf = 1,
@@ -57,7 +58,7 @@ class SunburnCalculatorTest {
     // Wearing sunscreen w/ SPF increases the maximum sun exposure time linearly
     @Test
     fun computeMaxTime_withSkinType4_andUV5_andSPF10_is600Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 4,
             spf = 10,
@@ -71,7 +72,7 @@ class SunburnCalculatorTest {
     // Having darker color skin increases maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType5_andUV5_is80Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 5,
             spf = 1,
@@ -85,7 +86,7 @@ class SunburnCalculatorTest {
     // Having darker color skin increases maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType6_andUV5_is100Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 6,
             spf = 1,
@@ -99,7 +100,7 @@ class SunburnCalculatorTest {
     // Having lighter color skin reduces maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType3_andUV5_is30Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 3,
             spf = 1,
@@ -113,7 +114,7 @@ class SunburnCalculatorTest {
     // Having lighter color skin reduces maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType2_andUV5_is20Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 2,
             spf = 1,
@@ -127,7 +128,7 @@ class SunburnCalculatorTest {
     // Having lighter color skin reduces maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType1_andUV5_is13_3Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 1,
             spf = 1,
@@ -141,7 +142,7 @@ class SunburnCalculatorTest {
     // Higher altitude reduces maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType3_andUV5_at2km_is30Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 3,
             spf = 1,
@@ -155,7 +156,7 @@ class SunburnCalculatorTest {
     // Higher altitude reduces maximum sun exposure time
     @Test
     fun computeMaxTime_withSkinType3_andUV5_at7km_is19Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 3,
             spf = 1,
@@ -169,7 +170,7 @@ class SunburnCalculatorTest {
     // If skintype isn't set, we can't compute
     @Test
     fun computeMaxTime_withSkinTypeUnknown_is0Minutes() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
             skinType = 0,
             spf = 1,
@@ -183,7 +184,7 @@ class SunburnCalculatorTest {
     // If the max time is 20 minutes, then the sun units in one minute is 5. 100% / 20min = 5%/min
     @Test
     fun computeSunUnits_withMaxTime20Minutes_is5Percent() {
-        val sunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
+        val sunUnits = sunburnCalculator.computeSunUnitsInOneMinute(
             uvIndex = 5.0,
             skinType = 2,
             spf = 1,
@@ -201,7 +202,7 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 10.0) // 30 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
             skinType = 4,
@@ -220,7 +221,7 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 5.0) // 60 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
             skinType = 4,
@@ -239,7 +240,7 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 10.0) // 30 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
             sunUnitsSoFar = 50.0,
@@ -260,7 +261,7 @@ class SunburnCalculatorTest {
         val prediction = listOf(elevenAmPrediction, noonPrediction, onePmPrediction)
         val currentTime = LocalTime.NOON.minusMinutes(30) // 11:30 am
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = currentTime,
             skinType = 4,
@@ -279,7 +280,7 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 5.0) // 60 minutes to burn
         val prediction = listOf(elevenAmPrediction, noonPrediction, onePmPrediction)
 
-        val rising = SunburnCalculator.computeMaxTime(
+        val rising = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON.minusMinutes(3),
             skinType = 4,
@@ -288,7 +289,7 @@ class SunburnCalculatorTest {
             isOnSnowOrWater = false
         )
 
-        val falling = SunburnCalculator.computeMaxTime(
+        val falling = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON.plusMinutes(3),
             skinType = 4,
@@ -306,10 +307,10 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 5.0) // 60 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
-            sunUnitsSoFar = SunburnCalculator.maxSunUnits,
+            sunUnitsSoFar = SunburnCalculator.MAX_SUN_UNITS,
             skinType = 4,
             spf = 1,
             altitudeInKm = 0,
@@ -325,10 +326,10 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 5.0) // 60 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
-            sunUnitsSoFar = SunburnCalculator.maxSunUnits * 2,
+            sunUnitsSoFar = SunburnCalculator.MAX_SUN_UNITS * 2,
             skinType = 4,
             spf = 1,
             altitudeInKm = 0,
@@ -344,10 +345,10 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 5.0) // 60 minutes to burn
         val prediction = listOf(noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON,
-            sunUnitsSoFar = SunburnCalculator.maxSunUnits - 0.1,
+            sunUnitsSoFar = SunburnCalculator.MAX_SUN_UNITS - 0.1,
             skinType = 4,
             spf = 1,
             altitudeInKm = 0,
@@ -360,9 +361,9 @@ class SunburnCalculatorTest {
 
     @Test
     fun computeMaxTime_constantUv_whenAlreadyBurned_returnsZero() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
-            sunUnitsSoFar = SunburnCalculator.maxSunUnits,
+            sunUnitsSoFar = SunburnCalculator.MAX_SUN_UNITS,
             skinType = 3,
             spf = 1,
             altitudeInKm = 7000,
@@ -374,9 +375,9 @@ class SunburnCalculatorTest {
 
     @Test
     fun computeMaxTime_constantUv_whenAlmostBurned_returnsOneOrLess() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 5.0,
-            sunUnitsSoFar = SunburnCalculator.maxSunUnits - 0.1,
+            sunUnitsSoFar = SunburnCalculator.MAX_SUN_UNITS - 0.1,
             skinType = 3,
             spf = 1,
             altitudeInKm = 7000,
@@ -389,7 +390,7 @@ class SunburnCalculatorTest {
 
     @Test
     fun computeMaxTime_constantUv_whenBurnUnlikely_returnsMaxValue() {
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvIndex = 1.0,
             sunUnitsSoFar = 0.0,
             skinType = 6,
@@ -408,7 +409,7 @@ class SunburnCalculatorTest {
         val onePmPrediction = UvPredictionPoint(LocalTime.NOON.plusHours(1), 1.0)
         val prediction = listOf(elevenAmPrediction, noonPrediction, onePmPrediction)
 
-        val maxTime = SunburnCalculator.computeMaxTime(
+        val maxTime = sunburnCalculator.computeMaxTime(
             uvPrediction = prediction,
             currentTime = LocalTime.NOON.minusHours(1),
             sunUnitsSoFar = 0.0,
@@ -423,24 +424,12 @@ class SunburnCalculatorTest {
 
     @Test
     fun computeSunUnitsInOneMinute_whenUvIndexIs0_returns0() {
-        val sunUnits = SunburnCalculator.computeSunUnitsInOneMinute(
+        val sunUnits = sunburnCalculator.computeSunUnitsInOneMinute(
             uvIndex = 0.0,
             skinType = 5,
             spf = 50
         )
 
         assertEquals(0.0, sunUnits, 0.001)
-    }
-
-    @Test
-    fun getSpfClamped_clampsBetween1and50() {
-        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen))
-        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen - 1))
-        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfNoSunscreen - 2))
-
-        assertEquals(SunburnCalculator.spfMaxSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfMaxSunscreen))
-        assertEquals(SunburnCalculator.spfMaxSunscreen, SunburnCalculator.getSpfClamped(SunburnCalculator.spfMaxSunscreen + 1))
-
-        assertEquals(SunburnCalculator.spfNoSunscreen, SunburnCalculator.getSpfClamped(null))
     }
 }

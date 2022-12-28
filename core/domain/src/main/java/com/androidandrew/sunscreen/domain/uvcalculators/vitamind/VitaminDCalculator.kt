@@ -1,14 +1,16 @@
-package com.androidandrew.sunscreen.uvcalculators.vitamind
+package com.androidandrew.sunscreen.domain.uvcalculators.vitamind
 
-import com.androidandrew.sunscreen.uvcalculators.UvFactor
+import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
+import com.androidandrew.sunscreen.domain.UvFactor
 import kotlin.math.pow
 
-object VitaminDCalculator {
+class VitaminDCalculator(convertSpfUseCase: ConvertSpfUseCase) {
 
-    const val recommendedIU = 1000.0 // Some studies recommend less (400), others more (4000)
-    const val spfNoSunscreen = 1
+    companion object {
+        val RECOMMENDED_IU = 1000.0 // Some studies recommend less (400), others more (4000)
+    }
 
-    private const val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
+    private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
 
     /**
      * Returns the expected Vitamin D produced by a person in one minute, measured in IU.
@@ -16,7 +18,7 @@ object VitaminDCalculator {
      * https://www.climate-policy-watcher.org/ultraviolet-radiation-2/calculation-of-optimal-times-for-exposure-to-sunlight.html
      */
     fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, clothing: UvFactor.Clothing,
-                                     spf: Int = spfNoSunscreen, altitudeInKm: Int = 0): Double {
+                                     spf: Int = ConvertSpfUseCase.MIN_SPF, altitudeInKm: Int = 0): Double {
         val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * spf /
                 (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm))
         val vitDConversionFactor = when {
@@ -25,6 +27,6 @@ object VitaminDCalculator {
             uvIndex >= 9 -> 0.1
             else -> return 0.0
         }
-        return recommendedIU * UvFactor.getSkinExposedFactor(clothing) / 100.0 / (maxMinutes * vitDConversionFactor)
+        return RECOMMENDED_IU * UvFactor.getSkinExposedFactor(clothing) / 100.0 / (maxMinutes * vitDConversionFactor)
     }
 }
