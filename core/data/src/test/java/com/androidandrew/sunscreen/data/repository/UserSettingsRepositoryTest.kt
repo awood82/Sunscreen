@@ -17,12 +17,12 @@ import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class UserRepositoryTest {
+class UserSettingsRepositoryTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var repository: UserRepository
+    private lateinit var repository: UserSettingsRepository
     private lateinit var databaseHolder: FakeDatabaseWrapper
 
     private val location = "12345"
@@ -32,8 +32,7 @@ class UserRepositoryTest {
     @Before
     fun setup() {
         databaseHolder = FakeDatabaseWrapper()
-        repository = UserRepositoryImpl(
-            userTrackingDao = databaseHolder.userTrackingDao,
+        repository = UserSettingsRepositoryImpl(
             userSettingsDao = databaseHolder.userSettingsDao
         )
     }

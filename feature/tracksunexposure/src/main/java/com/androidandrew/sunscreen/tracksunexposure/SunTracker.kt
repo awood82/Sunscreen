@@ -3,7 +3,7 @@ package com.androidandrew.sunscreen.tracksunexposure
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.common.toDateString
 import com.androidandrew.sunscreen.common.toTime
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.getUvNow
@@ -19,7 +19,7 @@ import java.time.Clock
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private val clock: Clock) {
+class SunTracker(private val userTrackingRepository: UserTrackingRepository, private val clock: Clock) {
 
     private val spfUseCase = ConvertSpfUseCase()
     private val sunburnCalculator = SunburnCalculator(spfUseCase)
@@ -49,7 +49,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
 
     private fun initializeUserTrackingInfo() {
         trackerScope.launch {
-            userTracking = sunscreenRepository.getUserTracking(clock.toDateString())
+            userTracking = userTrackingRepository.getUserTracking(clock.toDateString())
             if (userTracking == null) {
                 userTracking = UserTracking(
                     date = clock.toDateString(),
@@ -79,7 +79,7 @@ class SunTracker(private val sunscreenRepository: UserRepositoryImpl, private va
             burnProgress = (userTracking?.burnProgress ?: 0.0).plus(burnDelta),
             vitaminDProgress = (userTracking?.vitaminDProgress ?: 0.0).plus(vitaminDDelta)
         )
-        sunscreenRepository.setUserTracking(userTracking!!)
+        userTrackingRepository.setUserTracking(userTracking!!)
     }
 
     private fun getBurnProgress(): Double {

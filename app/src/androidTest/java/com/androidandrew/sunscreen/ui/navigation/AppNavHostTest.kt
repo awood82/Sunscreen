@@ -1,16 +1,13 @@
 package com.androidandrew.sunscreen.ui.navigation
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
-import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -27,9 +24,9 @@ class AppNavHostTest {
     private fun setupNavController(withLocation: String) {
         // Init the navigation controller
         composeTestRule.setContent {
-            val userRepo: UserRepositoryImpl = get()
+            val userSettingsRepo: UserSettingsRepository = get()
             runBlocking {
-                userRepo.setLocation(withLocation)
+                userSettingsRepo.setLocation(withLocation)
             }
 
             navController = TestNavHostController(LocalContext.current)

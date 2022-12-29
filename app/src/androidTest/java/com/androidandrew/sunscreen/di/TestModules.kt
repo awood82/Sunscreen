@@ -11,7 +11,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val testViewModelModule = module {
-    viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get<FakeEpaService>(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val testModule = module {

@@ -5,9 +5,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
+import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
@@ -49,33 +52,50 @@ class MainViewModelTest {
     private val fakeUvService = FakeEpaService
     private val mockUvService = mockk<EpaService>()
     private val fakeDatabaseHolder = FakeDatabaseWrapper()
-    private lateinit var realRepository: UserRepositoryImpl
-    private val mockRepository = mockk<UserRepositoryImpl>(relaxed = true)
+    private lateinit var realUserSettingsRepository: UserSettingsRepository
+    private val mockUserSettingsRepository = mockk<UserSettingsRepository>(relaxed = true)
+    private lateinit var realUserTrackingRepository: UserTrackingRepository
+    private val mockUserTrackingRepository = mockk<UserTrackingRepository>(relaxed = true)
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
     private var initDb = false
     private val delta = 0.1
 
-    private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepo: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
+    private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepos: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
         fakeDatabaseHolder.clearDatabase()
-        realRepository = UserRepositoryImpl(fakeDatabaseHolder.userTrackingDao, fakeDatabaseHolder.userSettingsDao)
-        coEvery { mockRepository.getSpf() } returns null
+        realUserTrackingRepository = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
+        realUserSettingsRepository = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        coEvery { mockUserSettingsRepository.getSpf() } returns null
         if (initDb) {
-            realRepository.setLocation(FakeData.zip)
-            coEvery { mockRepository.getLocation() } returns FakeData.zip
+            realUserSettingsRepository.setLocation(FakeData.zip)
+            coEvery { mockUserSettingsRepository.getLocation() } returns FakeData.zip
         } else {
-            coEvery { mockRepository.getLocation() } returns ""
+            coEvery { mockUserSettingsRepository.getLocation() } returns ""
         }
         val networkToUse = when (useMockNetwork) {
             true -> mockUvService
             false -> fakeUvService
         }
-        val repositoryToUse = when (useMockRepo) {
-            true -> mockRepository
-            false -> realRepository
+        val userTrackingRepositoryToUse = when (useMockRepos) {
+            true -> mockUserTrackingRepository
+            false -> realUserTrackingRepository
         }
-        vm = MainViewModel(networkToUse, repositoryToUse, spfUseCase, sunburnCalculator, locationUtil, clock, serviceController)
+        val userSettingsRepositoryToUse = when (useMockRepos) {
+            true -> mockUserSettingsRepository
+            false -> realUserSettingsRepository
+        }
+
+        vm = MainViewModel(
+            uvService = networkToUse,
+            userSettingsRepo = userSettingsRepositoryToUse,
+            userTrackingRepo = userTrackingRepositoryToUse,
+            convertSpfUseCase = spfUseCase,
+            sunburnCalculator = sunburnCalculator,
+            locationUtil = locationUtil,
+            clock = clock,
+            sunTrackerServiceController = serviceController
+        )
     }
 
     @After
@@ -270,23 +290,23 @@ class MainViewModelTest {
 
     @Test
     fun forceTrackingRefresh_withNoPreviousTrackingInfo_triggersRepositoryUpdate() = runTest {
-        coEvery { mockRepository.getUserTracking(any()) } returns null
-        createViewModel(useMockNetwork = false, useMockRepo = true)
+        coEvery { mockUserTrackingRepository.getUserTracking(any()) } returns null
+        createViewModel(useMockNetwork = false, useMockRepos = true)
 
         updateTracking(0.0, 0.0)
 
-        coVerify { mockRepository.setUserTracking(any()) }
+        coVerify { mockUserTrackingRepository.setUserTracking(any()) }
     }
 
     @Test
     fun forceTrackingRefresh_withArguments_updatesRepositoryValues() = runTest {
-        coEvery { mockRepository.getUserTracking(any()) } returns null
-        createViewModel(useMockNetwork = false, useMockRepo = true)
+        coEvery { mockUserTrackingRepository.getUserTracking(any()) } returns null
+        createViewModel(useMockNetwork = false, useMockRepos = true)
 
         updateTracking(1.0, 2.0)
 
         val slot = slot<UserTracking>()
-        coVerify { mockRepository.setUserTracking(capture(slot)) }
+        coVerify { mockUserTrackingRepository.setUserTracking(capture(slot)) }
         assertEquals(1.0, slot.captured.burnProgress, delta)
         assertEquals(2.0, slot.captured.vitaminDProgress, delta)
     }
@@ -294,7 +314,7 @@ class MainViewModelTest {
     @Test
     fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
         initDb = true
-        createViewModel(useMockNetwork = false, useMockRepo = false)
+        createViewModel(useMockNetwork = false, useMockRepos = false)
 
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
@@ -311,29 +331,29 @@ class MainViewModelTest {
 
     @Test
     fun onSpfTextChanged_toEmptyString_doesNotSaveToRepo() = runTest {
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
 
-        coVerify(exactly = 0) { mockRepository.setSpf(any()) }
+        coVerify(exactly = 0) { mockUserSettingsRepository.setSpf(any()) }
     }
 
     @Test
     fun onSpfTextChanged_toValidSpf_savesToRepo() = runTest {
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("10"))
 
-        coVerify(exactly = 1) { mockRepository.setSpf(10) }
+        coVerify(exactly = 1) { mockUserSettingsRepository.setSpf(10) }
     }
 
     @Test
     fun onSpfTextChanged_toTooHighSpf_stillSavesToRepo() = runTest {
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("1000"))
 
-        coVerify(exactly = 1) { mockRepository.setSpf(1000) }
+        coVerify(exactly = 1) { mockUserSettingsRepository.setSpf(1000) }
     }
 
     @Test
@@ -386,11 +406,11 @@ class MainViewModelTest {
 
     @Test
     fun onIsOnSnowOrWaterChanged_savesToRepo() = runTest {
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
-        coVerify(exactly = 1) { mockRepository.setIsOnSnowOrWater(true) }
+        coVerify(exactly = 1) { mockUserSettingsRepository.setIsOnSnowOrWater(true) }
     }
 
     @Test
@@ -430,7 +450,7 @@ class MainViewModelTest {
     @Test
     fun init_ifLocationExistsInRepo_itAppearsInTheLocationBar() = runTest {
         setLocationInMockRepo(FakeData.zip)
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         val locationBarState = vm.locationBarState.first()
 
@@ -440,7 +460,7 @@ class MainViewModelTest {
     @Test
     fun init_ifLocationExistsInRepo_queriesNetworkOnlyOnce() = runTest {
         setLocationInMockRepo(FakeData.zip)
-        createViewModel(useMockNetwork = true, useMockRepo = true)
+        createViewModel(useMockNetwork = true, useMockRepos = true)
 
         coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
     }
@@ -449,7 +469,7 @@ class MainViewModelTest {
     fun init_ifLocationDoesNotExistInRepo_navigatesToLocationScreen() = runTest {
         setLocationInMockRepo(null)
 
-        createViewModel(useMockRepo = true)
+        createViewModel(useMockRepos = true)
 
         assertEquals(AppState.NotOnboarded, vm.appState.first())
     }
@@ -470,7 +490,7 @@ class MainViewModelTest {
 
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched("10001"))
 
-        assertEquals("10001", realRepository.getLocation())
+        assertEquals("10001", realUserSettingsRepository.getLocation())
     }
 
     @Test
@@ -479,13 +499,13 @@ class MainViewModelTest {
 
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched("1"))
 
-        assertNotEquals("10001", realRepository.getLocation())
+        assertNotEquals("10001", realUserSettingsRepository.getLocation())
     }
 
 
     private fun setLocationInMockRepo(location: String?) {
-        coEvery { mockRepository.getLocation() } returns location
-        every { mockRepository.getLocationFlow() } returns flowOf(location)
+        coEvery { mockUserSettingsRepository.getLocation() } returns location
+        every { mockUserSettingsRepository.getLocationFlow() } returns flowOf(location)
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
@@ -494,7 +514,7 @@ class MainViewModelTest {
             burnProgress = burnProgress,
             vitaminDProgress = vitaminDProgress
         )
-        mockRepository.setUserTracking(userTracking)
-        realRepository.setUserTracking(userTracking)
+        mockUserTrackingRepository.setUserTracking(userTracking)
+        realUserTrackingRepository.setUserTracking(userTracking)
     }
 }

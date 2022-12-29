@@ -4,26 +4,15 @@ import com.androidandrew.sunscreen.database.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class UserRepositoryImpl(
-    private val userTrackingDao: UserTrackingDao,
+class UserSettingsRepositoryImpl(
     private val userSettingsDao: UserSettingsDao
-) : UserRepository {
+) : UserSettingsRepository {
 
     companion object {
         //        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
         const val LOCATION = 1L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
-    }
-
-    override fun getUserTrackingFlow(date: String): Flow<UserTracking?> {
-        return userTrackingDao.getFlow(date)
-    }
-    override suspend fun getUserTracking(date: String): UserTracking? {
-        return userTrackingDao.getOnce(date)
-    }
-    override suspend fun setUserTracking(tracking: UserTracking) {
-        userTrackingDao.insert(tracking)
     }
 
     override fun getLocationFlow(): Flow<String?> {

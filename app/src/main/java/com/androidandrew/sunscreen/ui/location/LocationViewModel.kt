@@ -2,13 +2,13 @@ package com.androidandrew.sunscreen.ui.location
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class LocationViewModel(
-    private val repository: UserRepositoryImpl,
+    private val userSettingsRepo: UserSettingsRepository,
     private val locationUtil: LocationUtil
 ) : ViewModel() {
 
@@ -32,7 +32,7 @@ class LocationViewModel(
     fun onSearchLocation(zipLocation: String) {
         if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
-                repository.setLocation(zipLocation)
+                userSettingsRepo.setLocation(zipLocation)
                 _isLocationValid.value = true
             }
         }

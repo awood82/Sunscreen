@@ -2,8 +2,9 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.common.RepeatingTimer
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
+import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPrediction
 import com.androidandrew.sunscreen.model.trim
@@ -30,8 +31,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
-    private val uvService: EpaService, private val userRepository: UserRepositoryImpl,
-    private val convertSpfUseCase: ConvertSpfUseCase, private val sunburnCalculator: SunburnCalculator,
+    private val uvService: EpaService, private val userSettingsRepo: UserSettingsRepository,
+    userTrackingRepo: UserTrackingRepository, private val convertSpfUseCase: ConvertSpfUseCase,
+    private val sunburnCalculator: SunburnCalculator,
     private val locationUtil: LocationUtil,
     private val clock: Clock,
     private val sunTrackerServiceController: SunTrackerServiceController
@@ -42,9 +44,9 @@ class MainViewModel(
         private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
     }
 
-    private val _isOnSnowOrWater = userRepository.getIsOnSnowOrWaterFlow()
+    private val _isOnSnowOrWater = userSettingsRepo.getIsOnSnowOrWaterFlow()
 
-    private val _spf = userRepository.getSpfFlow()
+    private val _spf = userSettingsRepo.getSpfFlow()
     private val _spfToDisplay = MutableStateFlow("")
 
     // TODO: Move these into settings repository
@@ -59,7 +61,7 @@ class MainViewModel(
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
 
-    private val _hasSetupRun = userRepository.getLocationFlow().map {
+    private val _hasSetupRun = userSettingsRepo.getLocationFlow().map {
         Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
         !it.isNullOrEmpty()
     }
@@ -81,7 +83,7 @@ class MainViewModel(
     val locationBarState = _locationBarState
         .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = _locationBarState.value)
 
-    private val _userTrackingInfo = userRepository.getUserTrackingFlow(_lastDateUsed.value)
+    private val _userTrackingInfo = userTrackingRepo.getUserTrackingFlow(_lastDateUsed.value)
 
 //    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
 //// TODO: Add back?       onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
@@ -175,7 +177,7 @@ class MainViewModel(
 //    }
 
     val networkRefresher = viewModelScope.launch {
-        userRepository.getLocationFlow()
+        userSettingsRepo.getLocationFlow()
             .distinctUntilChanged()
             .onEach { location ->
                 location?.let {
@@ -190,7 +192,7 @@ class MainViewModel(
     init {
         Timber.d("Initializing MainViewModel")
         viewModelScope.launch {
-            _spfToDisplay.value = convertSpfUseCase.forDisplay(userRepository.getSpf())
+            _spfToDisplay.value = convertSpfUseCase.forDisplay(userSettingsRepo.getSpf())
         }
     }
 
@@ -231,13 +233,13 @@ class MainViewModel(
                 _spfToDisplay.value = event.spf
                 event.spf.toIntOrNull()?.let {
                     viewModelScope.launch {
-                        userRepository.setSpf(it)
+                        userSettingsRepo.setSpf(it)
                     }
                 }
             }
             is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
                 viewModelScope.launch {
-                    userRepository.setIsOnSnowOrWater(event.isOnSnowOrWater)
+                    userSettingsRepo.setIsOnSnowOrWater(event.isOnSnowOrWater)
                 }
             }
         }
@@ -311,7 +313,7 @@ class MainViewModel(
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 Timber.d("Updating location ($location) in repo")
-                userRepository.setLocation(location)
+                userSettingsRepo.setLocation(location)
             }
         }
     }

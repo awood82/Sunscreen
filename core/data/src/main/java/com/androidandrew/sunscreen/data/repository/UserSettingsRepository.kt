@@ -1,13 +1,8 @@
 package com.androidandrew.sunscreen.data.repository
 
-import com.androidandrew.sunscreen.database.UserTracking
 import kotlinx.coroutines.flow.Flow
 
-interface UserRepository {
-    fun getUserTrackingFlow(date: String): Flow<UserTracking?>
-    suspend fun getUserTracking(date: String): UserTracking?
-    suspend fun setUserTracking(tracking: UserTracking)
-
+interface UserSettingsRepository {
     fun getLocationFlow(): Flow<String?>
     suspend fun getLocation(): String?
     suspend fun setLocation(location: String)

@@ -8,7 +8,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
+import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import kotlinx.coroutines.delay
@@ -25,14 +26,16 @@ class MainScreenUiAutomatorTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     lateinit var uiDevice: UiDevice
-    lateinit var userRepo: UserRepositoryImpl
+    lateinit var userSettingsRepo: UserSettingsRepository
+    lateinit var userTrackingRepo: UserTrackingRepository
 
     @Before
     fun setup() {
         composeTestRule.setContent {
-            userRepo = get()
+            userSettingsRepo = get()
+            userTrackingRepo = get()
             runBlocking {
-                userRepo.setLocation(FakeData.zip)
+                userSettingsRepo.setLocation(FakeData.zip)
             }
 
             SunscreenTheme {
@@ -47,7 +50,7 @@ class MainScreenUiAutomatorTest {
     @Test
     fun startTracking_continues_whenAppIsInTheBackground() {
         runBlocking {
-            val trackingInfo = userRepo.getUserTracking(FakeData.localDate.toString())
+            val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
             assertNull(trackingInfo)
         }
 
@@ -70,7 +73,7 @@ class MainScreenUiAutomatorTest {
         val progressEnd = vitaminDProgressBar.text.progressTextToInt()
 
         runBlocking {
-            val trackingInfo = userRepo.getUserTracking(FakeData.localDate.toString())
+            val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
             assertNotEquals(0.0, trackingInfo?.vitaminDProgress)
             assertNotEquals(0.0, trackingInfo?.burnProgress)
         }

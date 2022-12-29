@@ -2,7 +2,7 @@ package com.androidandrew.sunscreen.ui.location
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.androidandrew.sunscreen.data.repository.UserRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.util.LocationUtil
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -22,7 +22,7 @@ class LocationViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var vm: LocationViewModel
-    private val mockRepository = mockk<UserRepositoryImpl>(relaxed = true)
+    private val mockRepository = mockk<UserSettingsRepositoryImpl>(relaxed = true)
 
     private fun createViewModel() {
         vm = LocationViewModel(mockRepository, LocationUtil())
