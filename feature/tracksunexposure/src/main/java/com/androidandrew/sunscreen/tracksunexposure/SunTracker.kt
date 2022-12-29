@@ -36,7 +36,7 @@ class SunTracker(private val userTrackingRepository: UserTrackingRepository, pri
 
     fun startTracking() {
         Timber.d("SunTrackerService - startTracking")
-        initializeUserTrackingInfo()
+        initializeUserTracking()
         trackingTimer?.cancel()
         trackingTimer = createTrackingTimer().also {
             it.start()
@@ -47,7 +47,7 @@ class SunTracker(private val userTrackingRepository: UserTrackingRepository, pri
         trackingTimer?.cancel()
     }
 
-    private fun initializeUserTrackingInfo() {
+    private fun initializeUserTracking() {
         trackerScope.launch {
             userTracking = userTrackingRepository.getUserTracking(clock.toDateString())
             if (userTracking == null) {

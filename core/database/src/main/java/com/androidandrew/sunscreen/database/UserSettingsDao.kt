@@ -13,10 +13,10 @@ interface UserSettingsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(setting: UserSettingEntity)
 
-    @Query("SELECT * FROM user_settings_table WHERE id=:id")
+    @Query("SELECT * FROM user_settings_table WHERE id = :id")
     suspend fun getOnce(id: Long): UserSettingEntity?
 
-    @Query("SELECT * FROM user_settings_table WHERE id=:id")
+    @Query("SELECT * FROM user_settings_table WHERE id = :id")
     fun getFlow(id: Long): Flow<UserSettingEntity?>
 
     @Query("DELETE FROM user_settings_table")

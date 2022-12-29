@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user_settings_table")
 data class UserSettingEntity constructor(
     @PrimaryKey(autoGenerate = false)
-    var id: Long,
+    val id: Long,
 
     @ColumnInfo(name="value")
-    var value: String
+    val value: String
 )

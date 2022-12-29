@@ -11,6 +11,7 @@ class FakeData {
         val dateNetworkFormatted = "Sep/25/2022"
         val nextDateNetworkFormatted = "Sep/26/2022"
         val localDate = LocalDate.of(2022, 9, 25)
+        val nextLocalDate = LocalDate.of(2022, 9, 26)
 
         val noon = Instant.parse("2022-09-25T12:00:00.00Z")
         val clockDefaultNoon = Clock.fixed(noon, ZoneId.of("UTC"))
