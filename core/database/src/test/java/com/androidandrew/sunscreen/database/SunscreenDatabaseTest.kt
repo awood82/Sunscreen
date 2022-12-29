@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.database
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sunscreen.database.entity.UserSettingEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -44,13 +45,13 @@ class SunscreenDatabaseTest {
     @Test
     fun insert_thenGet_retrievesSetting() = runTest {
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 1, value = string)
+            UserSettingEntity(id = 1, value = string)
         )
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 2, value = int)
+            UserSettingEntity(id = 2, value = int)
         )
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 3, value = boolean)
+            UserSettingEntity(id = 3, value = boolean)
         )
 
         val stringSetting = databaseHolder.db.userSettingsDao.getOnce(1)
@@ -69,13 +70,13 @@ class SunscreenDatabaseTest {
         val booleanFlow = databaseHolder.db.userSettingsDao.getFlow(3)
 
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 1, value = string)
+            UserSettingEntity(id = 1, value = string)
         )
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 2, value = int)
+            UserSettingEntity(id = 2, value = int)
         )
         databaseHolder.db.userSettingsDao.insert(
-            UserSetting(id = 3, value = boolean)
+            UserSettingEntity(id = 3, value = boolean)
         )
 
         assertEquals(string, stringFlow.first()?.value)

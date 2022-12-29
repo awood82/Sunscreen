@@ -65,7 +65,7 @@ class SunTrackerTest {
         val info = repo.getUserTracking(clock.toDateString())
         assertNotNull(info)
         assertTrue(info!!.vitaminDProgress > 0.0)
-        assertTrue(info.burnProgress > 0.0)
+        assertTrue(info.sunburnProgress > 0.0)
     }
 
     @Test

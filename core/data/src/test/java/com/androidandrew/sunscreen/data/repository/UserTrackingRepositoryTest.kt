@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.database.UserTracking
+import com.androidandrew.sunscreen.model.UserTracking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -29,8 +29,7 @@ class UserTrackingRepositoryTest {
 
     private val date = FakeData.localDate.toString()
     private val userTracking = UserTracking(
-        date = date,
-        burnProgress = 20.0,
+        sunburnProgress = 20.0,
         vitaminDProgress = 500.0
     )
 
@@ -52,7 +51,7 @@ class UserTrackingRepositoryTest {
 
     @Test
     fun insert_thenGet_retrievesValue() = runTest {
-        repository.setUserTracking(userTracking)
+        repository.setUserTracking(date, userTracking)
 
         val actualUserTracking = repository.getUserTracking(date)
 
@@ -63,7 +62,7 @@ class UserTrackingRepositoryTest {
     fun getFlow_thenSet_getsUpdatedFlowValue() = runTest {
         val userTrackingFlow = repository.getUserTrackingFlow(date)
 
-        repository.setUserTracking(userTracking)
+        repository.setUserTracking(date, userTracking)
 
         assertEquals(userTracking, userTrackingFlow.first())
     }

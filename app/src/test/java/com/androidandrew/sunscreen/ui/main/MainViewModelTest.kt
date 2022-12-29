@@ -7,12 +7,12 @@ import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
-import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
+import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
@@ -295,7 +295,7 @@ class MainViewModelTest {
 
         updateTracking(0.0, 0.0)
 
-        coVerify { mockUserTrackingRepository.setUserTracking(any()) }
+        coVerify { mockUserTrackingRepository.setUserTracking(any(), any()) }
     }
 
     @Test
@@ -306,8 +306,8 @@ class MainViewModelTest {
         updateTracking(1.0, 2.0)
 
         val slot = slot<UserTracking>()
-        coVerify { mockUserTrackingRepository.setUserTracking(capture(slot)) }
-        assertEquals(1.0, slot.captured.burnProgress, delta)
+        coVerify { mockUserTrackingRepository.setUserTracking(any(), capture(slot)) }
+        assertEquals(1.0, slot.captured.sunburnProgress, delta)
         assertEquals(2.0, slot.captured.vitaminDProgress, delta)
     }
 
@@ -509,12 +509,12 @@ class MainViewModelTest {
     }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
+        val date = LocalDate.now(clock).toString()
         val userTracking = UserTracking(
-            date = LocalDate.now(clock).toString(),
-            burnProgress = burnProgress,
+            sunburnProgress = burnProgress,
             vitaminDProgress = vitaminDProgress
         )
-        mockUserTrackingRepository.setUserTracking(userTracking)
-        realUserTrackingRepository.setUserTracking(userTracking)
+        mockUserTrackingRepository.setUserTracking(date, userTracking)
+        realUserTrackingRepository.setUserTracking(date, userTracking)
     }
 }

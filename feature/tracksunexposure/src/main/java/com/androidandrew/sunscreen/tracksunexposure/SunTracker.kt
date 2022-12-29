@@ -4,12 +4,12 @@ import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.common.toDateString
 import com.androidandrew.sunscreen.common.toTime
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
-import com.androidandrew.sunscreen.database.UserTracking
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.getUvNow
 import com.androidandrew.sunscreen.domain.UvFactor
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
+import com.androidandrew.sunscreen.model.UserTracking
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,8 +52,7 @@ class SunTracker(private val userTrackingRepository: UserTrackingRepository, pri
             userTracking = userTrackingRepository.getUserTracking(clock.toDateString())
             if (userTracking == null) {
                 userTracking = UserTracking(
-                    date = clock.toDateString(),
-                    burnProgress = 0.0,
+                    sunburnProgress = 0.0,
                     vitaminDProgress = 0.0
                 )
             }
@@ -75,11 +74,10 @@ class SunTracker(private val userTrackingRepository: UserTrackingRepository, pri
 
     suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
         userTracking = UserTracking(
-            date = clock.toDateString(),
-            burnProgress = (userTracking?.burnProgress ?: 0.0).plus(burnDelta),
+            sunburnProgress = (userTracking?.sunburnProgress ?: 0.0).plus(burnDelta),
             vitaminDProgress = (userTracking?.vitaminDProgress ?: 0.0).plus(vitaminDDelta)
         )
-        userTrackingRepository.setUserTracking(userTracking!!)
+        userTrackingRepository.setUserTracking(clock.toDateString(), userTracking!!)
     }
 
     private fun getBurnProgress(): Double {

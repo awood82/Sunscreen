@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.data.repository
 
 import com.androidandrew.sunscreen.database.*
+import com.androidandrew.sunscreen.database.entity.UserSettingEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -56,10 +57,12 @@ class UserSettingsRepositoryImpl(
         writeSetting(IS_ON_SNOW_OR_WATER, isOnSnowOrWater.toString())
     }
 
+
+
     private suspend fun writeSetting(id: Long, value: String) {
-        writeSetting(UserSetting(id, value))
+        writeSetting(UserSettingEntity(id, value))
     }
-    private suspend fun writeSetting(setting: UserSetting) {
+    private suspend fun writeSetting(setting: UserSettingEntity) {
         userSettingsDao.insert(setting)
     }
 
@@ -90,10 +93,10 @@ class UserSettingsRepositoryImpl(
         return readSetting(id)?.value?.toBooleanStrictOrNull()
     }
 
-    private fun readSettingFlow(id: Long): Flow<UserSetting?> {
+    private fun readSettingFlow(id: Long): Flow<UserSettingEntity?> {
         return userSettingsDao.getFlow(id)
     }
-    private suspend fun readSetting(id: Long): UserSetting? {
+    private suspend fun readSetting(id: Long): UserSettingEntity? {
         return userSettingsDao.getOnce(id)
     }
 }

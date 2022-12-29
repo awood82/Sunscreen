@@ -112,8 +112,8 @@ class MainViewModel(
             isTracking = isTracking,
             spfOfSunscreenAppliedToSkin = spf,
             isOnSnowOrWater = isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER,
-            sunburnProgressAmount = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
-            sunburnProgressPercent0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.MAX_SUN_UNITS).toFloat(),
+            sunburnProgressAmount = trackingInfo?.sunburnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
+            sunburnProgressPercent0to1 = (trackingInfo?.sunburnProgress ?: 0.0).div(SunburnCalculator.MAX_SUN_UNITS).toFloat(),
             vitaminDProgressAmount = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
             vitaminDProgressPercent0to1 = (trackingInfo?.vitaminDProgress ?: 0.0).div(
                 VitaminDCalculator.RECOMMENDED_IU).toFloat()
@@ -141,7 +141,7 @@ class MainViewModel(
             true -> sunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
                 currentTime = time,
-                sunUnitsSoFar = trackingSoFar?.burnProgress ?: 0.0,
+                sunUnitsSoFar = trackingSoFar?.sunburnProgress ?: 0.0,
                 skinType = userSettings.skinType ?: HARDCODED_SKIN_TYPE,
                 spf = convertSpfUseCase.forCalculations(spfToDisplay.toIntOrNull()),
                 altitudeInKm = 0,
