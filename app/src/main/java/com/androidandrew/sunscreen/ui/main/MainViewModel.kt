@@ -39,14 +39,16 @@ class MainViewModel(
 
     companion object {
         private const val UNKNOWN_BURN_TIME = -1L
+        private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
     }
 
-    // TODO: Move these into settings repository
-    private val isOnSnowOrWater = MutableStateFlow(false)
-    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
+    private val _isOnSnowOrWater = userRepository.getIsOnSnowOrWaterFlow()
 
     private val _spf = userRepository.getSpfFlow()
     private val _spfToDisplay = MutableStateFlow("")
+
+    // TODO: Move these into settings repository
+    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
 
     private val _isCurrentlyTracking = MutableStateFlow(false)
 
@@ -87,7 +89,7 @@ class MainViewModel(
 //    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     val uvTrackingState: StateFlow<UvTrackingState> = combine(
-        _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, _spfToDisplay, isOnSnowOrWater
+        _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, _spfToDisplay, _isOnSnowOrWater
     ) { isTracking, prediction, trackingInfo, spf, isOnSnowOrWater ->
         Timber.d("Updating UvTrackingState")
         Timber.d("spf = $spf")
@@ -95,7 +97,7 @@ class MainViewModel(
             isTrackingPossible = prediction.isNotEmpty(),
             isTracking = isTracking,
             spfOfSunscreenAppliedToSkin = spf,
-            isOnSnowOrWater = isOnSnowOrWater,
+            isOnSnowOrWater = isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER,
             sunburnProgressAmount = trackingInfo?.burnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
             sunburnProgressPercent0to1 = (trackingInfo?.burnProgress ?: 0.0).div(SunburnCalculator.MAX_SUN_UNITS).toFloat(),
             vitaminDProgressAmount = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
@@ -117,8 +119,8 @@ class MainViewModel(
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
     private val _minutesToBurn = combine(
-        _userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, isOnSnowOrWater, _spfToDisplay)
-    { trackingSoFar, time, forecast, snowOrWater, spf ->
+        _userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, _isOnSnowOrWater, _spfToDisplay)
+    { trackingSoFar, time, forecast, isOnSnowOrWater, spf ->
         when (forecast.isNotEmpty()) {
             true -> sunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
@@ -127,7 +129,7 @@ class MainViewModel(
                 skinType = hardcodedSkinType,
                 spf = convertSpfUseCase.forCalculations(spf.toIntOrNull()),
                 altitudeInKm = 0,
-                isOnSnowOrWater = snowOrWater
+                isOnSnowOrWater = isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER
             ).toLong()
             false -> UNKNOWN_BURN_TIME
         }
@@ -233,7 +235,11 @@ class MainViewModel(
                     }
                 }
             }
-            is UvTrackingEvent.IsOnSnowOrWaterChanged -> isOnSnowOrWater.value = event.isOnSnowOrWater
+            is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                viewModelScope.launch {
+                    userRepository.setIsOnSnowOrWater(event.isOnSnowOrWater)
+                }
+            }
         }
 
         forwardTrackingEventToServiceController(event)
@@ -270,7 +276,7 @@ class MainViewModel(
                         uvPrediction = _uvPrediction.value,
                         skinType = hardcodedSkinType,
                         spf = convertSpfUseCase.forCalculations(_spf.first()),
-                        isOnSnowOrWater = isOnSnowOrWater.value
+                        isOnSnowOrWater = _isOnSnowOrWater.first() ?: DEFAULT_IS_ON_SNOW_OR_WATER
                     )
                     sunTrackerServiceController.bind()
                     _isCurrentlyTracking.value = true

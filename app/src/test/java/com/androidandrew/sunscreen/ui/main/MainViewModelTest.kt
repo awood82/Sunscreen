@@ -385,6 +385,15 @@ class MainViewModelTest {
     }
 
     @Test
+    fun onIsOnSnowOrWaterChanged_savesToRepo() = runTest {
+        createViewModel(useMockRepo = true)
+
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
+
+        coVerify(exactly = 1) { mockRepository.setIsOnSnowOrWater(true) }
+    }
+
+    @Test
     fun afterSearch_ifUserAndUvForecastExist_enablesStartTracking() = runTest {
         createViewModel()
 
