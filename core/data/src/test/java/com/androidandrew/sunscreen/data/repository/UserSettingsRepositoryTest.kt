@@ -26,6 +26,7 @@ class UserSettingsRepositoryTest {
     private lateinit var databaseHolder: FakeDatabaseWrapper
 
     private val location = "12345"
+    private val skinType = 6
     private val spf = 15
     private val isOnSnowOrWater = true
 
@@ -48,14 +49,17 @@ class UserSettingsRepositoryTest {
     @Test
     fun insert_thenGet_retrievesValue() = runTest {
         repository.setLocation(location)
+        repository.setSkinType(skinType)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
         val actualLocation = repository.getLocation()
+        val actualSkinType = repository.getSkinType()
         val actualSpf = repository.getSpf()
         val actualIsOnSnowOrWater = repository.getIsOnSnowOrWater()
 
         assertEquals(location, actualLocation)
+        assertEquals(skinType, actualSkinType)
         assertEquals(spf, actualSpf)
         assertEquals(isOnSnowOrWater, actualIsOnSnowOrWater)
     }
@@ -63,14 +67,17 @@ class UserSettingsRepositoryTest {
     @Test
     fun getFlow_thenSet_getsUpdatedFlowValue() = runTest {
         val locationFlow = repository.getLocationFlow()
+        val skinTypeFlow = repository.getSkinTypeFlow()
         val spfFlow = repository.getSpfFlow()
         val isOnSnowOrWaterFlow = repository.getIsOnSnowOrWaterFlow()
 
         repository.setLocation(location)
+        repository.setSkinType(skinType)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
         assertEquals(location, locationFlow.first())
+        assertEquals(skinType, skinTypeFlow.first())
         assertEquals(spf, spfFlow.first())
         assertEquals(isOnSnowOrWater, isOnSnowOrWaterFlow.first())
     }

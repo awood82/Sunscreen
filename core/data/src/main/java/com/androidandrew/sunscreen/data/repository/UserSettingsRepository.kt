@@ -7,6 +7,10 @@ interface UserSettingsRepository {
     suspend fun getLocation(): String?
     suspend fun setLocation(location: String)
 
+    fun getSkinTypeFlow(): Flow<Int?>
+    suspend fun getSkinType(): Int?
+    suspend fun setSkinType(skinType: Int)
+
     fun getSpfFlow(): Flow<Int?>
     suspend fun getSpf(): Int?
     suspend fun setSpf(spf: Int)

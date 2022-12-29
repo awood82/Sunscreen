@@ -11,6 +11,7 @@ class UserSettingsRepositoryImpl(
     companion object {
         //        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
         const val LOCATION = 1L
+        const val SKIN_TYPE = 2L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
     }
@@ -23,6 +24,16 @@ class UserSettingsRepositoryImpl(
     }
     override suspend fun setLocation(location: String) {
         writeSetting(LOCATION, location)
+    }
+
+    override fun getSkinTypeFlow(): Flow<Int?> {
+        return readIntSettingFlow(SKIN_TYPE)
+    }
+    override suspend fun getSkinType(): Int? {
+        return readIntSetting(SKIN_TYPE)
+    }
+    override suspend fun setSkinType(skinType: Int) {
+        writeSetting(SKIN_TYPE, skinType.toString())
     }
 
     override fun getSpfFlow(): Flow<Int?> {

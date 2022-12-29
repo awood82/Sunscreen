@@ -20,6 +20,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
+import com.androidandrew.sunscreen.model.UserSettings
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -42,26 +43,37 @@ class MainViewModel(
     companion object {
         private const val UNKNOWN_BURN_TIME = -1L
         private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
+        private const val HARDCODED_SKIN_TYPE = 2 // TODO: Remove hardcoded value
     }
 
+    // User Settings
+    private val _location = userSettingsRepo.getLocationFlow()
+    private val _skinType = userSettingsRepo.getSkinTypeFlow()
     private val _isOnSnowOrWater = userSettingsRepo.getIsOnSnowOrWaterFlow()
-
     private val _spf = userSettingsRepo.getSpfFlow()
     private val _spfToDisplay = MutableStateFlow("")
+    private val _userSettings = combine(
+        _location, _skinType, _isOnSnowOrWater, _spf
+    ) { location, skinType, isOnSnowOrWater, spf ->
+        UserSettings(
+            location = location,
+            skinType = skinType,
+            isOnSnowOrWater = isOnSnowOrWater,
+            spf = spf
+        )
+    }
 
-    // TODO: Move these into settings repository
-    private val hardcodedSkinType = 2 // TODO: Remove hardcoded value
-
+    // User Tracking
     private val _isCurrentlyTracking = MutableStateFlow(false)
 
+    // Time Tracking
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
     private var networkJob: Job? = null
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
-
-    private val _hasSetupRun = userSettingsRepo.getLocationFlow().map {
+    private val _hasSetupRun = _location.map {
         Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
         !it.isNullOrEmpty()
     }
@@ -108,7 +120,9 @@ class MainViewModel(
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
-    val uvChartUiState: StateFlow<UvChartUiState> = combine(_uvPrediction, _lastLocalTimeUsed) { prediction, time ->
+    val uvChartUiState: StateFlow<UvChartUiState> = combine(
+        _uvPrediction, _lastLocalTimeUsed
+    ) { prediction, time ->
         when (prediction.isEmpty()) {
             true -> UvChartUiState.NoData
             false -> {
@@ -121,17 +135,17 @@ class MainViewModel(
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
 
     private val _minutesToBurn = combine(
-        _userTrackingInfo, _lastLocalTimeUsed, _uvPrediction, _isOnSnowOrWater, _spfToDisplay)
-    { trackingSoFar, time, forecast, isOnSnowOrWater, spf ->
+        _userTrackingInfo, _userSettings, _lastLocalTimeUsed, _uvPrediction, _spfToDisplay
+    ) { trackingSoFar, userSettings, time, forecast, spfToDisplay ->
         when (forecast.isNotEmpty()) {
             true -> sunburnCalculator.computeMaxTime(
                 uvPrediction = forecast,
                 currentTime = time,
                 sunUnitsSoFar = trackingSoFar?.burnProgress ?: 0.0,
-                skinType = hardcodedSkinType,
-                spf = convertSpfUseCase.forCalculations(spf.toIntOrNull()),
+                skinType = userSettings.skinType ?: HARDCODED_SKIN_TYPE,
+                spf = convertSpfUseCase.forCalculations(spfToDisplay.toIntOrNull()),
                 altitudeInKm = 0,
-                isOnSnowOrWater = isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER
+                isOnSnowOrWater = userSettings.isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER
             ).toLong()
             false -> UNKNOWN_BURN_TIME
         }
@@ -177,7 +191,7 @@ class MainViewModel(
 //    }
 
     val networkRefresher = viewModelScope.launch {
-        userSettingsRepo.getLocationFlow()
+        _location
             .distinctUntilChanged()
             .onEach { location ->
                 location?.let {
@@ -276,7 +290,7 @@ class MainViewModel(
                     /* TODO: Could have service read these settings as a flow from the repository */
                     sunTrackerServiceController.setSettings(
                         uvPrediction = _uvPrediction.value,
-                        skinType = hardcodedSkinType,
+                        skinType = HARDCODED_SKIN_TYPE,
                         spf = convertSpfUseCase.forCalculations(_spf.first()),
                         isOnSnowOrWater = _isOnSnowOrWater.first() ?: DEFAULT_IS_ON_SNOW_OR_WATER
                     )
