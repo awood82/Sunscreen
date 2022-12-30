@@ -43,4 +43,6 @@ dependencies {
 
     // Networking
     implementation project(":core:network")
+
+    implementation project(":core:model")
 }

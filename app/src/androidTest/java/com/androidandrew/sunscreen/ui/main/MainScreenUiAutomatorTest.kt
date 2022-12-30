@@ -75,7 +75,7 @@ class MainScreenUiAutomatorTest {
         runBlocking {
             val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
             assertNotEquals(0.0, trackingInfo?.vitaminDProgress)
-            assertNotEquals(0.0, trackingInfo?.burnProgress)
+            assertNotEquals(0.0, trackingInfo?.sunburnProgress)
         }
 
 //        assertNotEquals(progressMid, progressEnd)

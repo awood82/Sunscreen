@@ -6,6 +6,7 @@ import android.app.Service
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.AppDatabase
+import com.androidandrew.sunscreen.database.HourlyForecastDao
 import com.androidandrew.sunscreen.database.UserSettingsDao
 import com.androidandrew.sunscreen.database.UserTrackingDao
 import com.androidandrew.sunscreen.domain.di.domainModule
@@ -44,6 +45,7 @@ class CheckModulesTest : KoinTest {
         single { mockk<AppDatabase>(relaxed = true) }
         single { mockk<UserSettingsDao>(relaxed = true) }
         single { mockk<UserTrackingDao>(relaxed = true) }
+        single { mockk<HourlyForecastDao>(relaxed = true) }
     }
 
     private val context = mockk<Application>(relaxed = true)

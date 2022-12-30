@@ -4,13 +4,13 @@ import androidx.lifecycle.*
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
+import com.androidandrew.sunscreen.data.repository.asExternalModel
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPrediction
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
-import com.androidandrew.sunscreen.model.uv.asUvPrediction
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
@@ -315,7 +315,7 @@ class MainViewModel(
         networkJob = viewModelScope.launch {
             try {
                 val response = uvService.getUvForecast(zipCode)
-                _uvPrediction.value = response.asUvPrediction().trim()
+                _uvPrediction.value = response.asExternalModel().trim()
             } catch (e: Exception) {
 //                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
                 _snackbarMessage.postValue(e.message)

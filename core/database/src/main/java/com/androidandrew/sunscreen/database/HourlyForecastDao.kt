@@ -16,12 +16,12 @@ interface HourlyForecastDao {
     @Query("SELECT * FROM hourly_forecast_table WHERE zip = :zip AND date =" +
             " (SELECT MIN(date) FROM hourly_forecast_table WHERE zip = :zip AND date >= :date)" +
             "ORDER BY date DESC, `order` ASC")
-    suspend fun getOnce(zip: String, date: String): List<HourlyForecastEntity?>
+    suspend fun getOnce(zip: String, date: String): List<HourlyForecastEntity>
 
     @Query("SELECT * FROM hourly_forecast_table WHERE zip = :zip AND date =" +
             " (SELECT MIN(date) FROM hourly_forecast_table WHERE zip = :zip AND date >= :date)" +
             "ORDER BY date DESC, `order` ASC")
-    fun getFlow(zip: String, date: String): Flow<List<HourlyForecastEntity?>>
+    fun getFlow(zip: String, date: String): Flow<List<HourlyForecastEntity>>
 
     @Query("DELETE FROM hourly_forecast_table")
     suspend fun deleteAll()

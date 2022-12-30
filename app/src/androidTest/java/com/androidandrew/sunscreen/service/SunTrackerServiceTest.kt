@@ -35,7 +35,7 @@ class SunTrackerServiceTest {
         runBlocking {
             val info = repo.getUserTracking(fakeDate)
             assertNull(info?.vitaminDProgress)
-            assertNull(info?.burnProgress)
+            assertNull(info?.sunburnProgress)
         }
 
         appContext.startService(sunTrackerIntent)
@@ -44,7 +44,7 @@ class SunTrackerServiceTest {
             delay(1_000)
             val info = repo.getUserTracking(fakeDate)
             assertNotEquals(0.0, info?.vitaminDProgress)
-            assertNotEquals(0.0, info?.burnProgress)
+            assertNotEquals(0.0, info?.sunburnProgress)
         }
     }
 }

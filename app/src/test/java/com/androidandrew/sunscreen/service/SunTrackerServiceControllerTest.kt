@@ -3,8 +3,8 @@ package com.androidandrew.sunscreen.service
 import android.content.Context
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.androidandrew.sharedtest.model.asModel
 import com.androidandrew.sharedtest.network.FakeEpaService
-import com.androidandrew.sunscreen.model.uv.asUvPredictionPoint
 import com.androidandrew.sunscreen.tracksunexposure.SunTrackerSettings
 import io.mockk.mockk
 import io.mockk.verify
@@ -55,7 +55,7 @@ class SunTrackerServiceControllerTest {
     private fun bindWithFakeData() {
         val fakeData = SunTrackerSettings(
             uvPrediction = FakeEpaService.sampleDailyUvForecast.map {
-                it.asUvPredictionPoint()
+                it.asModel()
             },
             hardcodedSkinType = 2,
             spf = 1,

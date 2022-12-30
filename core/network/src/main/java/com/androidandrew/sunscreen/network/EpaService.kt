@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.network
 
+import com.androidandrew.sunscreen.network.model.DailyUvIndexForecast
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
