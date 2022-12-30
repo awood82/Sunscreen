@@ -36,14 +36,12 @@ class HourlyForecastRepositoryImpl(
     }
 
     private suspend fun refreshNetwork(zipCode: String) {
-        android.util.Log.i("HourlyForecastRepositoryImpl", "Refreshing zip $zipCode")
+        android.util.Log.i("HourlyForecastRepositoryImpl", "Refreshing from network for zip $zipCode")
         try {
             val response = uvService.getUvForecast(zipCode)
             hourlyForecastDao.insert(response.asEntity())
         } catch (e: Exception) {
             android.util.Log.e("HourlyForecastRepositoryImpl", "Exception: $e")
-//                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
-//            _snackbarMessage.postValue(e.message)
         }
     }
 }

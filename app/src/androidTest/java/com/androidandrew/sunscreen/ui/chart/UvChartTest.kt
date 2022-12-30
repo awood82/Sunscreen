@@ -56,6 +56,5 @@ class UvChartTest {
         }
 
         composeTestRule.onNodeWithTag("UvChart").assertIsDisplayed()
-        // TODO: Screenshot test would show data
     }
 }

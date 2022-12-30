@@ -2,13 +2,11 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.common.RepeatingTimer
+import com.androidandrew.sunscreen.data.repository.HourlyForecastRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
-import com.androidandrew.sunscreen.data.repository.asExternalModel
-import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.UvPrediction
-import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.toChartData
@@ -21,7 +19,6 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -32,8 +29,10 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
-    private val uvService: EpaService, private val userSettingsRepo: UserSettingsRepository,
-    userTrackingRepo: UserTrackingRepository, private val convertSpfUseCase: ConvertSpfUseCase,
+    private val hourlyForecastRepository: HourlyForecastRepository,
+    private val userSettingsRepo: UserSettingsRepository,
+    userTrackingRepo: UserTrackingRepository,
+    private val convertSpfUseCase: ConvertSpfUseCase,
     private val sunburnCalculator: SunburnCalculator,
     private val locationUtil: LocationUtil,
     private val clock: Clock,
@@ -70,7 +69,7 @@ class MainViewModel(
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
-    private var networkJob: Job? = null
+    // Forecast
     private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
 
     private val _hasSetupRun = _location.map {
@@ -190,14 +189,14 @@ class MainViewModel(
 //            .collect()
 //    }
 
-    val networkRefresher = viewModelScope.launch {
+    val forecastRefresher = viewModelScope.launch {
         _location
             .distinctUntilChanged()
             .onEach { location ->
                 location?.let {
-                    Timber.d("network refresher is refreshing for $location")
+                    Timber.d("forecastRefresher is refreshing for $location")
                     _locationBarState.value = LocationBarState(location)
-                    refreshNetwork(location)
+                    refreshForecast(location)
                 }
             }
             .collect()
@@ -309,16 +308,18 @@ class MainViewModel(
         }
     }
 
-    private fun refreshNetwork(zipCode: String) {
-        networkJob?.cancel()
-        Timber.i("Refreshing zip $zipCode")
-        networkJob = viewModelScope.launch {
-            try {
-                val response = uvService.getUvForecast(zipCode)
-                _uvPrediction.value = response.asExternalModel().trim()
-            } catch (e: Exception) {
-//                uvPrediction = null // TODO: Verify this: No need to set uvPrediction to null. Keep the existing data at least.
-                _snackbarMessage.postValue(e.message)
+    private fun refreshForecast(zipCode: String) {
+        Timber.i("Refreshing forecast $zipCode")
+
+        viewModelScope.launch {
+            hourlyForecastRepository.getForecastFlow(
+                zipCode = zipCode,
+                date = LocalDate.now(clock)
+            ).collect { forecast ->
+                _uvPrediction.value = forecast
+                if (forecast.isEmpty()) {
+                    _snackbarMessage.postValue("Network error") // TODO: Handle network errors
+                }
             }
         }
     }

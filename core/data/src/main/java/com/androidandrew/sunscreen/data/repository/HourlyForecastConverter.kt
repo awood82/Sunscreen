@@ -10,19 +10,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 // Network to Model isn't necessary since Network data flows to DB and then to the UI as Model
-// TODO: Remove it from MainViewModel once forecast data is stored in the Repo/DB
-fun DailyUvIndexForecast.asExternalModel(): UvPrediction {
-    return this.sortedBy { it.order }.map {
-        it.asModel()
-    }
-}
-
-fun HourlyUvIndexForecast.asModel(): UvPredictionPoint {
-    return UvPredictionPoint(
-        time = dateTimeString.asLocalTime(),
-        uvIndex = this.uv.toDouble()
-    )
-}
 
 // Network to DB
 fun DailyUvIndexForecast.asEntity(): List<HourlyForecastEntity> {

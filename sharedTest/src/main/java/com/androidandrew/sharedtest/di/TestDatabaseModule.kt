@@ -26,4 +26,9 @@ val testDatabaseModule = module {
         val database = get<AppDatabase>()
         database.userSettingsDao
     }
+
+    single {
+        val database = get<AppDatabase>()
+        database.hourlyForecastDao
+    }
 }

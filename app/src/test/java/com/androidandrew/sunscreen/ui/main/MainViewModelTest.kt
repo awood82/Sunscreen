@@ -5,11 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
-import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
+import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.network.EpaService
-import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
-import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.UserTracking
@@ -52,6 +49,7 @@ class MainViewModelTest {
     private val fakeUvService = FakeEpaService
     private val mockUvService = mockk<EpaService>()
     private val fakeDatabaseHolder = FakeDatabaseWrapper()
+    private lateinit var realHourlyForecastRepository: HourlyForecastRepository
     private lateinit var realUserSettingsRepository: UserSettingsRepository
     private val mockUserSettingsRepository = mockk<UserSettingsRepository>(relaxed = true)
     private lateinit var realUserTrackingRepository: UserTrackingRepository
@@ -64,8 +62,14 @@ class MainViewModelTest {
     private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepos: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
         fakeDatabaseHolder.clearDatabase()
+        val networkToUse = when (useMockNetwork) {
+            true -> mockUvService
+            false -> fakeUvService
+        }
         realUserTrackingRepository = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
         realUserSettingsRepository = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        realHourlyForecastRepository = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, networkToUse)
+
         coEvery { mockUserSettingsRepository.getSpf() } returns null
         if (initDb) {
             realUserSettingsRepository.setLocation(FakeData.zip)
@@ -73,10 +77,7 @@ class MainViewModelTest {
         } else {
             coEvery { mockUserSettingsRepository.getLocation() } returns ""
         }
-        val networkToUse = when (useMockNetwork) {
-            true -> mockUvService
-            false -> fakeUvService
-        }
+
         val userTrackingRepositoryToUse = when (useMockRepos) {
             true -> mockUserTrackingRepository
             false -> realUserTrackingRepository
@@ -85,9 +86,10 @@ class MainViewModelTest {
             true -> mockUserSettingsRepository
             false -> realUserSettingsRepository
         }
+        // no mockHourlyForecastRepository needed. Tests use useMockRepos for testing user tracking and settings only
 
         vm = MainViewModel(
-            uvService = networkToUse,
+            hourlyForecastRepository = realHourlyForecastRepository,
             userSettingsRepo = userSettingsRepositoryToUse,
             userTrackingRepo = userTrackingRepositoryToUse,
             convertSpfUseCase = spfUseCase,
