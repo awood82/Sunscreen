@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 interface HourlyForecastRepository {
-    fun getForecastFlow(zip: String, date: LocalDate): Flow<List<UvPredictionPoint>>
-    suspend fun getForecast(zip: String, date: LocalDate): List<UvPredictionPoint>
+    fun getForecastFlow(zipCode: String, date: LocalDate): Flow<List<UvPredictionPoint>>
+    suspend fun getForecast(zipCode: String, date: LocalDate): List<UvPredictionPoint>
     suspend fun setForecast(forecast: DailyUvIndexForecast)
 }

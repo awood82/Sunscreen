@@ -13,8 +13,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.*
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.*
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.time.LocalTime
@@ -49,6 +48,23 @@ class HourlyForecastDaoTest {
         runBlocking {
             databaseHolder.tearDown()
         }
+    }
+
+    @Test
+    fun noForecasts_thenGet_returnsNoForecasts() = runTest {
+
+        val actualForecast = databaseHolder.db.hourlyForecastDao.getOnce(zip = locationOne, date = today)
+
+        assertTrue(actualForecast.isEmpty())
+    }
+
+    @Test
+    fun noForecasts_getFlow_returnsNoForecasts() = runTest {
+
+        val forecastFlow = databaseHolder.db.hourlyForecastDao.getFlow(zip = locationOne, date = today)
+
+        val actualForecast = forecastFlow.first()
+        assertTrue(actualForecast.isEmpty())
     }
 
     @Test
