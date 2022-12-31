@@ -6,7 +6,6 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.*
-import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
@@ -49,7 +48,6 @@ class MainViewModelTest {
     private val sunburnCalculator = SunburnCalculator(spfUseCase)
     private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
-    private val mockUvService = mockk<EpaService>()
     private val fakeDatabaseHolder = FakeDatabaseWrapper()
     private lateinit var hourlyForecastRepo: HourlyForecastRepository
     private lateinit var userSettingsRepo: UserSettingsRepository
@@ -65,6 +63,7 @@ class MainViewModelTest {
         }
         userTrackingRepo = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
         userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        hourlyForecastRepo = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, fakeUvService)
     }
 
     @After
@@ -75,14 +74,8 @@ class MainViewModelTest {
         }
     }
 
-    private suspend fun createViewModel(useMockNetwork: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
+    private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
-
-        val networkToUse = when (useMockNetwork) {
-            true -> mockUvService
-            false -> fakeUvService
-        }
-        hourlyForecastRepo = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, networkToUse)
 
         vm = MainViewModel(
             getLocalForecastForToday = GetLocalForecastForTodayUseCase(
@@ -219,57 +212,65 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_isLessThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("1234")
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("1234") }
+        val forecast = hourlyForecastRepo.getForecastFlow("1234", getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_isMoreThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("123456")
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("123456") }
+        val forecast = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_is5Digits_refreshesNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("12345")
 
-        coVerify(exactly=1) { mockUvService.getUvForecast("12345") }
+        val forecast = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
+        assertTrue(forecast.isNotEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPrefix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("ABC45")
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("ABC45") }
+        val forecast = hourlyForecastRepo.getForecastFlow("ABC45", getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPostfix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("123DE")
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("123DE") }
+        val forecast = hourlyForecastRepo.getForecastFlow("123DE", getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_has5Digits_andSomeLetters_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         searchZip("12345ABC")
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("12345") }
-        coVerify(exactly=0) { mockUvService.getUvForecast("12345ABC") }
+        val forecast1 = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
+        val forecast2 = hourlyForecastRepo.getForecastFlow("12345ABC", getDate()).first()
+
+        assertTrue(forecast1.isEmpty())
+        assertTrue(forecast2.isEmpty())
     }
 
     @Test
@@ -278,7 +279,7 @@ class MainViewModelTest {
 
         updateTracking(0.0, 0.0)
 
-        val tracking = userTrackingRepo.getUserTrackingFlow(getDate()).first()!!
+        val tracking = userTrackingRepo.getUserTrackingFlow(getDate().toString()).first()!!
         assertEquals(0.0, tracking.sunburnProgress, delta)
         assertEquals(0.0, tracking.vitaminDProgress, delta)
     }
@@ -289,7 +290,8 @@ class MainViewModelTest {
 
         updateTracking(1.0, 2.0)
 
-        val tracking = userTrackingRepo.getUserTrackingFlow(getDate()).first()!!
+        val date = getDate().toString()
+        val tracking = userTrackingRepo.getUserTrackingFlow(date).first()!!
         assertEquals(1.0, tracking.sunburnProgress, delta)
         assertEquals(2.0, tracking.vitaminDProgress, delta)
     }
@@ -446,12 +448,15 @@ class MainViewModelTest {
 
     @Test
     fun init_ifLocationExistsInRepo_queriesRepoOnce() = runTest {
+        fakeUvService.networkRequestCount = 0
         setLocation(FakeData.zip)
-        createViewModel(useMockNetwork = true)
+        createViewModel()
 
         triggerLocationUpdate()
 
-        coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
+        val forecast = hourlyForecastRepo.getForecastFlow(FakeData.zip, getDate()).first()
+        assertTrue(forecast.isNotEmpty())
+        assertEquals(1, fakeUvService.networkRequestCount)
     }
 
     @Test
@@ -501,7 +506,7 @@ class MainViewModelTest {
 
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
-        val date = getDate()
+        val date = getDate().toString()
         val userTracking = UserTracking(
             sunburnProgress = burnProgress,
             vitaminDProgress = vitaminDProgress
@@ -509,8 +514,8 @@ class MainViewModelTest {
         userTrackingRepo.setUserTracking(date, userTracking)
     }
 
-    private fun getDate(): String {
-        return LocalDate.now(clock).toString()
+    private fun getDate(): LocalDate {
+        return LocalDate.now(clock)
     }
 
     private suspend fun setLocation(location: String) {

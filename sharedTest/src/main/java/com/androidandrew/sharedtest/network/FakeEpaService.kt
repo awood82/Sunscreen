@@ -36,8 +36,10 @@ object FakeEpaService : EpaService {
 
     var forecast: DailyUvIndexForecast = sampleDailyUvForecast
     var exception: Exception? = null
+    var networkRequestCount = 0
 
     override suspend fun getUvForecast(zipCode: String): DailyUvIndexForecast {
+        networkRequestCount++
         when (exception) {
             null -> return forecast
             else -> throw(exception!!)
