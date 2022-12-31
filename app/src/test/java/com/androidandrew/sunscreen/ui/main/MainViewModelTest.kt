@@ -56,7 +56,6 @@ class MainViewModelTest {
     private lateinit var userTrackingRepo: UserTrackingRepository
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
-    private var initDb = false
     private val delta = 0.1
 
     @Before
@@ -85,10 +84,6 @@ class MainViewModelTest {
         }
         hourlyForecastRepo = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, networkToUse)
 
-        if (initDb) {
-            userSettingsRepo.setLocation(FakeData.zip)
-        }
-
         vm = MainViewModel(
             getLocalForecastForToday = GetLocalForecastForTodayUseCase(
                 userSettingsRepository = userSettingsRepo,
@@ -103,16 +98,6 @@ class MainViewModelTest {
             clock = clock,
             sunTrackerServiceController = serviceController
         )
-    }
-
-    private fun searchZip(zip: String) {
-        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
-        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
-        triggerLocationUpdate()
-    }
-
-    private fun setLocationToRefreshNetworkOnInit() {
-        initDb = true
     }
 
     @Test
@@ -223,10 +208,9 @@ class MainViewModelTest {
         assertEquals("Network error", vm.snackbarMessage.getOrAwaitValue())
     }
 
-    // TODO: onInit tests not working. Hang in database get()
     @Test
     fun networkError_onInit_triggersSnackbar() = runTest {
-        setLocationToRefreshNetworkOnInit()
+        setLocation(FakeData.zip)
         fakeUvService.exception = IOException("Network error")
         createViewModel()
 
@@ -312,7 +296,7 @@ class MainViewModelTest {
 
     @Test
     fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
-        initDb = true
+        setLocation(FakeData.zip)
         createViewModel()
 
         updateTracking(10.0, 20.0)
@@ -531,6 +515,12 @@ class MainViewModelTest {
 
     private suspend fun setLocation(location: String) {
         userSettingsRepo.setLocation(location)
+    }
+
+    private fun searchZip(zip: String) {
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
+        triggerLocationUpdate()
     }
 
     private fun triggerLocationUpdate() {
