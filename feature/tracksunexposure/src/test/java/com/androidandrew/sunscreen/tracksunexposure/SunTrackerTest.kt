@@ -4,7 +4,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.model.FakeUvPredictions
 import com.androidandrew.sharedtest.util.FakeData
-import com.androidandrew.sunscreen.common.toDateString
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.testing.MainDispatcherRule

@@ -1,8 +1,6 @@
 package com.androidandrew.sunscreen.tracksunexposure
 
 import com.androidandrew.sunscreen.common.RepeatingTimer
-import com.androidandrew.sunscreen.common.toDateString
-import com.androidandrew.sunscreen.common.toTime
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.model.getUvNow

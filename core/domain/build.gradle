@@ -35,7 +35,13 @@ dependencies {
     // Koin for dependency injection
     implementation "io.insert-koin:koin-android:$koinAndroidVersion"
 
+    // Logging
+    implementation "com.jakewharton.timber:timber:$timberVersion"
+
+    implementation project(":core:data")
     implementation project(":core:model")
 
     testImplementation project(":core:testing")
+
+    testImplementation project(":sharedTest")
 }
