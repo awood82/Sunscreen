@@ -18,7 +18,6 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
-import com.androidandrew.sunscreen.model.UvPrediction
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -261,57 +260,23 @@ class MainViewModel(
                 }
             }
         }
-
-        forwardTrackingEventToServiceController(event)
-    }
-
-    private fun forwardTrackingEventToServiceController(event: UvTrackingEvent) {
-        if (_isCurrentlyTracking.value) {
-            when (event) {
-                is UvTrackingEvent.SpfChanged -> {
-                    event.spf.toIntOrNull()?.let {
-                        sunTrackerServiceController.setSpf(it)
-                    }
-                }
-                is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
-                    val isOn = event.isOnSnowOrWater
-                    sunTrackerServiceController.setIsOnSnowOrWater(isOn)
-                }
-                else -> { /* Do nothing */ }
-            }
-        }
     }
 
     fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
             true -> {
-                sunTrackerServiceController.unbind()
                 sunTrackerServiceController.stop()
                 _isCurrentlyTracking.value = false
             }
             else -> {
                 viewModelScope.launch {
-                    /* TODO: Could have service read these settings as a flow from the repository */
-                    sunTrackerServiceController.setSettings(
-                        uvPrediction = _uvPrediction.first(),
-                        skinType = HARDCODED_SKIN_TYPE,
-                        spf = convertSpfUseCase.forCalculations(_spf.first()),
-                        isOnSnowOrWater = _isOnSnowOrWater.first() ?: DEFAULT_IS_ON_SNOW_OR_WATER
-                    )
-                    sunTrackerServiceController.bind()
+                    sunTrackerServiceController.start()
                     _isCurrentlyTracking.value = true
                 }
             }
         }
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        if (_isCurrentlyTracking.value) {
-            // Start the service so it continues to run while the app is in the background
-            sunTrackerServiceController.start()
-        }
-    }
 /*
     private fun refreshForecast(zipCode: String) {
         Timber.i("Refreshing forecast $zipCode")

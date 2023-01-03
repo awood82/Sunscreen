@@ -15,43 +15,56 @@ class UserSettingsRepositoryImpl(
         const val SKIN_TYPE = 2L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
+
+        private const val DEFAULT_LOCATION = ""
+        private const val MY_HARDCODED_SKIN_TYPE = 2 // TODO: Remove this hardcoded value b/c skin type must be set before tracking is possible. The others can use defaults.
+        private const val NO_SUNSCREEN = 0
+        private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
     }
 
-    override fun getLocationFlow(): Flow<String?> {
-        return readStringSettingFlow(LOCATION)
+    override fun getLocationFlow(): Flow<String> {
+        return readStringSettingFlow(LOCATION).map {
+            it ?: DEFAULT_LOCATION
+        }
     }
-    override suspend fun getLocation(): String? {
-        return readStringSetting(LOCATION)
+    override suspend fun getLocation(): String {
+        return readStringSetting(LOCATION) ?: DEFAULT_LOCATION
     }
     override suspend fun setLocation(location: String) {
         writeSetting(LOCATION, location)
     }
 
     override fun getSkinTypeFlow(): Flow<Int?> {
-        return readIntSettingFlow(SKIN_TYPE)
+        return readIntSettingFlow(SKIN_TYPE).map {
+            it ?: MY_HARDCODED_SKIN_TYPE
+        }
     }
-    override suspend fun getSkinType(): Int? {
-        return readIntSetting(SKIN_TYPE)
+    override suspend fun getSkinType(): Int {
+        return readIntSetting(SKIN_TYPE) ?: MY_HARDCODED_SKIN_TYPE
     }
     override suspend fun setSkinType(skinType: Int) {
         writeSetting(SKIN_TYPE, skinType.toString())
     }
 
-    override fun getSpfFlow(): Flow<Int?> {
-        return readIntSettingFlow(SPF)
+    override fun getSpfFlow(): Flow<Int> {
+        return readIntSettingFlow(SPF).map {
+            it ?: NO_SUNSCREEN
+        }
     }
-    override suspend fun getSpf(): Int? {
-        return readIntSetting(SPF)
+    override suspend fun getSpf(): Int {
+        return readIntSetting(SPF) ?: NO_SUNSCREEN
     }
     override suspend fun setSpf(spf: Int) {
         writeSetting(SPF, spf.toString())
     }
 
-    override fun getIsOnSnowOrWaterFlow(): Flow<Boolean?> {
-        return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER)
+    override fun getIsOnSnowOrWaterFlow(): Flow<Boolean> {
+        return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER).map {
+            it ?: false
+        }
     }
-    override suspend fun getIsOnSnowOrWater(): Boolean? {
-        return readBooleanSetting(IS_ON_SNOW_OR_WATER)
+    override suspend fun getIsOnSnowOrWater(): Boolean {
+        return readBooleanSetting(IS_ON_SNOW_OR_WATER) ?: DEFAULT_IS_ON_SNOW_OR_WATER
     }
     override suspend fun setIsOnSnowOrWater(isOnSnowOrWater: Boolean) {
         writeSetting(IS_ON_SNOW_OR_WATER, isOnSnowOrWater.toString())

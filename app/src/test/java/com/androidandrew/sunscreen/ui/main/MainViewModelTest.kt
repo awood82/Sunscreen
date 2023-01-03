@@ -212,65 +212,70 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_isLessThan5Chars_doesNotRefreshNetwork() = runTest {
+        val tooShortZip = "1234"
         createViewModel()
 
-        searchZip("1234")
+        searchZip(tooShortZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow("1234", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(tooShortZip, getDate()).first()
         assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_isMoreThan5Chars_doesNotRefreshNetwork() = runTest {
+        val tooLongZip = "123456"
         createViewModel()
 
-        searchZip("123456")
+        searchZip(tooLongZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(tooLongZip, getDate()).first()
         assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_is5Digits_refreshesNetwork() = runTest {
+        val justRightZip = "12345"
         createViewModel()
 
-        searchZip("12345")
+        searchZip(justRightZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(justRightZip, getDate()).first()
         assertTrue(forecast.isNotEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPrefix_doesNotRefreshNetwork() = runTest {
+        val alphaZip = "ABC45"
         createViewModel()
 
-        searchZip("ABC45")
+        searchZip(alphaZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow("ABC45", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
         assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPostfix_doesNotRefreshNetwork() = runTest {
+        val alphaZip = "123DE"
         createViewModel()
 
-        searchZip("123DE")
+        searchZip(alphaZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow("123DE", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
         assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_has5Digits_andSomeLetters_doesNotRefreshNetwork() = runTest {
+        val longAlphaZip = "12345ABC"
+        setLocation(FakeData.zip)
         createViewModel()
 
-        searchZip("12345ABC")
+        searchZip(longAlphaZip)
 
-        val forecast1 = hourlyForecastRepo.getForecastFlow("12345", getDate()).first()
-        val forecast2 = hourlyForecastRepo.getForecastFlow("12345ABC", getDate()).first()
+        val forecast = hourlyForecastRepo.getForecastFlow(longAlphaZip, getDate()).first()
 
-        assertTrue(forecast1.isEmpty())
-        assertTrue(forecast2.isEmpty())
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
@@ -340,54 +345,6 @@ class MainViewModelTest {
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("1000"))
 
         assertEquals(1000, userSettingsRepo.getSpfFlow().first())
-    }
-
-    @Test
-    fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
-
-        verify(exactly = 0) { serviceController.setSpf(5) }
-    }
-
-    @Test
-    fun onSpfChanged_toInvalidValue_whileTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
-
-        verify(exactly = 0) { serviceController.setSpf(any()) }
-    }
-
-    @Test
-    fun onSpfChanged_whileTracking_updatesController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
-
-        verify { serviceController.setSpf(5) }
-    }
-
-    @Test
-    fun onIsSnowOrWaterChanged_whileNotTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
-
-        verify(exactly = 0) { serviceController.setIsOnSnowOrWater(true) }
-    }
-
-    @Test
-    fun onIsSnowOrWaterChanged_whileTracking_updatesController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
-
-        verify { serviceController.setIsOnSnowOrWater(true) }
     }
 
     @Test

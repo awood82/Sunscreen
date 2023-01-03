@@ -37,7 +37,7 @@ val serviceModule = module {
     factory<INotificationHandler> { (channelId: String) -> DefaultNotificationHandler(channelId, get(), get(), get()) }
     factory { Intent(androidApplication(), SunTrackerService::class.java) }
     factory { SunTrackerServiceController(androidApplication(), get()) }
-    factory { SunTracker(get(), get()) }
+    factory { SunTracker(get(), get(), get(), get()) }
 }
 
 val viewModelModule = module {
