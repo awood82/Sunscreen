@@ -62,6 +62,27 @@ class HourlyForecastRepositoryTest {
 //        UvPredictionPoint(time = LocalTime.of(13, 0), 0.0)
     )
 
+    private val forecastForTomorrow = listOf(
+        HourlyUvIndexForecast(1, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 07 AM", 0),
+        HourlyUvIndexForecast(2, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 08 AM", 0),
+        HourlyUvIndexForecast(3, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 09 AM", 3),
+        HourlyUvIndexForecast(4, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 10 AM", 5),
+        HourlyUvIndexForecast(5, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 11 AM", 3),
+        HourlyUvIndexForecast(6, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 12 PM", 0),
+        HourlyUvIndexForecast(7, FakeData.zip, "${FakeData.nextDateNetworkFormatted} 01 PM", 0)
+    )
+
+    // It's expected that only one 0.0 UV value is kept at the start and end
+    private val expectedModelForTomorrow = listOf(
+//        UvPredictionPoint(time = LocalTime.of(7, 0), 0.0),
+        UvPredictionPoint(time = LocalTime.of(8, 0), 0.0),
+        UvPredictionPoint(time = LocalTime.of(9, 0), 3.0),
+        UvPredictionPoint(time = LocalTime.of(10, 0), 5.0),
+        UvPredictionPoint(time = LocalTime.of(11, 0), 3.0),
+        UvPredictionPoint(time = LocalTime.of(12, 0), 0.0),
+//        UvPredictionPoint(time = LocalTime.of(13, 0), 0.0)
+    )
+
     private val mockForecast = listOf(
         HourlyUvIndexForecast(3, FakeData.zip, "${FakeData.dateNetworkFormatted} 09 AM", 5)
     )
@@ -110,6 +131,15 @@ class HourlyForecastRepositoryTest {
         repository.setForecast(forecast)
 
         assertEquals(expectedModel, forecastFlow.first())
+    }
+
+    @Test
+    fun getNetworkForecastFlow_thenInsertForTomorrow_getsUpdatedFlowToday() = runTest {
+        val forecastFlow = repository.getForecastFlow(FakeData.zip, FakeData.localDate)
+
+        repository.setForecast(forecastForTomorrow)
+
+        assertEquals(expectedModelForTomorrow, forecastFlow.first())
     }
 
     @UseMockService

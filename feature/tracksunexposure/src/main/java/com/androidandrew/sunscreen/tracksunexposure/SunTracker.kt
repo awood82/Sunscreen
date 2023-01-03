@@ -10,11 +10,8 @@ import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCa
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserTracking
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.time.Clock
 import java.util.*
@@ -24,15 +21,15 @@ class SunTracker(
     getLocalForecastForToday: GetLocalForecastForTodayUseCase,
     userSettingsRepository: UserSettingsRepository,
     private val userTrackingRepository: UserTrackingRepository,
-    private val clock: Clock
+    private val clock: Clock,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val spfUseCase = ConvertSpfUseCase()
     private val sunburnCalculator = SunburnCalculator(spfUseCase)
     private val vitaminDCalculator = VitaminDCalculator(spfUseCase)
     private lateinit var userTracking: UserTracking
     private var trackingTimer: RepeatingTimer? = null
-    private val trackerJob = Job()
-    private val trackerScope = CoroutineScope(Dispatchers.IO + trackerJob)
+    private val trackerScope = CoroutineScope(ioDispatcher + Job())
 
     private lateinit var settings: SunTrackerSettings
 //    private val uvPredictionStream = getLocalForecastForToday()
@@ -42,7 +39,7 @@ class SunTracker(
     private val settingsStream = combine(
         getLocalForecastForToday(), skinTypeStream, spfStream, isOnReflectiveSurfaceStream
     ) { uvPrediction, skinType, spf, isOnReflectiveSurface ->
-        if (uvPrediction.isNotEmpty() && skinType != null && spf != null && isOnReflectiveSurface != null) {
+        if (uvPrediction.isNotEmpty()) {
             SunTrackerSettings(
                 uvPrediction = uvPrediction,
                 hardcodedSkinType = skinType,
@@ -50,7 +47,7 @@ class SunTracker(
                 isOnReflectiveSurface = isOnReflectiveSurface
             )
         } else {
-            Timber.e("collected null: uvPrediction: ${uvPrediction.isEmpty()}, skinType: ${skinType==null}, spf: ${spf==null}, reflect: ${isOnReflectiveSurface==null}")
+            Timber.e("collected null: uvPrediction: ${uvPrediction.isEmpty()}")
             null
         }
     }
@@ -70,15 +67,26 @@ class SunTracker(
     }
 
     private fun initializeUserSettingsStream() {
-        trackerScope.launch {
-            settingsStream.collect {
-                Timber.d("settings detected a change")
+        settingsStream
+            .flowOn(ioDispatcher)
+            .onEach {
+                Timber.d("settings detected a change, possibly null")
                 it?.let {
                     Timber.d("and they weren't null")
                     settings = it
                 }
             }
-        }
+            .launchIn(trackerScope)
+
+//        trackerScope.launch {
+//            settingsStream.collect {
+//                Timber.d("settings detected a change")
+//                it?.let {
+//                    Timber.d("and they weren't null")
+//                    settings = it
+//                }
+//            }
+//        }
     }
 
     private fun initializeUserTracking() {
@@ -92,9 +100,9 @@ class SunTracker(
     private fun createTrackingTimer(): RepeatingTimer {
         return RepeatingTimer(object : TimerTask() {
             override fun run() {
-                trackerScope.launch {
-                    Timber.d("Updating burn and vitamin D progress")
-                    if (::settings.isInitialized) {
+                if (::settings.isInitialized) {
+                    trackerScope.launch {
+                        Timber.d("Updating burn and vitamin D progress")
                         updateTracking(getBurnProgress(), getVitaminDProgress())
                     }
                 }

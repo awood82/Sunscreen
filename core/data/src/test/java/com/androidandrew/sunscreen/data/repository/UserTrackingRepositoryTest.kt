@@ -28,7 +28,8 @@ class UserTrackingRepositoryTest {
     private lateinit var databaseHolder: FakeDatabaseWrapper
 
     private val date = FakeData.localDate.toString()
-    private val userTracking = UserTracking(
+    private val userTrackingNotSet = UserTracking(0.0, 0.0)
+    private val userTrackingWithProgress = UserTracking(
         sunburnProgress = 20.0,
         vitaminDProgress = 500.0
     )
@@ -51,19 +52,33 @@ class UserTrackingRepositoryTest {
 
     @Test
     fun insert_thenGet_retrievesValue() = runTest {
-        repository.setUserTracking(date, userTracking)
+        repository.setUserTracking(date, userTrackingWithProgress)
 
         val actualUserTracking = repository.getUserTracking(date)
 
-        assertEquals(userTracking, actualUserTracking)
+        assertEquals(userTrackingWithProgress, actualUserTracking)
     }
 
     @Test
     fun getFlow_thenSet_getsUpdatedFlowValue() = runTest {
         val userTrackingFlow = repository.getUserTrackingFlow(date)
 
-        repository.setUserTracking(date, userTracking)
+        repository.setUserTracking(date, userTrackingWithProgress)
 
-        assertEquals(userTracking, userTrackingFlow.first())
+        assertEquals(userTrackingWithProgress, userTrackingFlow.first())
+    }
+
+    @Test
+    fun get_whenValueNeverSet_returns0() = runTest {
+        val actualUserTracking = repository.getUserTracking(date)
+
+        assertEquals(userTrackingNotSet, actualUserTracking)
+    }
+
+    @Test
+    fun getFlow_whenValueNeverSet_returns0() = runTest {
+        val actualUserTrackingFlow = repository.getUserTrackingFlow(date)
+
+        assertEquals(userTrackingNotSet, actualUserTrackingFlow.first())
     }
 }

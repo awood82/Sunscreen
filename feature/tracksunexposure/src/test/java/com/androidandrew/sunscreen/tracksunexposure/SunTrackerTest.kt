@@ -9,6 +9,7 @@ import com.androidandrew.sunscreen.data.repository.HourlyForecastRepositoryImpl
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
+import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,7 +55,7 @@ class SunTrackerTest {
         runBlocking {
             dbWrapper.clearDatabase()
         }
-        sunTracker = SunTracker(getLocalForecastForToday, userSettingsRepo, userTrackingRepo, clock)
+        sunTracker = SunTracker(getLocalForecastForToday, userSettingsRepo, userTrackingRepo, clock, mainDispatcherRule.testDispatcher)
     }
 
     @After
@@ -74,8 +75,9 @@ class SunTrackerTest {
     fun setSettings_databaseStarts_withEmptyValues() = runTest {
         setSettings(settings)
 
-        val info = userTrackingRepo.getUserTracking(clock.toDateString())
-        assertNull(info)
+        val actualTracking = userTrackingRepo.getUserTracking(clock.toDateString())
+        val expectedTracking = UserTracking(0.0, 0.0)
+        assertEquals(expectedTracking, actualTracking)
     }
 
     @Test
@@ -87,7 +89,7 @@ class SunTrackerTest {
 
         val info = userTrackingRepo.getUserTracking(clock.toDateString())
         assertNotNull(info)
-        assertTrue(info!!.vitaminDProgress > 0.0)
+        assertTrue(info.vitaminDProgress > 0.0)
         assertTrue(info.sunburnProgress > 0.0)
     }
 
@@ -121,8 +123,8 @@ class SunTrackerTest {
 
         val newInfo = userTrackingRepo.getUserTracking(clock.toDateString())
         assertNotEquals(initialInfo, info)
-        assertTrue(info!!.vitaminDProgress > 5.0) // Lots of exposure
-        assertTrue(newInfo!!.vitaminDProgress - info.vitaminDProgress < 1.0) // New settings, much less exposure
+        assertTrue(info.vitaminDProgress > 5.0) // Lots of exposure
+        assertTrue(newInfo.vitaminDProgress - info.vitaminDProgress < 1.0) // New settings, much less exposure
         assertTrue(newInfo.vitaminDProgress > 0.0)
         assertTrue(newInfo.sunburnProgress > 0.0)
     }
