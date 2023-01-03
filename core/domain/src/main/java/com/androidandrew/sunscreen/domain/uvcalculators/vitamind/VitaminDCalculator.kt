@@ -4,7 +4,7 @@ import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.UvFactor
 import kotlin.math.pow
 
-class VitaminDCalculator(convertSpfUseCase: ConvertSpfUseCase) {
+class VitaminDCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
 
     companion object {
         val RECOMMENDED_IU = 1000.0 // Some studies recommend less (400), others more (4000)
@@ -19,7 +19,10 @@ class VitaminDCalculator(convertSpfUseCase: ConvertSpfUseCase) {
      */
     fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, clothing: UvFactor.Clothing,
                                      spf: Int = ConvertSpfUseCase.MIN_SPF, altitudeInKm: Int = 0): Double {
-        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * spf /
+        if (uvIndex <= 0.0) {
+            return 0.0
+        }
+        val maxMinutes = minuteMagicNumber * UvFactor.getSkinBlockFactor(skinType) * convertSpfUseCase.forCalculations(spf) /
                 (uvIndex * UvFactor.getAltitudeFactor(altitudeInKm))
         val vitDConversionFactor = when {
             uvIndex > 0.5 && uvIndex <= 1 -> 0.2
