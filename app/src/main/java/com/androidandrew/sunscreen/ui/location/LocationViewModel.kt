@@ -21,7 +21,7 @@ class LocationViewModel(
     fun onEvent(event: LocationBarEvent) {
         when (event) {
             is LocationBarEvent.TextChanged -> {
-                _locationBarState.value = LocationBarState(typedSoFar = event.text)
+                _locationBarState.update { it.copy(typedSoFar = event.text) }
             }
             is LocationBarEvent.LocationSearched -> {
                 onSearchLocation(event.location)
@@ -34,7 +34,7 @@ class LocationViewModel(
             viewModelScope.launch {
                 userSettingsRepo.setIsOnboarded(true)
                 userSettingsRepo.setLocation(zipLocation)
-                _isLocationValid.value = true
+                _isLocationValid.update { true }
             }
         }
     }

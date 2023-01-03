@@ -79,7 +79,8 @@ class MainViewModel(
                 true -> {
                     Timber.d("Setup completed")
                     startTimers()
-                    _locationBarState.value = LocationBarState(_location.firstOrNull() ?: "")
+                    _locationBarState.update { it.copy(typedSoFar = _location.firstOrNull() ?: "") }
+                    _spfToDisplay.update { convertSpfUseCase.forDisplay(userSettingsRepo.getSpf()) }
 //                    viewModelScope.launch {
 //                        getLocalForecastForToday().collect {
 //                            Timber.d("GetLocalForecastForTodayUseCase detected a change")
@@ -164,14 +165,14 @@ class MainViewModel(
         RepeatingTimer(object : TimerTask() {
             override fun run() {
                 Timber.d("Update timer is running")
-                _lastLocalTimeUsed.value = LocalTime.now(clock)
+                _lastLocalTimeUsed.update { LocalTime.now(clock) }
             }
         }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
 
     private val dailyTrackingRefreshTimer =
         RepeatingTimer(object : TimerTask() {
             override fun run() {
-                _lastDateUsed.value = getDateToday()
+                _lastDateUsed.update { getDateToday() }
             }
         }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
 
@@ -192,7 +193,7 @@ class MainViewModel(
 //            .onEach { location ->
 //                location?.let {
 //                    Timber.d("forecastRefresher is refreshing for $location")
-//                    _locationBarState.value = LocationBarState(location)
+//                    _locationBarState.update { it.copy(/*LocationBarState*/(location)) }
 ////                    refreshForecast(location)
 //                }
 //            }
@@ -202,7 +203,7 @@ class MainViewModel(
     init {
         Timber.d("Initializing MainViewModel")
         viewModelScope.launch {
-            _spfToDisplay.value = convertSpfUseCase.forDisplay(userSettingsRepo.getSpf())
+            _spfToDisplay.update { convertSpfUseCase.forDisplay(userSettingsRepo.getSpf()) }
         }
     }
 
@@ -227,7 +228,7 @@ class MainViewModel(
         Timber.d("onLocationBarEvent: $event")
         when (event) {
             is LocationBarEvent.TextChanged -> {
-                _locationBarState.value = LocationBarState(typedSoFar = event.text)
+                _locationBarState.update { it.copy(typedSoFar = event.text) }
             }
             is LocationBarEvent.LocationSearched -> {
                 onSearchLocation(event.location)
@@ -240,7 +241,7 @@ class MainViewModel(
         when (event) {
             is UvTrackingEvent.TrackingButtonClicked -> onTrackingClicked()
             is UvTrackingEvent.SpfChanged -> {
-                _spfToDisplay.value = event.spf
+                _spfToDisplay.update { event.spf }
                 event.spf.toIntOrNull()?.let {
                     viewModelScope.launch {
                         userSettingsRepo.setSpf(it)
@@ -259,12 +260,12 @@ class MainViewModel(
         when (_isCurrentlyTracking.value) {
             true -> {
                 sunTrackerServiceController.stop()
-                _isCurrentlyTracking.value = false
+                _isCurrentlyTracking.update { false }
             }
             else -> {
                 viewModelScope.launch {
                     sunTrackerServiceController.start()
-                    _isCurrentlyTracking.value = true
+                    _isCurrentlyTracking.update { true }
                 }
             }
         }
