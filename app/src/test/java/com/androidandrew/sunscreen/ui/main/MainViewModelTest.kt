@@ -6,8 +6,8 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.*
-import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
+import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,57 +48,22 @@ class MainViewModelTest {
     private val sunburnCalculator = SunburnCalculator(spfUseCase)
     private lateinit var clock: Clock
     private val fakeUvService = FakeEpaService
-    private val mockUvService = mockk<EpaService>()
     private val fakeDatabaseHolder = FakeDatabaseWrapper()
-    private lateinit var realHourlyForecastRepository: HourlyForecastRepository
-    private lateinit var realUserSettingsRepository: UserSettingsRepository
-    private val mockUserSettingsRepository = mockk<UserSettingsRepository>(relaxed = true)
-    private lateinit var realUserTrackingRepository: UserTrackingRepository
-    private val mockUserTrackingRepository = mockk<UserTrackingRepository>(relaxed = true)
+    private lateinit var hourlyForecastRepo: HourlyForecastRepository
+    private lateinit var userSettingsRepo: UserSettingsRepository
+    private lateinit var userTrackingRepo: UserTrackingRepository
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
-    private var initDb = false
     private val delta = 0.1
 
-    private suspend fun createViewModel(useMockNetwork: Boolean = false, useMockRepos: Boolean = false, clock: Clock = FakeData.clockDefaultNoon) {
-        this.clock = clock
-        fakeDatabaseHolder.clearDatabase()
-        val networkToUse = when (useMockNetwork) {
-            true -> mockUvService
-            false -> fakeUvService
+    @Before
+    fun setup() {
+        runBlocking {
+            fakeDatabaseHolder.clearDatabase()
         }
-        realUserTrackingRepository = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
-        realUserSettingsRepository = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
-        realHourlyForecastRepository = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, networkToUse)
-
-        coEvery { mockUserSettingsRepository.getSpf() } returns null
-        if (initDb) {
-            realUserSettingsRepository.setLocation(FakeData.zip)
-            coEvery { mockUserSettingsRepository.getLocation() } returns FakeData.zip
-        } else {
-            coEvery { mockUserSettingsRepository.getLocation() } returns ""
-        }
-
-        val userTrackingRepositoryToUse = when (useMockRepos) {
-            true -> mockUserTrackingRepository
-            false -> realUserTrackingRepository
-        }
-        val userSettingsRepositoryToUse = when (useMockRepos) {
-            true -> mockUserSettingsRepository
-            false -> realUserSettingsRepository
-        }
-        // no mockHourlyForecastRepository needed. Tests use useMockRepos for testing user tracking and settings only
-
-        vm = MainViewModel(
-            hourlyForecastRepository = realHourlyForecastRepository,
-            userSettingsRepo = userSettingsRepositoryToUse,
-            userTrackingRepo = userTrackingRepositoryToUse,
-            convertSpfUseCase = spfUseCase,
-            sunburnCalculator = sunburnCalculator,
-            locationUtil = locationUtil,
-            clock = clock,
-            sunTrackerServiceController = serviceController
-        )
+        userTrackingRepo = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
+        userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        hourlyForecastRepo = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, fakeUvService)
     }
 
     @After
@@ -108,13 +74,23 @@ class MainViewModelTest {
         }
     }
 
-    private fun searchZip(zip: String) {
-        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
-        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
-    }
+    private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
+        this.clock = clock
 
-    private fun setLocationToRefreshNetworkOnInit() {
-        initDb = true
+        vm = MainViewModel(
+            getLocalForecastForToday = GetLocalForecastForTodayUseCase(
+                userSettingsRepository = userSettingsRepo,
+                hourlyForecastRepository = hourlyForecastRepo,
+                clock = clock
+            ),
+            userSettingsRepo = userSettingsRepo,
+            userTrackingRepo = userTrackingRepo,
+            convertSpfUseCase = spfUseCase,
+            sunburnCalculator = sunburnCalculator,
+            locationUtil = locationUtil,
+            clock = clock,
+            sunTrackerServiceController = serviceController
+        )
     }
 
     @Test
@@ -141,8 +117,8 @@ class MainViewModelTest {
 
     @Test
     fun burnTimeState_ifNoNetworkConnection_isUnknown() = runTest {
-        fakeUvService.exception = IOException()
         createViewModel()
+        fakeUvService.exception = IOException()
 
         searchZip(FakeData.zip)
 
@@ -225,10 +201,9 @@ class MainViewModelTest {
         assertEquals("Network error", vm.snackbarMessage.getOrAwaitValue())
     }
 
-    // TODO: onInit tests not working. Hang in database get()
     @Test
     fun networkError_onInit_triggersSnackbar() = runTest {
-        setLocationToRefreshNetworkOnInit()
+        setLocation(FakeData.zip)
         fakeUvService.exception = IOException("Network error")
         createViewModel()
 
@@ -237,86 +212,99 @@ class MainViewModelTest {
 
     @Test
     fun onLocationChanged_ifZip_isLessThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val tooShortZip = "1234"
+        createViewModel()
 
-        searchZip("1234")
+        searchZip(tooShortZip)
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("1234") }
+        val forecast = hourlyForecastRepo.getForecastFlow(tooShortZip, getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_isMoreThan5Chars_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val tooLongZip = "123456"
+        createViewModel()
 
-        searchZip("123456")
+        searchZip(tooLongZip)
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("123456") }
+        val forecast = hourlyForecastRepo.getForecastFlow(tooLongZip, getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_is5Digits_refreshesNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val justRightZip = "12345"
+        createViewModel()
 
-        searchZip("12345")
+        searchZip(justRightZip)
 
-        coVerify(exactly=1) { mockUvService.getUvForecast("12345") }
+        val forecast = hourlyForecastRepo.getForecastFlow(justRightZip, getDate()).first()
+        assertTrue(forecast.isNotEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPrefix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val alphaZip = "ABC45"
+        createViewModel()
 
-        searchZip("ABC45")
+        searchZip(alphaZip)
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("ABC45") }
+        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_lengthIs5WithLettersPostfix_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val alphaZip = "123DE"
+        createViewModel()
 
-        searchZip("123DE")
+        searchZip(alphaZip)
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("123DE") }
+        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun onLocationChanged_ifZip_has5Digits_andSomeLetters_doesNotRefreshNetwork() = runTest {
-        createViewModel(useMockNetwork = true)
+        val longAlphaZip = "12345ABC"
+        setLocation(FakeData.zip)
+        createViewModel()
 
-        searchZip("12345ABC")
+        searchZip(longAlphaZip)
 
-        coVerify(exactly=0) { mockUvService.getUvForecast("12345") }
-        coVerify(exactly=0) { mockUvService.getUvForecast("12345ABC") }
+        val forecast = hourlyForecastRepo.getForecastFlow(longAlphaZip, getDate()).first()
+
+        assertTrue(forecast.isEmpty())
     }
 
     @Test
     fun forceTrackingRefresh_withNoPreviousTrackingInfo_triggersRepositoryUpdate() = runTest {
-        coEvery { mockUserTrackingRepository.getUserTracking(any()) } returns null
-        createViewModel(useMockNetwork = false, useMockRepos = true)
+        createViewModel()
 
         updateTracking(0.0, 0.0)
 
-        coVerify { mockUserTrackingRepository.setUserTracking(any(), any()) }
+        val tracking = userTrackingRepo.getUserTrackingFlow(getDate().toString()).first()!!
+        assertEquals(0.0, tracking.sunburnProgress, delta)
+        assertEquals(0.0, tracking.vitaminDProgress, delta)
     }
 
     @Test
     fun forceTrackingRefresh_withArguments_updatesRepositoryValues() = runTest {
-        coEvery { mockUserTrackingRepository.getUserTracking(any()) } returns null
-        createViewModel(useMockNetwork = false, useMockRepos = true)
+        createViewModel()
 
         updateTracking(1.0, 2.0)
 
-        val slot = slot<UserTracking>()
-        coVerify { mockUserTrackingRepository.setUserTracking(any(), capture(slot)) }
-        assertEquals(1.0, slot.captured.sunburnProgress, delta)
-        assertEquals(2.0, slot.captured.vitaminDProgress, delta)
+        val date = getDate().toString()
+        val tracking = userTrackingRepo.getUserTrackingFlow(date).first()!!
+        assertEquals(1.0, tracking.sunburnProgress, delta)
+        assertEquals(2.0, tracking.vitaminDProgress, delta)
     }
 
     @Test
     fun forceTrackingRefresh_withArguments_andExistingRepoValue_updatesRepositoryValues() = runTest {
-        initDb = true
-        createViewModel(useMockNetwork = false, useMockRepos = false)
+        setLocation(FakeData.zip)
+        createViewModel()
 
         updateTracking(10.0, 20.0)
         advanceUntilIdle()
@@ -333,86 +321,39 @@ class MainViewModelTest {
 
     @Test
     fun onSpfTextChanged_toEmptyString_doesNotSaveToRepo() = runTest {
-        createViewModel(useMockRepos = true)
+        userSettingsRepo.setSpf(5)
+        createViewModel()
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
 
-        coVerify(exactly = 0) { mockUserSettingsRepository.setSpf(any()) }
+        assertEquals(5, userSettingsRepo.getSpfFlow().first())
     }
 
     @Test
     fun onSpfTextChanged_toValidSpf_savesToRepo() = runTest {
-        createViewModel(useMockRepos = true)
+        createViewModel()
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("10"))
 
-        coVerify(exactly = 1) { mockUserSettingsRepository.setSpf(10) }
+        assertEquals(10, userSettingsRepo.getSpfFlow().first())
     }
 
     @Test
     fun onSpfTextChanged_toTooHighSpf_stillSavesToRepo() = runTest {
-        createViewModel(useMockRepos = true)
+        createViewModel()
 
         vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("1000"))
 
-        coVerify(exactly = 1) { mockUserSettingsRepository.setSpf(1000) }
-    }
-
-    @Test
-    fun onSpfChanged_whileNotTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
-
-        verify(exactly = 0) { serviceController.setSpf(5) }
-    }
-
-    @Test
-    fun onSpfChanged_toInvalidValue_whileTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged(""))
-
-        verify(exactly = 0) { serviceController.setSpf(any()) }
-    }
-
-    @Test
-    fun onSpfChanged_whileTracking_updatesController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("5"))
-
-        verify { serviceController.setSpf(5) }
-    }
-
-    @Test
-    fun onIsSnowOrWaterChanged_whileNotTracking_doesNotUpdateController() = runTest {
-        createViewModel()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
-
-        verify(exactly = 0) { serviceController.setIsOnSnowOrWater(true) }
-    }
-
-    @Test
-    fun onIsSnowOrWaterChanged_whileTracking_updatesController() = runTest {
-        createViewModel()
-        vm.onTrackingClicked()
-
-        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
-
-        verify { serviceController.setIsOnSnowOrWater(true) }
+        assertEquals(1000, userSettingsRepo.getSpfFlow().first())
     }
 
     @Test
     fun onIsOnSnowOrWaterChanged_savesToRepo() = runTest {
-        createViewModel(useMockRepos = true)
+        createViewModel()
 
         vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
-        coVerify(exactly = 1) { mockUserSettingsRepository.setIsOnSnowOrWater(true) }
+        assertTrue(userSettingsRepo.getIsOnSnowOrWaterFlow().first()!!)
     }
 
     @Test
@@ -451,8 +392,11 @@ class MainViewModelTest {
 
     @Test
     fun init_ifLocationExistsInRepo_itAppearsInTheLocationBar() = runTest {
-        setLocationInMockRepo(FakeData.zip)
-        createViewModel(useMockRepos = true)
+        setLocation(FakeData.zip)
+        createViewModel()
+
+        // Check app state b/c it updates the location bar when the ViewModel first starts
+        val appState = vm.appState.first()
 
         val locationBarState = vm.locationBarState.first()
 
@@ -460,18 +404,31 @@ class MainViewModelTest {
     }
 
     @Test
-    fun init_ifLocationExistsInRepo_queriesNetworkOnlyOnce() = runTest {
-        setLocationInMockRepo(FakeData.zip)
-        createViewModel(useMockNetwork = true, useMockRepos = true)
+    fun init_ifLocationExistsInRepo_queriesRepoOnce() = runTest {
+        fakeUvService.networkRequestCount = 0
+        setLocation(FakeData.zip)
+        createViewModel()
 
-        coVerify(exactly = 1) { mockUvService.getUvForecast(FakeData.zip) }
+        triggerLocationUpdate()
+
+        val forecast = hourlyForecastRepo.getForecastFlow(FakeData.zip, getDate()).first()
+        assertTrue(forecast.isNotEmpty())
+        assertEquals(1, fakeUvService.networkRequestCount)
     }
 
     @Test
-    fun init_ifLocationDoesNotExistInRepo_navigatesToLocationScreen() = runTest {
-        setLocationInMockRepo(null)
+    fun init_ifLocationExistsInRepo_isOnboarded() = runTest {
+        setLocation(FakeData.zip)
 
-        createViewModel(useMockRepos = true)
+        createViewModel()
+
+        assertEquals(AppState.Onboarded, vm.appState.first())
+    }
+
+    @Test
+    fun init_ifLocationDoesNotExistInRepo_isNotOnboarded() = runTest {
+
+        createViewModel()
 
         assertEquals(AppState.NotOnboarded, vm.appState.first())
     }
@@ -492,7 +449,7 @@ class MainViewModelTest {
 
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched("10001"))
 
-        assertEquals("10001", realUserSettingsRepository.getLocation())
+        assertEquals("10001", userSettingsRepo.getLocation())
     }
 
     @Test
@@ -501,22 +458,36 @@ class MainViewModelTest {
 
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched("1"))
 
-        assertNotEquals("10001", realUserSettingsRepository.getLocation())
+        assertNotEquals("10001", userSettingsRepo.getLocation())
     }
 
-
-    private fun setLocationInMockRepo(location: String?) {
-        coEvery { mockUserSettingsRepository.getLocation() } returns location
-        every { mockUserSettingsRepository.getLocationFlow() } returns flowOf(location)
-    }
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
-        val date = LocalDate.now(clock).toString()
+        val date = getDate().toString()
         val userTracking = UserTracking(
             sunburnProgress = burnProgress,
             vitaminDProgress = vitaminDProgress
         )
-        mockUserTrackingRepository.setUserTracking(date, userTracking)
-        realUserTrackingRepository.setUserTracking(date, userTracking)
+        userTrackingRepo.setUserTracking(date, userTracking)
+    }
+
+    private fun getDate(): LocalDate {
+        return LocalDate.now(clock)
+    }
+
+    private suspend fun setLocation(location: String) {
+        userSettingsRepo.setLocation(location)
+    }
+
+    private fun searchZip(zip: String) {
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
+        triggerLocationUpdate()
+    }
+
+    private fun triggerLocationUpdate() {
+        runBlocking {
+            val state = vm.uvChartUiState.first()
+        }
     }
 }

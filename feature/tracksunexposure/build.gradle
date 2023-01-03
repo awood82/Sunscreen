@@ -51,6 +51,8 @@ dependencies {
 
     testImplementation project(":core:testing")
 
+    testImplementation project(":core:network")
+
     testImplementation project(":sharedTest")
 //    androidTestImplementation project(":sharedTest")
 }

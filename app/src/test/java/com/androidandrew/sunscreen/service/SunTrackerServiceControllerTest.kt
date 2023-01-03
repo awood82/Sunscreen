@@ -19,24 +19,6 @@ class SunTrackerServiceControllerTest {
     private val serviceIntent = mockk<Intent>(relaxed = true)
     private val sunTrackerServiceController = SunTrackerServiceController(context, serviceIntent)
 
-    @Test
-    fun bind_bindsToSunTrackerService() {
-        bindWithFakeData()
-
-//        val slot = slot<Intent>()
-//        verify { context.bindService(capture(slot), any(), any()) }
-//        assertEquals(SunTrackerService::class.qualifiedName, slot.captured.component?.className)
-
-        verify { context.bindService(serviceIntent, any(), any()) }
-    }
-
-    @Test
-    fun unbind_unbinds() {
-        sunTrackerServiceController.unbind()
-
-        verify { context.unbindService(any()) }
-    }
-
     @Ignore("It works with startService, but with startForegroundService, it fails with error: java.lang.NoSuchMethodError: 'android.content.ComponentName android.content.Context.startForegroundService(android.content.Intent)'")
     @Test
     fun start_starts() {
@@ -50,20 +32,5 @@ class SunTrackerServiceControllerTest {
         sunTrackerServiceController.stop()
 
         verify { context.stopService(serviceIntent) }
-    }
-
-    private fun bindWithFakeData() {
-        val fakeData = SunTrackerSettings(
-            uvPrediction = FakeEpaService.sampleDailyUvForecast.map {
-                it.asModel()
-            },
-            hardcodedSkinType = 2,
-            spf = 1,
-            isOnReflectiveSurface = false
-        )
-        sunTrackerServiceController.apply {
-            setSettings(fakeData)
-            bind()
-        }
     }
 }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -80,5 +81,31 @@ class UserSettingsRepositoryTest {
         assertEquals(skinType, skinTypeFlow.first())
         assertEquals(spf, spfFlow.first())
         assertEquals(isOnSnowOrWater, isOnSnowOrWaterFlow.first())
+    }
+
+    @Test
+    fun getValues_whenNotSet_areDefaultsNotNull() = runTest {
+        val location = repository.getLocation()
+        val skinType = repository.getSkinType()
+        val spf = repository.getSpf()
+        val isOnSnowOrWater = repository.getIsOnSnowOrWater()
+
+        assertNotNull(location)
+        assertNotNull(skinType)
+        assertNotNull(spf)
+        assertNotNull(isOnSnowOrWater)
+    }
+
+    @Test
+    fun getValuesFlow_whenNotSet_areDefaultsNotNull() = runTest {
+        val location = repository.getLocationFlow()
+        val skinType = repository.getSkinTypeFlow()
+        val spf = repository.getSpfFlow()
+        val isOnSnowOrWater = repository.getIsOnSnowOrWaterFlow()
+
+        assertNotNull(location.first())
+        assertNotNull(skinType.first())
+        assertNotNull(spf.first())
+        assertNotNull(isOnSnowOrWater.first())
     }
 }

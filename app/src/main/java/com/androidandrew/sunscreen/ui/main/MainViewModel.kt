@@ -2,11 +2,10 @@ package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
 import com.androidandrew.sunscreen.common.RepeatingTimer
-import com.androidandrew.sunscreen.data.repository.HourlyForecastRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
-import com.androidandrew.sunscreen.model.UvPrediction
+import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.toChartData
@@ -29,7 +28,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
-    private val hourlyForecastRepository: HourlyForecastRepository,
+    getLocalForecastForToday: GetLocalForecastForTodayUseCase,
     private val userSettingsRepo: UserSettingsRepository,
     userTrackingRepo: UserTrackingRepository,
     private val convertSpfUseCase: ConvertSpfUseCase,
@@ -70,7 +69,10 @@ class MainViewModel(
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
     // Forecast
-    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
+//    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
+    private val _uvPrediction = getLocalForecastForToday().shareIn(
+        scope = viewModelScope, started = SharingStarted.WhileSubscribed(), replay = 1
+    )
 
     private val _hasSetupRun = _location.map {
         Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
@@ -84,6 +86,13 @@ class MainViewModel(
                 true -> {
                     Timber.d("Setup completed")
                     startTimers()
+                    _locationBarState.value = LocationBarState(_location.firstOrNull() ?: "")
+//                    viewModelScope.launch {
+//                        getLocalForecastForToday().collect {
+//                            Timber.d("GetLocalForecastForTodayUseCase detected a change")
+//                            _uvPrediction.value = it
+//                        }
+//                    }
                     AppState.Onboarded
                 }
                 false -> AppState.NotOnboarded
@@ -95,11 +104,6 @@ class MainViewModel(
         .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = _locationBarState.value)
 
     private val _userTrackingInfo = userTrackingRepo.getUserTrackingFlow(_lastDateUsed.value)
-
-//    private val _userTrackingInfo = _lastDateUsed.flatMapLatest { date ->
-//// TODO: Add back?       onSearchLocation(userRepository.getLocation() ?: "") // Will only refresh if the ZIP code is valid
-//        userRepository.getUserTrackingInfoSync(date)
-//    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     val uvTrackingState: StateFlow<UvTrackingState> = combine(
         _isCurrentlyTracking, _uvPrediction, _userTrackingInfo, _spfToDisplay, _isOnSnowOrWater
@@ -189,18 +193,18 @@ class MainViewModel(
 //            .collect()
 //    }
 
-    val forecastRefresher = viewModelScope.launch {
-        _location
-            .distinctUntilChanged()
-            .onEach { location ->
-                location?.let {
-                    Timber.d("forecastRefresher is refreshing for $location")
-                    _locationBarState.value = LocationBarState(location)
-                    refreshForecast(location)
-                }
-            }
-            .collect()
-    }
+//    val locationRefresher = viewModelScope.launch {
+//        _location
+//            .distinctUntilChanged()
+//            .onEach { location ->
+//                location?.let {
+//                    Timber.d("forecastRefresher is refreshing for $location")
+//                    _locationBarState.value = LocationBarState(location)
+////                    refreshForecast(location)
+//                }
+//            }
+//            .collect()
+//    }
 
     init {
         Timber.d("Initializing MainViewModel")
@@ -256,58 +260,24 @@ class MainViewModel(
                 }
             }
         }
-
-        forwardTrackingEventToServiceController(event)
-    }
-
-    private fun forwardTrackingEventToServiceController(event: UvTrackingEvent) {
-        if (_isCurrentlyTracking.value) {
-            when (event) {
-                is UvTrackingEvent.SpfChanged -> {
-                    event.spf.toIntOrNull()?.let {
-                        sunTrackerServiceController.setSpf(it)
-                    }
-                }
-                is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
-                    val isOn = event.isOnSnowOrWater
-                    sunTrackerServiceController.setIsOnSnowOrWater(isOn)
-                }
-                else -> { /* Do nothing */ }
-            }
-        }
     }
 
     fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
             true -> {
-                sunTrackerServiceController.unbind()
                 sunTrackerServiceController.stop()
                 _isCurrentlyTracking.value = false
             }
             else -> {
                 viewModelScope.launch {
-                    /* TODO: Could have service read these settings as a flow from the repository */
-                    sunTrackerServiceController.setSettings(
-                        uvPrediction = _uvPrediction.value,
-                        skinType = HARDCODED_SKIN_TYPE,
-                        spf = convertSpfUseCase.forCalculations(_spf.first()),
-                        isOnSnowOrWater = _isOnSnowOrWater.first() ?: DEFAULT_IS_ON_SNOW_OR_WATER
-                    )
-                    sunTrackerServiceController.bind()
+                    sunTrackerServiceController.start()
                     _isCurrentlyTracking.value = true
                 }
             }
         }
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        if (_isCurrentlyTracking.value) {
-            // Start the service so it continues to run while the app is in the background
-            sunTrackerServiceController.start()
-        }
-    }
-
+/*
     private fun refreshForecast(zipCode: String) {
         Timber.i("Refreshing forecast $zipCode")
 
@@ -323,7 +293,7 @@ class MainViewModel(
             }
         }
     }
-
+*/
     private fun onSearchLocation(location: String) {
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {

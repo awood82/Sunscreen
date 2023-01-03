@@ -1,4 +1,4 @@
-package com.androidandrew.sunscreen.common
+package com.androidandrew.sunscreen.tracksunexposure
 
 import java.time.Clock
 import java.time.LocalDate

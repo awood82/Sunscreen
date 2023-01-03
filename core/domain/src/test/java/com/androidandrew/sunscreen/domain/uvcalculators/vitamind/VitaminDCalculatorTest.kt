@@ -39,6 +39,24 @@ class VitaminDCalculatorTest {
         assertEquals(0.2 * SunburnCalculator.MAX_SUN_UNITS / sunUnits, VitaminDCalculator.RECOMMENDED_IU / vitaminD, delta)
     }
 
+
+    @Test
+    fun computeIUVitaminDInOneMinute_whenSpfIsInvalidZero_itIsTreatedLikeValidOne() {
+        val sunUnits = sunburnCalculator.computeSunUnitsInOneMinute(
+            uvIndex = 1.0,
+            skinType = 2,
+            spf = 0
+        )
+        val vitaminD = vitaminDCalculator.computeIUVitaminDInOneMinute(
+            uvIndex = 1.0,
+            skinType = 2,
+            clothing = UvFactor.Clothing.NAKED,
+            spf = 0
+        )
+
+        assertEquals(0.2 * SunburnCalculator.MAX_SUN_UNITS / sunUnits, VitaminDCalculator.RECOMMENDED_IU / vitaminD, delta)
+    }
+
     @Test
     fun computeIUVitaminDInOneMinute_whenUvIndex_isNine_returns10PercentOfMaxUnits() {
         val sunUnits = sunburnCalculator.computeSunUnitsInOneMinute(
