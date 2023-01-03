@@ -10,16 +10,29 @@ class UserSettingsRepositoryImpl(
 ) : UserSettingsRepository {
 
     companion object {
-        //        const val HAS_SETUP_COMPLETED = 1L  ( // TODO : With renumbering)
-        const val LOCATION = 1L
-        const val SKIN_TYPE = 2L
+        const val IS_ONBOARDED = 1L
+        const val LOCATION = 2L
+        const val SKIN_TYPE = 3L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
 
+        private const val DEFAULT_IS_ONBOARDED = false
         private const val DEFAULT_LOCATION = ""
         private const val MY_HARDCODED_SKIN_TYPE = 2 // TODO: Remove this hardcoded value b/c skin type must be set before tracking is possible. The others can use defaults.
         private const val NO_SUNSCREEN = 0
         private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
+    }
+
+    override fun getIsOnboardedFlow(): Flow<Boolean> {
+        return readBooleanSettingFlow(IS_ONBOARDED).map {
+            it ?: DEFAULT_IS_ONBOARDED
+        }
+    }
+    override suspend fun getIsOnboarded(): Boolean {
+        return readBooleanSetting(IS_ONBOARDED) ?: DEFAULT_IS_ONBOARDED
+    }
+    override suspend fun setIsOnboarded(isOnboarded: Boolean) {
+        writeSetting(IS_ONBOARDED, isOnboarded.toString())
     }
 
     override fun getLocationFlow(): Flow<String> {
@@ -34,7 +47,7 @@ class UserSettingsRepositoryImpl(
         writeSetting(LOCATION, location)
     }
 
-    override fun getSkinTypeFlow(): Flow<Int?> {
+    override fun getSkinTypeFlow(): Flow<Int> {
         return readIntSettingFlow(SKIN_TYPE).map {
             it ?: MY_HARDCODED_SKIN_TYPE
         }
@@ -60,7 +73,7 @@ class UserSettingsRepositoryImpl(
 
     override fun getIsOnSnowOrWaterFlow(): Flow<Boolean> {
         return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER).map {
-            it ?: false
+            it ?: DEFAULT_IS_ON_SNOW_OR_WATER
         }
     }
     override suspend fun getIsOnSnowOrWater(): Boolean {

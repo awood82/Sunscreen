@@ -26,6 +26,7 @@ class UserSettingsRepositoryTest {
     private lateinit var repository: UserSettingsRepository
     private lateinit var databaseHolder: FakeDatabaseWrapper
 
+    private val isOnboarded = true
     private val location = "12345"
     private val skinType = 6
     private val spf = 15
@@ -49,16 +50,19 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun insert_thenGet_retrievesValue() = runTest {
+        repository.setIsOnboarded(isOnboarded)
         repository.setLocation(location)
         repository.setSkinType(skinType)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
+        val actualIsOnboarded = repository.getIsOnboarded()
         val actualLocation = repository.getLocation()
         val actualSkinType = repository.getSkinType()
         val actualSpf = repository.getSpf()
         val actualIsOnSnowOrWater = repository.getIsOnSnowOrWater()
 
+        assertEquals(isOnboarded, actualIsOnboarded)
         assertEquals(location, actualLocation)
         assertEquals(skinType, actualSkinType)
         assertEquals(spf, actualSpf)
@@ -67,16 +71,19 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun getFlow_thenSet_getsUpdatedFlowValue() = runTest {
+        val isOnboardedFlow = repository.getIsOnboardedFlow()
         val locationFlow = repository.getLocationFlow()
         val skinTypeFlow = repository.getSkinTypeFlow()
         val spfFlow = repository.getSpfFlow()
         val isOnSnowOrWaterFlow = repository.getIsOnSnowOrWaterFlow()
 
+        repository.setIsOnboarded(isOnboarded)
         repository.setLocation(location)
         repository.setSkinType(skinType)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
+        assertEquals(isOnboarded, isOnboardedFlow.first())
         assertEquals(location, locationFlow.first())
         assertEquals(skinType, skinTypeFlow.first())
         assertEquals(spf, spfFlow.first())
@@ -85,11 +92,13 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun getValues_whenNotSet_areDefaultsNotNull() = runTest {
+        val isOnboarded = repository.getIsOnboarded()
         val location = repository.getLocation()
         val skinType = repository.getSkinType()
         val spf = repository.getSpf()
         val isOnSnowOrWater = repository.getIsOnSnowOrWater()
 
+        assertNotNull(isOnboarded)
         assertNotNull(location)
         assertNotNull(skinType)
         assertNotNull(spf)
@@ -98,11 +107,13 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun getValuesFlow_whenNotSet_areDefaultsNotNull() = runTest {
+        val isOnboarded = repository.getIsOnboardedFlow()
         val location = repository.getLocationFlow()
         val skinType = repository.getSkinTypeFlow()
         val spf = repository.getSpfFlow()
         val isOnSnowOrWater = repository.getIsOnSnowOrWaterFlow()
 
+        assertNotNull(isOnboarded.first())
         assertNotNull(location.first())
         assertNotNull(skinType.first())
         assertNotNull(spf.first())

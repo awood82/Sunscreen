@@ -32,6 +32,7 @@ class LocationViewModel(
     fun onSearchLocation(zipLocation: String) {
         if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
+                userSettingsRepo.setIsOnboarded(true)
                 userSettingsRepo.setLocation(zipLocation)
                 _isLocationValid.value = true
             }

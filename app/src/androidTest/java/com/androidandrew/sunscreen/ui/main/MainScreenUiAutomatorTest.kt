@@ -35,6 +35,7 @@ class MainScreenUiAutomatorTest {
             userSettingsRepo = get()
             userTrackingRepo = get()
             runBlocking {
+                userSettingsRepo.setIsOnboarded(true)
                 userSettingsRepo.setLocation(FakeData.zip)
             }
 

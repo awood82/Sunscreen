@@ -40,8 +40,6 @@ class MainViewModel(
 
     companion object {
         private const val UNKNOWN_BURN_TIME = -1L
-        private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
-        private const val HARDCODED_SKIN_TYPE = 2 // TODO: Remove hardcoded value
     }
 
     // User Settings
@@ -74,15 +72,10 @@ class MainViewModel(
         scope = viewModelScope, started = SharingStarted.WhileSubscribed(), replay = 1
     )
 
-    private val _hasSetupRun = _location.map {
-        Timber.d("location repo change: $it, hasSetupRun = ${!it.isNullOrEmpty()}")
-        !it.isNullOrEmpty()
-    }
-
-    val appState = _hasSetupRun
+    val appState = userSettingsRepo.getIsOnboardedFlow()
         .distinctUntilChanged()
-        .map { hasSetupRun ->
-            when (hasSetupRun) {
+        .map { isOnboarded ->
+            when (isOnboarded) {
                 true -> {
                     Timber.d("Setup completed")
                     startTimers()
@@ -114,7 +107,7 @@ class MainViewModel(
             isTrackingPossible = prediction.isNotEmpty(),
             isTracking = isTracking,
             spfOfSunscreenAppliedToSkin = spf,
-            isOnSnowOrWater = isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER,
+            isOnSnowOrWater = isOnSnowOrWater,
             sunburnProgressAmount = trackingInfo?.sunburnProgress?.toInt() ?: 0, // ~100.0 means almost-certain sunburn
             sunburnProgressPercent0to1 = (trackingInfo?.sunburnProgress ?: 0.0).div(SunburnCalculator.MAX_SUN_UNITS).toFloat(),
             vitaminDProgressAmount = trackingInfo?.vitaminDProgress?.toInt() ?: 0, // in IU. Studies recommend 400-1000-4000 IU.
@@ -145,10 +138,10 @@ class MainViewModel(
                 uvPrediction = forecast,
                 currentTime = time,
                 sunUnitsSoFar = trackingSoFar?.sunburnProgress ?: 0.0,
-                skinType = userSettings.skinType ?: HARDCODED_SKIN_TYPE,
+                skinType = userSettings.skinType!!,
                 spf = convertSpfUseCase.forCalculations(spfToDisplay.toIntOrNull()),
                 altitudeInKm = 0,
-                isOnSnowOrWater = userSettings.isOnSnowOrWater ?: DEFAULT_IS_ON_SNOW_OR_WATER
+                isOnSnowOrWater = userSettings.isOnSnowOrWater!!
             ).toLong()
             false -> UNKNOWN_BURN_TIME
         }

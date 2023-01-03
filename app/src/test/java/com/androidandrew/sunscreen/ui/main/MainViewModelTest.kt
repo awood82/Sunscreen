@@ -28,6 +28,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestName
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.time.*
@@ -36,6 +37,11 @@ import java.time.*
 @RunWith(AndroidJUnit4::class)
 //@LooperMode(LooperMode.Mode.PAUSED)
 class MainViewModelTest {
+
+    private annotation class IsNotOnboarded
+
+    @get:Rule
+    val testName = TestName()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -76,6 +82,12 @@ class MainViewModelTest {
 
     private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
+
+        val method = this.javaClass.getMethod(testName.methodName)
+        val notOnboarded = method.isAnnotationPresent(IsNotOnboarded::class.java)
+        runBlocking {
+            userSettingsRepo.setIsOnboarded(!notOnboarded)
+        }
 
         vm = MainViewModel(
             getLocalForecastForToday = GetLocalForecastForTodayUseCase(
@@ -417,20 +429,39 @@ class MainViewModelTest {
     }
 
     @Test
-    fun init_ifLocationExistsInRepo_isOnboarded() = runTest {
-        setLocation(FakeData.zip)
+    fun init_ifRepoReportsIsOnboarded_isOnboarded() = runTest {
 
         createViewModel()
 
         assertEquals(AppState.Onboarded, vm.appState.first())
     }
 
+    @IsNotOnboarded
     @Test
-    fun init_ifLocationDoesNotExistInRepo_isNotOnboarded() = runTest {
+    fun init_ifRepoReportsNotOnboarded_isNotOnboarded() = runTest {
 
         createViewModel()
 
         assertEquals(AppState.NotOnboarded, vm.appState.first())
+    }
+
+    @IsNotOnboarded
+    @Test
+    fun init_ifRepoReportsLocationButNotOnboarded_isNotOnboarded() = runTest {
+        setLocation(FakeData.zip)
+
+        createViewModel()
+
+        assertEquals(AppState.NotOnboarded, vm.appState.first())
+    }
+
+    @Test
+    fun init_ifRepoReportsLocationAndOnboarded_isOnboarded() = runTest {
+        setLocation(FakeData.zip)
+
+        createViewModel()
+
+        assertEquals(AppState.Onboarded, vm.appState.first())
     }
 
     @Test

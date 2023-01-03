@@ -5,7 +5,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import kotlinx.coroutines.runBlocking
@@ -21,12 +20,12 @@ class AppNavHostTest {
 
     private lateinit var navController: TestNavHostController
 
-    private fun setupNavController(withLocation: String) {
+    private fun setupNavController(withOnboarded: Boolean) {
         // Init the navigation controller
         composeTestRule.setContent {
             val userSettingsRepo: UserSettingsRepository = get()
             runBlocking {
-                userSettingsRepo.setLocation(withLocation)
+                userSettingsRepo.setIsOnboarded(withOnboarded)
             }
 
             navController = TestNavHostController(LocalContext.current)
@@ -37,14 +36,14 @@ class AppNavHostTest {
 
     @Test
     fun startDestination_ifOnboardingIsComplete_isMainScreen() {
-        setupNavController(withLocation = FakeData.zip)
+        setupNavController(withOnboarded = true)
 
         assertDestinationIs(AppDestination.Main.name)
     }
 
     @Test
     fun startDestination_ifOnboardingIsIncomplete_navigatesToLocationScreen() {
-        setupNavController(withLocation = "")
+        setupNavController(withOnboarded = false)
 
         assertDestinationIs(AppDestination.Location.name)
     }
