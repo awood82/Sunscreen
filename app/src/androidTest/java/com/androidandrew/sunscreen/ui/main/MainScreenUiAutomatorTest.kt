@@ -10,6 +10,7 @@ import androidx.test.uiautomator.UiSelector
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
+import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import kotlinx.coroutines.delay
@@ -28,6 +29,7 @@ class MainScreenUiAutomatorTest {
     lateinit var uiDevice: UiDevice
     lateinit var userSettingsRepo: UserSettingsRepository
     lateinit var userTrackingRepo: UserTrackingRepository
+    private val emptyUserTracking = UserTracking(0.0, 0.0)
 
     @Before
     fun setup() {
@@ -35,6 +37,7 @@ class MainScreenUiAutomatorTest {
             userSettingsRepo = get()
             userTrackingRepo = get()
             runBlocking {
+                userTrackingRepo.setUserTracking(FakeData.localDate.toString(), emptyUserTracking)
                 userSettingsRepo.setIsOnboarded(true)
                 userSettingsRepo.setLocation(FakeData.zip)
             }
@@ -52,8 +55,7 @@ class MainScreenUiAutomatorTest {
     fun startTracking_continues_whenAppIsInTheBackground() {
         runBlocking {
             val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
-            assertEquals(0.0, trackingInfo?.sunburnProgress)
-            assertEquals(0.0, trackingInfo?.vitaminDProgress)
+            assertEquals(emptyUserTracking, trackingInfo)
         }
 
         val vitaminDProgressBar = uiDevice.findObjects(By.res("progress"))[1]
@@ -76,8 +78,7 @@ class MainScreenUiAutomatorTest {
 
         runBlocking {
             val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
-            assertNotEquals(0.0, trackingInfo?.vitaminDProgress)
-            assertNotEquals(0.0, trackingInfo?.sunburnProgress)
+            assertNotEquals(emptyUserTracking, trackingInfo)
         }
 
 //        assertNotEquals(progressMid, progressEnd)

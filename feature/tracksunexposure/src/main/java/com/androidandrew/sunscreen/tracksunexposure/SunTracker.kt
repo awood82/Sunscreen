@@ -14,7 +14,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.time.Clock
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class SunTracker(
@@ -70,23 +69,12 @@ class SunTracker(
         settingsStream
             .flowOn(ioDispatcher)
             .onEach {
-                Timber.d("settings detected a change, possibly null")
                 it?.let {
-                    Timber.d("and they weren't null")
+                    Timber.d("Updated SunTracker's settings")
                     settings = it
                 }
             }
             .launchIn(trackerScope)
-
-//        trackerScope.launch {
-//            settingsStream.collect {
-//                Timber.d("settings detected a change")
-//                it?.let {
-//                    Timber.d("and they weren't null")
-//                    settings = it
-//                }
-//            }
-//        }
     }
 
     private fun initializeUserTracking() {
@@ -98,8 +86,10 @@ class SunTracker(
     }
 
     private fun createTrackingTimer(): RepeatingTimer {
-        return RepeatingTimer(object : TimerTask() {
-            override fun run() {
+        return RepeatingTimer(
+            initialDelayMillis = TimeUnit.SECONDS.toMillis(1),
+            repeatPeriodMillis = TimeUnit.SECONDS.toMillis(1),
+            action = {
                 if (::settings.isInitialized) {
                     trackerScope.launch {
                         Timber.d("Updating burn and vitamin D progress")
@@ -107,7 +97,7 @@ class SunTracker(
                     }
                 }
             }
-        }, TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
+        )
     }
 
     suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {

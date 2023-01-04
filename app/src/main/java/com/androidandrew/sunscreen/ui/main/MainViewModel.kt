@@ -161,20 +161,20 @@ class MainViewModel(
     // TODO: Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()
 
     // TODO: Could move these Timers elsewhere like in TickHandler: https://developer.android.com/kotlin/flow/stateflow-and-sharedflow
-    private val updateTimer =
-        RepeatingTimer(object : TimerTask() {
-            override fun run() {
-                Timber.d("Update timer is running")
-                _lastLocalTimeUsed.update { LocalTime.now(clock) }
-            }
-        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.MINUTES.toMillis(1))
+    private val updateTimer = RepeatingTimer(
+        initialDelayMillis = TimeUnit.MINUTES.toMillis(1),
+        repeatPeriodMillis = TimeUnit.MINUTES.toMillis(1),
+        action = {
+            Timber.d("Update timer is running")
+            _lastLocalTimeUsed.update { LocalTime.now(clock) }
+        }
+    )
 
-    private val dailyTrackingRefreshTimer =
-        RepeatingTimer(object : TimerTask() {
-            override fun run() {
-                _lastDateUsed.update { getDateToday() }
-            }
-        }, TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(1))
+    private val dailyTrackingRefreshTimer = RepeatingTimer(
+        initialDelayMillis = TimeUnit.HOURS.toMillis(1),
+        repeatPeriodMillis = TimeUnit.HOURS.toMillis(1),
+        action = { _lastDateUsed.update { getDateToday() } }
+    )
 
     // TODO: Same thing, refactor w/ the timers
 //    val dayRefresher = viewModelScope.launch {

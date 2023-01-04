@@ -1,25 +1,35 @@
 package com.androidandrew.sunscreen.common
 
-import java.util.*
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.*
 
-class RepeatingTimer(private val timerTask: TimerTask,
-                     private val delayMillis: Long, private val periodMillis: Long) : Timer() {
+class RepeatingTimer(private val initialDelayMillis: Long, private val repeatPeriodMillis: Long,
+                     defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
+                     private val action: () -> Unit) {
 
     private var isStarted = false
-
-    companion object {
-        val ONE_MINUTE = TimeUnit.MINUTES.toMillis(1)
-    }
+    private var job = SupervisorJob()
+    private var coroutineScope = CoroutineScope(defaultDispatcher + job)
 
     fun start() {
         startIfNotStartedYet()
     }
 
+    fun cancel() {
+        coroutineScope.coroutineContext.cancelChildren()
+        isStarted = false
+    }
+
     private fun startIfNotStartedYet() {
         if (!isStarted) {
             isStarted = true
-            this.scheduleAtFixedRate(timerTask, delayMillis, periodMillis)
+
+            coroutineScope.launch {
+                delay(initialDelayMillis)
+                while (true) {
+                    action()
+                    delay(repeatPeriodMillis)
+                }
+            }
         }
     }
 }
