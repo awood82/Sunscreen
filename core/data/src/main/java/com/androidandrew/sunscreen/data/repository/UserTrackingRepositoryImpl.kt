@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.data.repository
 import com.androidandrew.sunscreen.database.UserTrackingDao
 import com.androidandrew.sunscreen.model.UserTracking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class UserTrackingRepositoryImpl(
@@ -11,9 +12,11 @@ class UserTrackingRepositoryImpl(
     private val NO_RECORD_YET = UserTracking(sunburnProgress = 0.0, vitaminDProgress = 0.0)
 
     override fun getUserTrackingFlow(date: String): Flow<UserTracking?> {
-        return userTrackingDao.getFlow(date).map {
-            it?.toModel() ?: NO_RECORD_YET
-        }
+        return userTrackingDao.getFlow(date)
+            .distinctUntilChanged()
+            .map {
+                it?.toModel() ?: NO_RECORD_YET
+            }
     }
     override suspend fun getUserTracking(date: String): UserTracking {
         return userTrackingDao.getOnce(date)?.toModel() ?: NO_RECORD_YET

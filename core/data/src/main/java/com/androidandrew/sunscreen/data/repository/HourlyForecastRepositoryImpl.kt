@@ -14,13 +14,16 @@ class HourlyForecastRepositoryImpl(
 ) : HourlyForecastRepository {
 
     override fun getForecastFlow(zipCode: String, date: LocalDate): Flow<List<UvPredictionPoint>> {
-        return hourlyForecastDao.getFlow(zipCode, date.toString()).map {
-            it.asModel().trim()
-        }.onEach {
-            if (it.isEmpty()) {
-                refreshNetwork(zipCode)
+        return hourlyForecastDao.getFlow(zipCode, date.toString())
+            .distinctUntilChanged()
+            .map {
+                it.asModel().trim()
             }
-        }
+            .onEach {
+                if (it.isEmpty()) {
+                    refreshNetwork(zipCode)
+                }
+            }
     }
 
     override suspend fun getForecast(zipCode: String, date: LocalDate): List<UvPredictionPoint> {

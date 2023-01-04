@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.data.repository
 import com.androidandrew.sunscreen.database.*
 import com.androidandrew.sunscreen.database.entity.UserSettingEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class UserSettingsRepositoryImpl(
@@ -24,9 +25,11 @@ class UserSettingsRepositoryImpl(
     }
 
     override fun getIsOnboardedFlow(): Flow<Boolean> {
-        return readBooleanSettingFlow(IS_ONBOARDED).map {
-            it ?: DEFAULT_IS_ONBOARDED
-        }
+        return readBooleanSettingFlow(IS_ONBOARDED)
+            .distinctUntilChanged()
+            .map {
+                it ?: DEFAULT_IS_ONBOARDED
+            }
     }
     override suspend fun getIsOnboarded(): Boolean {
         return readBooleanSetting(IS_ONBOARDED) ?: DEFAULT_IS_ONBOARDED
@@ -36,9 +39,11 @@ class UserSettingsRepositoryImpl(
     }
 
     override fun getLocationFlow(): Flow<String> {
-        return readStringSettingFlow(LOCATION).map {
-            it ?: DEFAULT_LOCATION
-        }
+        return readStringSettingFlow(LOCATION)
+            .distinctUntilChanged()
+            .map {
+                it ?: DEFAULT_LOCATION
+            }
     }
     override suspend fun getLocation(): String {
         return readStringSetting(LOCATION) ?: DEFAULT_LOCATION
@@ -48,9 +53,11 @@ class UserSettingsRepositoryImpl(
     }
 
     override fun getSkinTypeFlow(): Flow<Int> {
-        return readIntSettingFlow(SKIN_TYPE).map {
-            it ?: MY_HARDCODED_SKIN_TYPE
-        }
+        return readIntSettingFlow(SKIN_TYPE)
+            .distinctUntilChanged()
+            .map {
+                it ?: MY_HARDCODED_SKIN_TYPE
+            }
     }
     override suspend fun getSkinType(): Int {
         return readIntSetting(SKIN_TYPE) ?: MY_HARDCODED_SKIN_TYPE
@@ -60,9 +67,11 @@ class UserSettingsRepositoryImpl(
     }
 
     override fun getSpfFlow(): Flow<Int> {
-        return readIntSettingFlow(SPF).map {
-            it ?: NO_SUNSCREEN
-        }
+        return readIntSettingFlow(SPF)
+            .distinctUntilChanged()
+            .map {
+                it ?: NO_SUNSCREEN
+            }
     }
     override suspend fun getSpf(): Int {
         return readIntSetting(SPF) ?: NO_SUNSCREEN
@@ -72,9 +81,11 @@ class UserSettingsRepositoryImpl(
     }
 
     override fun getIsOnSnowOrWaterFlow(): Flow<Boolean> {
-        return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER).map {
-            it ?: DEFAULT_IS_ON_SNOW_OR_WATER
-        }
+        return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER)
+            .distinctUntilChanged()
+            .map {
+                it ?: DEFAULT_IS_ON_SNOW_OR_WATER
+            }
     }
     override suspend fun getIsOnSnowOrWater(): Boolean {
         return readBooleanSetting(IS_ON_SNOW_OR_WATER) ?: DEFAULT_IS_ON_SNOW_OR_WATER

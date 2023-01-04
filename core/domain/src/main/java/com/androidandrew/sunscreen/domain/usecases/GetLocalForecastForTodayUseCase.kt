@@ -27,9 +27,11 @@ class GetLocalForecastForTodayUseCase(
             .distinctUntilChanged()
             .map {
                 Timber.i("Use Case: Get local forecast for $it")
-                it?.let { zip ->
-                    hourlyForecastRepository.getForecast(zip, LocalDate.now(clock))
-                } ?: emptyList()
+                if (it.isEmpty()) {
+                    emptyList()
+                } else {
+                    hourlyForecastRepository.getForecast(it, LocalDate.now(clock))
+                }
             }
     }
 }

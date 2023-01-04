@@ -52,7 +52,8 @@ class MainScreenUiAutomatorTest {
     fun startTracking_continues_whenAppIsInTheBackground() {
         runBlocking {
             val trackingInfo = userTrackingRepo.getUserTracking(FakeData.localDate.toString())
-            assertNull(trackingInfo)
+            assertEquals(0.0, trackingInfo?.sunburnProgress)
+            assertEquals(0.0, trackingInfo?.vitaminDProgress)
         }
 
         val vitaminDProgressBar = uiDevice.findObjects(By.res("progress"))[1]
