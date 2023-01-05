@@ -142,9 +142,9 @@ class MainViewModelTest {
     fun onTrackingClicked_canBeCalledMultipleTimes() = runTest {
         createViewModel()
 
-        vm.onTrackingClicked()
-        vm.onTrackingClicked()
-        vm.onTrackingClicked()
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
     }
 
     @Test
@@ -288,6 +288,24 @@ class MainViewModelTest {
         val forecast = hourlyForecastRepo.getForecastFlow(longAlphaZip, getDate()).first()
 
         assertTrue(forecast.isEmpty())
+    }
+
+    @Test
+    fun onLocationChanged_ifNoNetworkBefore_thenNetworkEnabled_refreshesNetwork() = runTest {
+        val validZip = "12345"
+        createViewModel()
+
+        fakeUvService.exception = IOException()
+        searchZip(validZip)
+
+        var forecast = hourlyForecastRepo.getForecastFlow(validZip, getDate()).first()
+        assertTrue(forecast.isEmpty())
+
+        fakeUvService.exception = null
+        searchZip(validZip)
+
+        forecast = hourlyForecastRepo.getForecastFlow(validZip, getDate()).first()
+        assertTrue(forecast.isNotEmpty())
     }
 
     @Test

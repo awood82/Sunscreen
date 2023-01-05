@@ -176,6 +176,10 @@ class MainViewModel(
         action = { _lastDateUsed.update { getDateToday() } }
     )
 
+    private fun getDateToday(): String {
+        return LocalDate.now(clock).toString()
+    }
+
     // TODO: Same thing, refactor w/ the timers
 //    val dayRefresher = viewModelScope.launch {
 //        _lastDateUsed
@@ -236,6 +240,18 @@ class MainViewModel(
         }
     }
 
+    private fun onSearchLocation(location: String) {
+        if (locationUtil.isValidZipCode(location)) {
+            viewModelScope.launch {
+                Timber.d("Updating location ($location) in repo")
+                // Setting the value to "" and then the correct value ensures that
+                // distinctUntilChanged() won't block forced refreshes.
+                userSettingsRepo.setLocation("")
+                userSettingsRepo.setLocation(location)
+            }
+        }
+    }
+
     fun onUvTrackingEvent(event: UvTrackingEvent) {
         Timber.d("onUvTrackingEvent: $event")
         when (event) {
@@ -256,7 +272,7 @@ class MainViewModel(
         }
     }
 
-    fun onTrackingClicked() {
+    private fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
             true -> {
                 sunTrackerServiceController.stop()
@@ -288,16 +304,4 @@ class MainViewModel(
         }
     }
 */
-    private fun onSearchLocation(location: String) {
-        if (locationUtil.isValidZipCode(location)) {
-            viewModelScope.launch {
-                Timber.d("Updating location ($location) in repo")
-                userSettingsRepo.setLocation(location)
-            }
-        }
-    }
-
-    private fun getDateToday(): String {
-        return LocalDate.now(clock).toString()
-    }
 }
