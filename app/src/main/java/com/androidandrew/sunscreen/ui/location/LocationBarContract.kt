@@ -5,6 +5,6 @@ data class LocationBarState(
 )
 
 sealed interface LocationBarEvent {
-    data class TextChanged(val text: String): LocationBarEvent
-    data class LocationSearched(val location: String): LocationBarEvent
+    data class TextChanged(val text: String) : LocationBarEvent
+    data class LocationSearched(val location: String) : LocationBarEvent
 }

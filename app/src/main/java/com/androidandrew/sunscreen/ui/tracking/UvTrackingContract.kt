@@ -28,7 +28,7 @@ data class UvTrackingState(
 }
 
 sealed interface UvTrackingEvent {
-    object TrackingButtonClicked: UvTrackingEvent
-    data class SpfChanged(val spf: String): UvTrackingEvent
-    data class IsOnSnowOrWaterChanged(val isOnSnowOrWater: Boolean): UvTrackingEvent
+    object TrackingButtonClicked : UvTrackingEvent
+    data class SpfChanged(val spf: String) : UvTrackingEvent
+    data class IsOnSnowOrWaterChanged(val isOnSnowOrWater: Boolean) : UvTrackingEvent
 }
