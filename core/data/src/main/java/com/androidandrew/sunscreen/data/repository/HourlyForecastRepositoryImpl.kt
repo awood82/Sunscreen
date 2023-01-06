@@ -27,11 +27,12 @@ class HourlyForecastRepositoryImpl(
     }
 
     override suspend fun getForecast(zipCode: String, date: LocalDate): List<UvPredictionPoint> {
-        val forecast = hourlyForecastDao.getOnce(zipCode, date.toString())
+        var forecast = hourlyForecastDao.getOnce(zipCode, date.toString())
         if (forecast.isEmpty()) {
             refreshNetwork(zipCode)
+            forecast = hourlyForecastDao.getOnce(zipCode, date.toString())
         }
-        return hourlyForecastDao.getOnce(zipCode, date.toString()).asModel().trim()
+        return forecast.asModel().trim()
     }
 
     override suspend fun setForecast(forecast: DailyUvIndexForecast) {
