@@ -15,7 +15,7 @@ import java.time.LocalDate
  *   Either inject a Clock everywhere, or write it to a database as it gets updated by some clock-watching feature
  */
 class GetLocalForecastForTodayUseCase(
-    userSettingsRepository: UserSettingsRepository,
+    private val userSettingsRepository: UserSettingsRepository,
     private val hourlyForecastRepository: HourlyForecastRepository,
     private val clock: Clock
 ) {
@@ -33,5 +33,10 @@ class GetLocalForecastForTodayUseCase(
                     hourlyForecastRepository.getForecast(it, LocalDate.now(clock))
                 }
             }
+    }
+
+    suspend fun forceRefresh(location: String) {
+        userSettingsRepository.setLocation("")
+        userSettingsRepository.setLocation(location)
     }
 }

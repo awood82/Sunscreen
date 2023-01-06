@@ -7,10 +7,13 @@ import com.androidandrew.sharedtest.model.FakeUvPredictions
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.*
+import com.androidandrew.sunscreen.model.UvPredictionPoint
 import com.androidandrew.sunscreen.model.trim
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -19,6 +22,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -80,6 +84,26 @@ class GetLocalForecastForTodayUseCaseTest {
 
         val actualForecast = forecastStream.first()
         assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+    }
+
+    @Test
+    fun forceRefresh_triggersForecastUpdate() = runTest {
+        setLocation(FakeData.zip)
+        fakeUvService.exception = IOException()
+        createUseCase()
+        var actualForecast: List<UvPredictionPoint> = emptyList()
+        val collectJob = launch(UnconfinedTestDispatcher()) {
+            useCase.invoke().collect {
+                actualForecast = it
+            }
+        }
+
+        assertTrue(actualForecast.isEmpty())
+        fakeUvService.exception = null
+        useCase.forceRefresh(FakeData.zip)
+
+        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+        collectJob.cancel()
     }
 
     private suspend fun setLocation(location: String) {

@@ -24,11 +24,10 @@ import timber.log.Timber
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
-    getLocalForecastForToday: GetLocalForecastForTodayUseCase,
+    private val getLocalForecastForToday: GetLocalForecastForTodayUseCase,
     private val userSettingsRepo: UserSettingsRepository,
     userTrackingRepo: UserTrackingRepository,
     private val convertSpfUseCase: ConvertSpfUseCase,
@@ -244,10 +243,11 @@ class MainViewModel(
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 Timber.d("Updating location ($location) in repo")
-                // Setting the value to "" and then the correct value ensures that
-                // distinctUntilChanged() won't block forced refreshes.
-                userSettingsRepo.setLocation("")
                 userSettingsRepo.setLocation(location)
+                // We need to force a refresh in case there was a network error before,
+                // and the user is searching for the same location,
+                // otherwise the Use Case won't see a location change and new data won't be loaded.
+                getLocalForecastForToday.forceRefresh(location)
             }
         }
     }
