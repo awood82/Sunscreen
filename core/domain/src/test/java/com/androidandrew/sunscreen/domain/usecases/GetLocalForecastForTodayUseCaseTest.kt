@@ -72,7 +72,7 @@ class GetLocalForecastForTodayUseCaseTest {
         val forecastStream = useCase()
 
         val actualForecast = forecastStream.first()
-        assertTrue(actualForecast.isEmpty())
+        assertTrue(actualForecast.getOrNull()!!.isEmpty())
     }
 
     @Test
@@ -83,7 +83,8 @@ class GetLocalForecastForTodayUseCaseTest {
         val forecastStream = useCase()
 
         val actualForecast = forecastStream.first()
-        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+        assertTrue(actualForecast.isSuccess)
+        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast.getOrNull())
     }
 
     @Test
@@ -91,18 +92,20 @@ class GetLocalForecastForTodayUseCaseTest {
         setLocation(FakeData.zip)
         fakeUvService.exception = IOException()
         createUseCase()
-        var actualForecast: List<UvPredictionPoint> = emptyList()
+        var actualForecast: Result<List<UvPredictionPoint>> = Result.success(emptyList())
         val collectJob = launch(UnconfinedTestDispatcher()) {
             useCase.invoke().collect {
                 actualForecast = it
             }
         }
 
-        assertTrue(actualForecast.isEmpty())
+        assertTrue(actualForecast.isFailure)
+
         fakeUvService.exception = null
         useCase.forceRefresh(FakeData.zip)
 
-        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+        assertTrue(actualForecast.isSuccess)
+        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast.getOrNull()!!)
         collectJob.cancel()
     }
 

@@ -22,13 +22,13 @@ class GetLocalForecastForTodayUseCase(
 
     private val locationStream = userSettingsRepository.getLocationFlow()
 
-    operator fun invoke(): Flow<List<UvPredictionPoint>> {
+    operator fun invoke(): Flow<Result<List<UvPredictionPoint>>> {
         return locationStream
             .distinctUntilChanged()
             .map {
                 Timber.i("Use Case: Get local forecast for $it")
                 if (it.isEmpty()) {
-                    emptyList()
+                    Result.success(emptyList()) // TODO: Use the NiA app's Result.Loading?
                 } else {
                     hourlyForecastRepository.getForecast(it, LocalDate.now(clock))
                 }

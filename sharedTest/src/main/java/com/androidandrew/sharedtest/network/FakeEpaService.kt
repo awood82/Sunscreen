@@ -38,11 +38,11 @@ object FakeEpaService : EpaService {
     var exception: Exception? = null
     var networkRequestCount = 0
 
-    override suspend fun getUvForecast(zipCode: String): DailyUvIndexForecast {
+    override suspend fun getUvForecast(zipCode: String): Result<DailyUvIndexForecast> {
         networkRequestCount++
-        when (exception) {
-            null -> return forecast
-            else -> throw(exception!!)
+        return when (exception) {
+            null -> Result.success(forecast)
+            else -> Result.failure(exception!!)
         }
     }
 }

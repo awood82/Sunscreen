@@ -3,16 +3,17 @@ package com.androidandrew.sunscreen.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sharedtest.model.asExternalModel
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.model.UvPredictionPoint
+import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.model.HourlyUvIndexForecast
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.*
@@ -98,7 +99,7 @@ class HourlyForecastRepositoryTest {
             true -> mockService
             false -> fakeService
         }
-        coEvery { mockService.getUvForecast(any()) } returns mockForecast
+        coEvery { mockService.getUvForecast(any()) } returns Result.success(mockForecast)
 
         databaseHolder = FakeDatabaseWrapper()
         repository = HourlyForecastRepositoryImpl(
@@ -121,25 +122,7 @@ class HourlyForecastRepositoryTest {
 
         val actualReadModel = repository.getForecast(FakeData.zip, FakeData.localDate)
 
-        assertEquals(expectedModel, actualReadModel)
-    }
-
-    @Test
-    fun getNetworkForecastFlow_thenInsert_getsUpdatedFlow() = runTest {
-        val forecastFlow = repository.getForecastFlow(FakeData.zip, FakeData.localDate)
-
-        repository.setForecast(forecast)
-
-        assertEquals(expectedModel, forecastFlow.first())
-    }
-
-    @Test
-    fun getNetworkForecastFlow_thenInsertForTomorrow_getsUpdatedFlowToday() = runTest {
-        val forecastFlow = repository.getForecastFlow(FakeData.zip, FakeData.localDate)
-
-        repository.setForecast(forecastForTomorrow)
-
-        assertEquals(expectedModelForTomorrow, forecastFlow.first())
+        assertEquals(expectedModel, actualReadModel.getOrNull())
     }
 
     @UseMockService
@@ -150,43 +133,30 @@ class HourlyForecastRepositoryTest {
         val actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
 
         coVerify(exactly = 0) { mockService.getUvForecast(any()) }
-        assertEquals(expectedModel, actualReadForecast)
+        assertEquals(expectedModel, actualReadForecast.getOrNull())
     }
 
-    @UseMockService
     @Test
-    fun getNetworkForecast_ifDoesNotExistInDatabase_queriesNetwork() = runTest {
+    fun getNetworkForecast_ifDoesNotExistInDatabase_queriesNetwork_andCachesResult() = runTest {
+        val expectedNetworkResult = FakeEpaService.forecast.asExternalModel().trim()
 
+        var actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
+
+        assertTrue(actualReadForecast.isSuccess)
+        assertEquals(expectedNetworkResult, actualReadForecast.getOrNull())
+
+        // The result should be cached, so the network is not queried again
+        fakeService.exception = IOException() // Make updates unreadablee
+        actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
+        assertTrue(actualReadForecast.isSuccess)
+        assertEquals(expectedNetworkResult, actualReadForecast.getOrNull())
+    }
+
+    @Test
+    fun getNetworkForecast_ifDoesNotExistInDatabase_andNetworkHasError_returnsError() = runTest {
+        fakeService.exception = IOException()
         val actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
 
-        coVerify(exactly = 1) { mockService.getUvForecast(any()) }
-        assertEquals(expectedMockModel, actualReadForecast)
-    }
-
-    @UseMockService
-    @Test
-    fun getNetworkForecastFlow_ifExistsInDatabase_doesNotQueryNetwork() = runTest {
-        repository.setForecast(forecast)
-
-        val actualFlow = repository.getForecastFlow(FakeData.zip, FakeData.localDate)
-
-        coVerify(exactly = 0) { mockService.getUvForecast(any()) }
-        assertEquals(expectedModel, actualFlow.first())
-    }
-
-    @UseMockService
-    @Test
-    fun getNetworkForecastFlow_ifDoesNotExistInDatabase_queriesNetwork() = runTest {
-
-        val actualFlow = repository.getForecastFlow(FakeData.zip, FakeData.localDate)
-
-        // Trigger network response
-        var flowContents = actualFlow.first()
-        coVerify(exactly = 1) { mockService.getUvForecast(any()) }
-        assertTrue(flowContents.isEmpty())
-
-        // Get network results
-        flowContents = actualFlow.first()
-        assertEquals(expectedMockModel, flowContents)
+        assertTrue(actualReadForecast.isFailure)
     }
 }

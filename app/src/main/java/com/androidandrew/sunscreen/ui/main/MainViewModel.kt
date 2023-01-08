@@ -18,6 +18,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -65,11 +66,32 @@ class MainViewModel(
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
+    // Errors
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage = _errorMessage.asStateFlow()
+
     // Forecast
 //    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
-    private val _uvPrediction = getLocalForecastForToday().shareIn(
+    private val _uvPrediction = getLocalForecastForToday().map {
+        if (it.isSuccess) {
+            it.getOrNull()!!
+        } else {
+            val error = it.exceptionOrNull()!!
+            Timber.e("ViewModel got the error: $error")
+            displayError(error)
+            emptyList()
+        }
+    }.shareIn(
         scope = viewModelScope, started = SharingStarted.WhileSubscribed(), replay = 1
     )
+
+    private fun displayError(throwable: Throwable) {
+        _errorMessage.update { throwable.message ?: "Unknown Error" }
+        viewModelScope.launch {
+            delay(2_000)
+            _errorMessage.update { "" }
+        }
+    }
 
     val appState = userSettingsRepo.getIsOnboardedFlow()
         .distinctUntilChanged()
@@ -154,10 +176,6 @@ class MainViewModel(
             else -> BurnTimeUiState.Known(minutes)
         }
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = BurnTimeUiState.Unknown)
-
-    private val _snackbarMessage = MutableLiveData<String>()
-    val snackbarMessage: LiveData<String> = _snackbarMessage
-    // TODO: Snackbar.make(binding.main, message, Snackbar.LENGTH_LONG).show()
 
     // TODO: Could move these Timers elsewhere like in TickHandler: https://developer.android.com/kotlin/flow/stateflow-and-sharedflow
     private val updateTimer = RepeatingTimer(

@@ -2,10 +2,8 @@ package com.androidandrew.sunscreen.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -22,6 +20,17 @@ fun SunscreenApp(
     navController: NavHostController = rememberNavController()
 ) {
 //    val backStackEntry by navController.currentBackStackEntryAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackbarMessage by remember { mutableStateOf("") }
+
+    LaunchedEffect(snackbarMessage) {
+        if (snackbarMessage.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = snackbarMessage,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -35,6 +44,7 @@ fun SunscreenApp(
 //                navigateUp = { navController.navigateUp() }
 //            )
 //        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Surface(
             modifier = Modifier
@@ -42,7 +52,7 @@ fun SunscreenApp(
                 .padding(innerPadding)
         ) {
             Timber.d("Loading AppNavHost")
-            AppNavHost(navController = navController, modifier = modifier)
+            AppNavHost(navController = navController, onError = { snackbarMessage = it }, modifier = modifier)
         }
     }
 }
