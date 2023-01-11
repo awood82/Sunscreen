@@ -23,13 +23,13 @@ import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
-import org.koin.androidx.compose.get
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = get(),
+    viewModel: MainViewModel = koinViewModel(),
     onNotOnboarded: () -> Unit,
     onError: (String) -> Unit
 ) {

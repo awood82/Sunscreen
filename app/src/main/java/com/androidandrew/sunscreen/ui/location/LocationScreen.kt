@@ -10,14 +10,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.androidx.compose.get
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LocationScreen(
     onLocationValid: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LocationViewModel = get()
+    viewModel: LocationViewModel = koinViewModel()
 ) {
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
     val isLocationValid by viewModel.isLocationValid.collectAsStateWithLifecycle()
