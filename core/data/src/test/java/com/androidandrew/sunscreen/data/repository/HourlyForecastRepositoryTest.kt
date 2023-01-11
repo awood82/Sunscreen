@@ -6,6 +6,7 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.model.asExternalModel
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.model.UvPredictionPoint
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.network.EpaService
@@ -122,7 +123,7 @@ class HourlyForecastRepositoryTest {
 
         val actualReadModel = repository.getForecast(FakeData.zip, FakeData.localDate)
 
-        assertEquals(expectedModel, actualReadModel.getOrNull())
+        assertEquals(expectedModel, (actualReadModel as DataResult.Success).data)
     }
 
     @UseMockService
@@ -133,7 +134,7 @@ class HourlyForecastRepositoryTest {
         val actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
 
         coVerify(exactly = 0) { mockService.getUvForecast(any()) }
-        assertEquals(expectedModel, actualReadForecast.getOrNull())
+        assertEquals(expectedModel, (actualReadForecast as DataResult.Success).data)
     }
 
     @Test
@@ -142,14 +143,14 @@ class HourlyForecastRepositoryTest {
 
         var actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
 
-        assertTrue(actualReadForecast.isSuccess)
-        assertEquals(expectedNetworkResult, actualReadForecast.getOrNull())
+        assertTrue(actualReadForecast is DataResult.Success)
+        assertEquals(expectedNetworkResult, (actualReadForecast as DataResult.Success).data)
 
         // The result should be cached, so the network is not queried again
         fakeService.exception = IOException() // Make updates unreadablee
         actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
-        assertTrue(actualReadForecast.isSuccess)
-        assertEquals(expectedNetworkResult, actualReadForecast.getOrNull())
+        assertTrue(actualReadForecast is DataResult.Success)
+        assertEquals(expectedNetworkResult, (actualReadForecast as DataResult.Success).data)
     }
 
     @Test
@@ -157,6 +158,6 @@ class HourlyForecastRepositoryTest {
         fakeService.exception = IOException()
         val actualReadForecast = repository.getForecast(FakeData.zip, FakeData.localDate)
 
-        assertTrue(actualReadForecast.isFailure)
+        assertTrue(actualReadForecast is DataResult.Error)
     }
 }

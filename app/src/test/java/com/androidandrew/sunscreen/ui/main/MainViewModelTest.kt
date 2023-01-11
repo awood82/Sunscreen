@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
@@ -21,9 +22,7 @@ import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -298,13 +297,13 @@ class MainViewModelTest {
         searchZip(validZip)
 
         var forecast = hourlyForecastRepo.getForecast(validZip, getDate())
-        assertTrue(forecast.isFailure)
+        assertTrue(forecast is DataResult.Error)
 
         fakeUvService.exception = null
         searchZip(validZip)
 
         forecast = hourlyForecastRepo.getForecast(validZip, getDate())
-        assertTrue(forecast.isSuccess)
+        assertTrue(forecast is DataResult.Success)
     }
 
     @Test

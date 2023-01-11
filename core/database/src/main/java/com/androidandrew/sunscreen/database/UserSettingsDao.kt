@@ -6,19 +6,24 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.androidandrew.sunscreen.database.entity.UserSettingEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Dao
-interface UserSettingsDao {
+abstract class UserSettingsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(setting: UserSettingEntity)
+    abstract suspend fun insert(setting: UserSettingEntity)
 
     @Query("SELECT * FROM user_settings_table WHERE id = :id")
-    suspend fun getOnce(id: Long): UserSettingEntity?
+    abstract suspend fun getOnce(id: Long): UserSettingEntity?
+
+    fun getDistinctFlow(id: Long): Flow<UserSettingEntity?> {
+        return getFlow(id).distinctUntilChanged()
+    }
 
     @Query("SELECT * FROM user_settings_table WHERE id = :id")
-    fun getFlow(id: Long): Flow<UserSettingEntity?>
+    protected abstract fun getFlow(id: Long): Flow<UserSettingEntity?>
 
     @Query("DELETE FROM user_settings_table")
-    suspend fun deleteAll()
+    abstract suspend fun deleteAll()
 }

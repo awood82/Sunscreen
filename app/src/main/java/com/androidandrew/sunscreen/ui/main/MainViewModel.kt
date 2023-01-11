@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
@@ -73,13 +74,15 @@ class MainViewModel(
     // Forecast
 //    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
     private val _uvPrediction = getLocalForecastForToday().map {
-        if (it.isSuccess) {
-            it.getOrNull()!!
-        } else {
-            val error = it.exceptionOrNull()!!
-            Timber.e("ViewModel got the error: $error")
-            displayError(error)
-            emptyList()
+        when (it) {
+            is DataResult.Success -> it.data
+            is DataResult.Loading -> emptyList()
+            is DataResult.Error -> {
+                val error = it.exception
+                Timber.e("ViewModel got the error: $error")
+                displayError(error!!)
+                emptyList()
+            }
         }
     }.shareIn(
         scope = viewModelScope, started = SharingStarted.WhileSubscribed(), replay = 1

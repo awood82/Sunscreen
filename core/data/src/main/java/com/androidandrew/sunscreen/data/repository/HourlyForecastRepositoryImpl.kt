@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.data.repository
 
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.database.HourlyForecastDao
 import com.androidandrew.sunscreen.database.entity.HourlyForecastEntity
 import com.androidandrew.sunscreen.model.UvPredictionPoint
@@ -19,7 +20,7 @@ class HourlyForecastRepositoryImpl(
         hourlyForecastDao.insert(forecast.asEntity())
     }
 
-    override suspend fun getForecast(zipCode: String, date: LocalDate): Result<List<UvPredictionPoint>> {
+    override suspend fun getForecast(zipCode: String, date: LocalDate): DataResult<List<UvPredictionPoint>> {
         var forecastFromDb = readForecastFromDatabaseFor(zipCode, date)
         if (forecastFromDb.isEmpty()) {
             val forecastFromNetwork = getForecastFromNetwork(zipCode)
@@ -27,10 +28,10 @@ class HourlyForecastRepositoryImpl(
                 forecastFromDb = forecastFromNetwork.getOrNull()!!.asEntity()
                 cacheForecast(forecastFromDb)
             } else {
-                return Result.failure(forecastFromNetwork.exceptionOrNull()!!)
+                return DataResult.Error(forecastFromNetwork.exceptionOrNull()!!)
             }
         }
-        return Result.success(forecastFromDb.asModel().trim())
+        return DataResult.Success(forecastFromDb.asModel().trim())
     }
 
     private suspend fun getForecastFromNetwork(zipCode: String): Result<List<HourlyUvIndexForecast>> {
