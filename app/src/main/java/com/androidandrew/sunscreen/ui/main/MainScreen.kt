@@ -23,14 +23,15 @@ import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
-import org.koin.androidx.compose.get
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = get(),
-    onNotOnboarded: () -> Unit
+    viewModel: MainViewModel = koinViewModel(),
+    onNotOnboarded: () -> Unit,
+    onError: (String) -> Unit
 ) {
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
@@ -39,6 +40,9 @@ fun MainScreen(
     val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
     val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
+    val errorMessage: String by viewModel.errorMessage.collectAsStateWithLifecycle()
+
+    onError(errorMessage)
 
     when (appState) {
         AppState.Loading -> {}

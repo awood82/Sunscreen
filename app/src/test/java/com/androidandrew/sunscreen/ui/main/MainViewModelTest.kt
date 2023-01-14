@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
@@ -13,12 +14,13 @@ import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainCoroutineRule
 import com.androidandrew.sunscreen.util.LocationUtil
-import com.androidandrew.sunscreen.testing.getOrAwaitValue
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -61,6 +63,8 @@ class MainViewModelTest {
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
     private val delta = 0.1
+    private lateinit var chartState: UvChartUiState
+    private lateinit var collectJob: Job
 
     @Before
     fun setup() {
@@ -80,7 +84,7 @@ class MainViewModelTest {
         }
     }
 
-    private fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
+    private suspend fun createViewModel(clock: Clock = FakeData.clockDefaultNoon) {
         this.clock = clock
 
         val method = this.javaClass.getMethod(testName.methodName)
@@ -204,22 +208,24 @@ class MainViewModelTest {
     }
 
     @Test
-    fun networkError_onSearch_triggersSnackbar() = runTest {
+    fun networkError_onSearch_triggersError() = runTest {
         fakeUvService.exception = IOException("Network error")
         createViewModel()
 
         searchZip("12345")
 
-        assertEquals("Network error", vm.snackbarMessage.getOrAwaitValue())
+        assertEquals("Network error", vm.errorMessage.first())
     }
 
     @Test
-    fun networkError_onInit_triggersSnackbar() = runTest {
-        setLocation(FakeData.zip)
+    fun networkError_onInit_triggersError() = runTest {
         fakeUvService.exception = IOException("Network error")
+        setLocation(FakeData.zip)
         createViewModel()
 
-        assertEquals("Network error", vm.snackbarMessage.getOrAwaitValue())
+        triggerLocationUpdate()
+
+        assertEquals("Network error", vm.errorMessage.first())
     }
 
     @Test
@@ -229,8 +235,7 @@ class MainViewModelTest {
 
         searchZip(tooShortZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(tooShortZip, getDate()).first()
-        assertTrue(forecast.isEmpty())
+        assertTrue(chartState is UvChartUiState.NoData)
     }
 
     @Test
@@ -240,8 +245,7 @@ class MainViewModelTest {
 
         searchZip(tooLongZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(tooLongZip, getDate()).first()
-        assertTrue(forecast.isEmpty())
+        assertTrue(chartState is UvChartUiState.NoData)
     }
 
     @Test
@@ -251,8 +255,7 @@ class MainViewModelTest {
 
         searchZip(justRightZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(justRightZip, getDate()).first()
-        assertTrue(forecast.isNotEmpty())
+        assertTrue(chartState is UvChartUiState.HasData)
     }
 
     @Test
@@ -262,8 +265,7 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
-        assertTrue(forecast.isEmpty())
+        assertTrue(chartState is UvChartUiState.NoData)
     }
 
     @Test
@@ -273,21 +275,17 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(alphaZip, getDate()).first()
-        assertTrue(forecast.isEmpty())
+        assertTrue(chartState is UvChartUiState.NoData)
     }
 
     @Test
     fun onLocationChanged_ifZip_has5Digits_andSomeLetters_doesNotRefreshNetwork() = runTest {
         val longAlphaZip = "12345ABC"
-        setLocation(FakeData.zip)
         createViewModel()
 
         searchZip(longAlphaZip)
 
-        val forecast = hourlyForecastRepo.getForecastFlow(longAlphaZip, getDate()).first()
-
-        assertTrue(forecast.isEmpty())
+        assertTrue(chartState is UvChartUiState.NoData)
     }
 
     @Test
@@ -298,14 +296,14 @@ class MainViewModelTest {
         fakeUvService.exception = IOException()
         searchZip(validZip)
 
-        var forecast = hourlyForecastRepo.getForecastFlow(validZip, getDate()).first()
-        assertTrue(forecast.isEmpty())
+        var forecast = hourlyForecastRepo.getForecast(validZip, getDate())
+        assertTrue(forecast is DataResult.Error)
 
         fakeUvService.exception = null
         searchZip(validZip)
 
-        forecast = hourlyForecastRepo.getForecastFlow(validZip, getDate()).first()
-        assertTrue(forecast.isNotEmpty())
+        forecast = hourlyForecastRepo.getForecast(validZip, getDate())
+        assertTrue(forecast is DataResult.Success)
     }
 
     @Test
@@ -383,7 +381,7 @@ class MainViewModelTest {
 
         vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
-        assertTrue(userSettingsRepo.getIsOnSnowOrWaterFlow().first()!!)
+        assertTrue(userSettingsRepo.getIsOnSnowOrWaterFlow().first())
     }
 
     @Test
@@ -441,8 +439,7 @@ class MainViewModelTest {
 
         triggerLocationUpdate()
 
-        val forecast = hourlyForecastRepo.getForecastFlow(FakeData.zip, getDate()).first()
-        assertTrue(forecast.isNotEmpty())
+        assertTrue(chartState is UvChartUiState.HasData)
         assertEquals(1, fakeUvService.networkRequestCount)
     }
 
@@ -536,7 +533,7 @@ class MainViewModelTest {
 
     private fun triggerLocationUpdate() {
         runBlocking {
-            val state = vm.uvChartUiState.first()
+            chartState = vm.uvChartUiState.first()
         }
     }
 }

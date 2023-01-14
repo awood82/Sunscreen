@@ -8,17 +8,21 @@ import com.androidandrew.sunscreen.database.entity.UserTrackingEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserTrackingDao {
+abstract class UserTrackingDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(tracking: UserTrackingEntity)
+    abstract suspend fun insert(tracking: UserTrackingEntity)
 
     @Query("SELECT * FROM user_tracking_table WHERE date >= :date ORDER BY date DESC LIMIT 1")
-    suspend fun getOnce(date: String): UserTrackingEntity?
+    abstract suspend fun getOnce(date: String): UserTrackingEntity?
+
+    fun getDistinctFlow(date:String): Flow<UserTrackingEntity?> {
+        return getFlow(date)
+    }
 
     @Query("SELECT * FROM user_tracking_table WHERE date >= :date ORDER BY date DESC LIMIT 1")
-    fun getFlow(date: String): Flow<UserTrackingEntity?>
+    protected abstract fun getFlow(date: String): Flow<UserTrackingEntity?>
 
     @Query("DELETE FROM user_tracking_table")
-    suspend fun deleteAll()
+    abstract suspend fun deleteAll()
 }

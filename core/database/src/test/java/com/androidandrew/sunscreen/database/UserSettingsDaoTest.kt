@@ -65,9 +65,9 @@ class UserSettingsDaoTest {
 
     @Test
     fun getFlow_thenInsert_getsUpdatedFlowSetting() = runTest {
-        val stringFlow = databaseHolder.db.userSettingsDao.getFlow(1)
-        val intFlow = databaseHolder.db.userSettingsDao.getFlow(2)
-        val booleanFlow = databaseHolder.db.userSettingsDao.getFlow(3)
+        val stringFlow = databaseHolder.db.userSettingsDao.getDistinctFlow(1)
+        val intFlow = databaseHolder.db.userSettingsDao.getDistinctFlow(2)
+        val booleanFlow = databaseHolder.db.userSettingsDao.getDistinctFlow(3)
 
         databaseHolder.db.userSettingsDao.insert(
             UserSettingEntity(id = 1, value = string)
