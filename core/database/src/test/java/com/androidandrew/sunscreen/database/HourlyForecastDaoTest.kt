@@ -61,7 +61,7 @@ class HourlyForecastDaoTest {
     @Test
     fun noForecasts_getFlow_returnsNoForecasts() = runTest {
 
-        val forecastFlow = databaseHolder.db.hourlyForecastDao.getFlow(zip = locationOne, date = today)
+        val forecastFlow = databaseHolder.db.hourlyForecastDao.getDistinctFlow(zip = locationOne, date = today)
 
         val actualForecast = forecastFlow.first()
         assertTrue(actualForecast.isEmpty())
@@ -78,7 +78,7 @@ class HourlyForecastDaoTest {
 
     @Test
     fun getFlow_thenInsertForecasts_returnsUpdatedForecasts() = runTest {
-        val forecastFlow = databaseHolder.db.hourlyForecastDao.getFlow(zip = locationOne, date = today)
+        val forecastFlow = databaseHolder.db.hourlyForecastDao.getDistinctFlow(zip = locationOne, date = today)
 
         insertForecast(locationOneForecastForToday)
 
@@ -136,7 +136,7 @@ class HourlyForecastDaoTest {
     fun insertHourlyForecastsForTodayAndTomorrow_andGetFlowForToday_returnsForecastForToday() = runTest {
         insertForecast(locationOneForecastForToday)
         insertForecast(locationOneForecastForTomorrow)
-        val forecastFlow = databaseHolder.db.hourlyForecastDao.getFlow(zip = locationOne, date = today)
+        val forecastFlow = databaseHolder.db.hourlyForecastDao.getDistinctFlow(zip = locationOne, date = today)
 
         val actualForecast = forecastFlow.first()
 
@@ -150,7 +150,7 @@ class HourlyForecastDaoTest {
         val date = MutableStateFlow(today)
         // See https://stackoverflow.com/questions/69800618/how-to-manually-update-a-kotlin-flow
         val forecastFlow = date.flatMapLatest {
-            databaseHolder.db.hourlyForecastDao.getFlow(zip = locationOne, date = it)
+            databaseHolder.db.hourlyForecastDao.getDistinctFlow(zip = locationOne, date = it)
         }
 
         advanceUntilIdle()

@@ -6,6 +6,7 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.model.FakeUvPredictions
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.model.UvPredictionPoint
 import com.androidandrew.sunscreen.model.trim
@@ -71,8 +72,8 @@ class GetLocalForecastForTodayUseCaseTest {
 
         val forecastStream = useCase()
 
-        val actualForecast = forecastStream.first()
-        assertTrue(actualForecast.isEmpty())
+        val actualForecast = forecastStream.first() as DataResult.Success
+        assertTrue(actualForecast.data.isEmpty())
     }
 
     @Test
@@ -82,8 +83,8 @@ class GetLocalForecastForTodayUseCaseTest {
 
         val forecastStream = useCase()
 
-        val actualForecast = forecastStream.first()
-        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+        val actualForecast = forecastStream.first() as DataResult.Success
+        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast.data)
     }
 
     @Test
@@ -91,18 +92,20 @@ class GetLocalForecastForTodayUseCaseTest {
         setLocation(FakeData.zip)
         fakeUvService.exception = IOException()
         createUseCase()
-        var actualForecast: List<UvPredictionPoint> = emptyList()
+        var actualForecast: DataResult<List<UvPredictionPoint>> = DataResult.Success(emptyList())
         val collectJob = launch(UnconfinedTestDispatcher()) {
             useCase.invoke().collect {
                 actualForecast = it
             }
         }
 
-        assertTrue(actualForecast.isEmpty())
+        assertTrue(actualForecast is DataResult.Error)
+
         fakeUvService.exception = null
         useCase.forceRefresh(FakeData.zip)
 
-        assertEquals(FakeUvPredictions.forecast.trim(), actualForecast)
+        assertTrue(actualForecast is DataResult.Success)
+        assertEquals(FakeUvPredictions.forecast.trim(), (actualForecast as DataResult.Success).data)
         collectJob.cancel()
     }
 

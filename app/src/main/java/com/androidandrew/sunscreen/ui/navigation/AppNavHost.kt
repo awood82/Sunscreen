@@ -13,6 +13,7 @@ import timber.log.Timber
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    onError: (String) -> Unit,
     startDestination: String = AppDestination.Main.name
 ) {
     NavHost(
@@ -25,6 +26,7 @@ fun AppNavHost(
                 onNotOnboarded = {
                     navController.navigate(AppDestination.Location.name)
                 },
+                onError = onError,
                 modifier = modifier
             )
         }

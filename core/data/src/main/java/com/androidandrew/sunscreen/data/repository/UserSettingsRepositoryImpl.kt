@@ -26,7 +26,6 @@ class UserSettingsRepositoryImpl(
 
     override fun getIsOnboardedFlow(): Flow<Boolean> {
         return readBooleanSettingFlow(IS_ONBOARDED)
-            .distinctUntilChanged()
             .map {
                 it ?: DEFAULT_IS_ONBOARDED
             }
@@ -40,7 +39,6 @@ class UserSettingsRepositoryImpl(
 
     override fun getLocationFlow(): Flow<String> {
         return readStringSettingFlow(LOCATION)
-            .distinctUntilChanged()
             .map {
                 it ?: DEFAULT_LOCATION
             }
@@ -54,7 +52,6 @@ class UserSettingsRepositoryImpl(
 
     override fun getSkinTypeFlow(): Flow<Int> {
         return readIntSettingFlow(SKIN_TYPE)
-            .distinctUntilChanged()
             .map {
                 it ?: MY_HARDCODED_SKIN_TYPE
             }
@@ -68,7 +65,6 @@ class UserSettingsRepositoryImpl(
 
     override fun getSpfFlow(): Flow<Int> {
         return readIntSettingFlow(SPF)
-            .distinctUntilChanged()
             .map {
                 it ?: NO_SUNSCREEN
             }
@@ -82,7 +78,6 @@ class UserSettingsRepositoryImpl(
 
     override fun getIsOnSnowOrWaterFlow(): Flow<Boolean> {
         return readBooleanSettingFlow(IS_ON_SNOW_OR_WATER)
-            .distinctUntilChanged()
             .map {
                 it ?: DEFAULT_IS_ON_SNOW_OR_WATER
             }
@@ -131,7 +126,7 @@ class UserSettingsRepositoryImpl(
     }
 
     private fun readSettingFlow(id: Long): Flow<UserSettingEntity?> {
-        return userSettingsDao.getFlow(id)
+        return userSettingsDao.getDistinctFlow(id)
     }
     private suspend fun readSetting(id: Long): UserSettingEntity? {
         return userSettingsDao.getOnce(id)

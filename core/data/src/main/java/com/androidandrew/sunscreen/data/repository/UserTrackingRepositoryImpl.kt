@@ -12,8 +12,7 @@ class UserTrackingRepositoryImpl(
     private val NO_RECORD_YET = UserTracking(sunburnProgress = 0.0, vitaminDProgress = 0.0)
 
     override fun getUserTrackingFlow(date: String): Flow<UserTracking?> {
-        return userTrackingDao.getFlow(date)
-            .distinctUntilChanged()
+        return userTrackingDao.getDistinctFlow(date)
             .map {
                 it?.toModel() ?: NO_RECORD_YET
             }

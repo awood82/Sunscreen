@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.domain.usecases
 
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.HourlyForecastRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.model.UvPredictionPoint
@@ -22,13 +23,12 @@ class GetLocalForecastForTodayUseCase(
 
     private val locationStream = userSettingsRepository.getLocationFlow()
 
-    operator fun invoke(): Flow<List<UvPredictionPoint>> {
+    operator fun invoke(): Flow<DataResult<List<UvPredictionPoint>>> {
         return locationStream
-            .distinctUntilChanged()
             .map {
                 Timber.i("Use Case: Get local forecast for $it")
                 if (it.isEmpty()) {
-                    emptyList()
+                    DataResult.Success(emptyList()) // TODO: Use the NiA app's Result.Loading?
                 } else {
                     hourlyForecastRepository.getForecast(it, LocalDate.now(clock))
                 }

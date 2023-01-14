@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.network
 
+import com.androidandrew.sunscreen.network.error.ResultCallAdapterFactory
 import com.androidandrew.sunscreen.network.model.DailyUvIndexForecast
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -12,7 +13,7 @@ private val BASE_URL = "https://data.epa.gov/"
 
 interface EpaService {
     @GET("efservice/getEnvirofactsUVHOURLY/ZIP/{zipCode}/JSON")
-    suspend fun getUvForecast(@Path("zipCode") zipCode: String): DailyUvIndexForecast
+    suspend fun getUvForecast(@Path("zipCode") zipCode: String): Result<DailyUvIndexForecast>
 }
 
 private val moshi = Moshi.Builder()
@@ -21,6 +22,7 @@ private val moshi = Moshi.Builder()
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(MoshiConverterFactory.create(moshi))
+    .addCallAdapterFactory(ResultCallAdapterFactory())
     .baseUrl(BASE_URL)
     .build()
 
