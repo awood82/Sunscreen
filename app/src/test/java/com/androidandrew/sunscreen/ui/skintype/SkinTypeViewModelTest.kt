@@ -2,13 +2,17 @@ package com.androidandrew.sunscreen.ui.skintype
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
-import io.mockk.coVerify
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,15 +24,33 @@ class SkinTypeViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val mockSettingsRepo = mockk<UserSettingsRepositoryImpl>(relaxed = true)
-    private val vm = SkinTypeViewModel(mockSettingsRepo)
+    private lateinit var vm: SkinTypeViewModel
+    private lateinit var fakeDatabaseHolder: FakeDatabaseWrapper
+    private lateinit var userSettingsRepo: UserSettingsRepository
+
+    @Before
+    fun setup() {
+        fakeDatabaseHolder = FakeDatabaseWrapper()
+        runBlocking {
+            fakeDatabaseHolder.clearDatabase()
+        }
+        userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        vm = SkinTypeViewModel(userSettingsRepo)
+    }
+
+    @After
+    fun tearDown() {
+        runBlocking {
+            fakeDatabaseHolder.tearDown()
+        }
+    }
 
     @Test
     fun whenSkinType_isSelected_itIsSavedToRepo_andOnboardingisComplete() = runTest {
         vm.onEvent(SkinTypeEvent.Selected(4))
 
-        coVerify { mockSettingsRepo.setSkinType(4) }
-        coVerify { mockSettingsRepo.setIsOnboarded(true) }
+        assertEquals(4, userSettingsRepo.getSkinType())
+        assertTrue(userSettingsRepo.getIsOnboarded())
     }
 
     @Test
