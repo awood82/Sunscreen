@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.androidandrew.sunscreen.ui.location.LocationScreen
 import com.androidandrew.sunscreen.ui.main.MainScreen
+import com.androidandrew.sunscreen.ui.skintype.SkinTypeScreen
 import timber.log.Timber
 
 @Composable
@@ -34,9 +35,16 @@ fun AppNavHost(
             Timber.d("Loading LocationScreen")
             LocationScreen(
                 onLocationValid = {
-                    navController.navigate(
-                        route = AppDestination.Main.name
-                    )
+                    navController.navigate(AppDestination.SkinType.name)
+                },
+                modifier = modifier
+            )
+        }
+        composable(route = AppDestination.SkinType.name) {
+            Timber.d("Loading SkinTypeScreen")
+            SkinTypeScreen(
+                onSkinTypeSelected = {
+                    navController.navigate(AppDestination.Main.name)
                 },
                 modifier = modifier
             )

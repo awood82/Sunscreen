@@ -1,12 +1,20 @@
 package com.androidandrew.sunscreen.ui.navigation
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
+import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
+import com.androidandrew.sunscreen.util.onNodeWithStringId
+import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.SunscreenApp
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -48,8 +56,45 @@ class AppNavHostTest {
         assertDestinationIs(AppDestination.Location.name)
     }
 
+    @Test
+    fun locationScreen_whenValidLocationIsSearched_navigatesToSkinTypeScreen() {
+        navigateToLocationScreen()
+
+        performLocationSearch(FakeData.zip)
+
+        assertDestinationIs(AppDestination.SkinType.name)
+    }
+
+    @Test
+    fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToMainScreen() {
+        navigateToSkinTypeScreen()
+
+        composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+
+        assertDestinationIs(AppDestination.Main.name)
+    }
+
+
+    private fun performLocationSearch(zip: String) {
+        composeTestRule.onNodeWithStringId(R.string.current_location).apply {
+            performTextInput(zip)
+            performImeAction()
+        }
+        // This waits for the keyboard to close. Otherwise the test fails and drives me crazy debugging.
+        awaitIdle()
+    }
+
+    private fun navigateToLocationScreen() {
+        setupNavController(withOnboarded = false)
+    }
+
+    private fun navigateToSkinTypeScreen() {
+        navigateToLocationScreen()
+        performLocationSearch(FakeData.zip)
+    }
 
     private fun assertDestinationIs(name: String) {
+        awaitIdle()
         assertEquals(name, getCurrentNavDestination())
     }
 
@@ -69,4 +114,11 @@ class AppNavHostTest {
 //        return composeTestRule.onNodeWithContentDescription(
 //            composeTestRule.activity.getString(R.string.navigate_back))
 //    }
+
+    // Wait for the keyboard to close, or for the navHost destination to update.
+    private fun awaitIdle() {
+        runBlocking {
+            composeTestRule.awaitIdle()
+        }
+    }
 }

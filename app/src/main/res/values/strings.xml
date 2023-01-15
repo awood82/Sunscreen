@@ -1,5 +1,30 @@
 <resources>
+    <!-- Screen titles -->
     <string name="app_name">Sunscreen</string>
+    <string name="location_title">Select Location</string>
+    <string name="skin_type_title">Select Skin Type</string>
+
+    <!-- Skin type selection -->
+    <string name="skin_type_instructions">Select the skin type that most closely resembles your own.</string>
+    <!-- Skin types -->
+    <string name="type_1_title">Type I</string>
+    <string name="type_1_description">Extremely sensitive skin. Always burns. Never tans.</string>
+    <string name="type_1_example">Ivory skin.\nLight blue, green, or gray eyes.\nRed or light blond hair.\n</string>
+    <string name="type_2_title">Type II</string>
+    <string name="type_2_description">Very sensitive skin. Burns easily. Tans minimally.</string>
+    <string name="type_2_example">Fair or pale skin.\nBlue, gray, or green eyes.\nBlond hair.</string>
+    <string name="type_3_title">Type III</string>
+    <string name="type_3_description">Sensitive skin. Sometimes burns. Slowly tans to light brown</string>
+    <string name="type_3_example">Fair to beige skin, with golden undertones.\nHazel or light brown eyes.\nDark blond or light brown hair.</string>
+    <string name="type_4_title">Type IV</string>
+    <string name="type_4_description">Mildly sensitive skin. Burns minimally. Always tans to moderate brown.</string>
+    <string name="type_4_example">Olive or light brown skin.\nDark brown eyes.\nDark brown hair.</string>
+    <string name="type_5_title">Type V</string>
+    <string name="type_5_description">Resistant skin. Rarely burns. Tans well.</string>
+    <string name="type_5_example">Dark brown skin.\nDark brown eyes.\nDark brown to black hair.</string>
+    <string name="type_6_title">Type VI</string>
+    <string name="type_6_description">Very resistant skin. Never burns. Deeply pigmented.</string>
+    <string name="type_6_example">Darkest brown skin.\nDark brown eyes.\nBlack hair.</string>
 
     <!-- Location screen -->
     <string name="current_location">Enter the ZIP code of your current location</string>

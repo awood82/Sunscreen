@@ -29,21 +29,22 @@ class LocationViewModelTest {
     }
 
     @Test
-    fun onSearchLocation_whenValidZipCode_navigatesToMainScreen() = runTest {
+    fun onSearchLocation_whenValidZipCode_savesItToRepo_andSetsLocationValid() = runTest {
         createViewModel()
 
-        vm.onSearchLocation("10001")
+        vm.onEvent(LocationBarEvent.LocationSearched("10001"))
 
         assertTrue(vm.isLocationValid.first())
         coVerify { mockRepository.setLocation("10001") }
     }
 
     @Test
-    fun onSearchLocation_whenInvalidZipCode_doesNotNavigate() = runTest {
+    fun onSearchLocation_whenInvalidZipCode_doesNotSaveItToRepo_andDoesNotNavigate() = runTest {
         createViewModel()
 
-        vm.onSearchLocation("1")
+        vm.onEvent(LocationBarEvent.LocationSearched("1"))
 
         assertFalse(vm.isLocationValid.first())
+        coVerify(exactly = 0) { mockRepository.setLocation(any()) }
     }
 }
