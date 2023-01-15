@@ -24,7 +24,7 @@ fun LocationScreen(
 
     when (isLocationValid) {
         true -> {
-            LaunchedEffect(isLocationValid) {
+            LaunchedEffect(true) {
                 onLocationValid()
             }
         }

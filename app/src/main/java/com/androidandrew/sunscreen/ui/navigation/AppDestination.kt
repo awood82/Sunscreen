@@ -8,6 +8,7 @@ enum class AppDestination(
     @StringRes val titleResId: Int,
     val args: List<NamedNavArgument>
 ) {
-    Location(titleResId = R.string.app_name, args = emptyList()),
+    Location(titleResId = R.string.location_title, args = emptyList()),
+    SkinType(titleResId = R.string.skin_type_title, args = emptyList()),
     Main(titleResId = R.string.app_name, args = emptyList())
 }

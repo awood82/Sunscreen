@@ -1,17 +1,17 @@
-package com.androidandrew.sunscreen.ui.location
+package com.androidandrew.sunscreen.ui.skintype
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
-import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -19,12 +19,12 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class LocationViewModelTest {
+class SkinTypeViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var vm: LocationViewModel
+    private lateinit var vm: SkinTypeViewModel
     private lateinit var fakeDatabaseHolder: FakeDatabaseWrapper
     private lateinit var userSettingsRepo: UserSettingsRepository
 
@@ -35,6 +35,7 @@ class LocationViewModelTest {
             fakeDatabaseHolder.clearDatabase()
         }
         userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
+        vm = SkinTypeViewModel(userSettingsRepo)
     }
 
     @After
@@ -44,27 +45,18 @@ class LocationViewModelTest {
         }
     }
 
-    private fun createViewModel() {
-        vm = LocationViewModel(userSettingsRepo, LocationUtil())
+    @Test
+    fun whenSkinType_isSelected_itIsSavedToRepo_andOnboardingisComplete() = runTest {
+        vm.onEvent(SkinTypeEvent.Selected(4))
+
+        assertEquals(4, userSettingsRepo.getSkinType())
+        assertTrue(userSettingsRepo.getIsOnboarded())
     }
 
     @Test
-    fun onSearchLocation_whenValidZipCode_savesItToRepo_andSetsLocationValid() = runTest {
-        createViewModel()
+    fun whenSkinType_isSelected_stateIsUpdated() = runTest {
+        vm.onEvent(SkinTypeEvent.Selected(4))
 
-        vm.onEvent(LocationBarEvent.LocationSearched("10001"))
-
-        assertTrue(vm.isLocationValid.first())
-        assertEquals("10001", userSettingsRepo.getLocation())
-    }
-
-    @Test
-    fun onSearchLocation_whenInvalidZipCode_doesNotSaveItToRepo_andDoesNotNavigate() = runTest {
-        createViewModel()
-
-        vm.onEvent(LocationBarEvent.LocationSearched("1"))
-
-        assertFalse(vm.isLocationValid.first())
-        assertEquals("", userSettingsRepo.getLocation())
+        assertTrue(vm.isSkinTypeSelected.first())
     }
 }
