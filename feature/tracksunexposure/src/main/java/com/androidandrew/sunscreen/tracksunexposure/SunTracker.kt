@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.tracksunexposure
 
+import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
@@ -38,16 +39,23 @@ class SunTracker(
     private val settingsStream = combine(
         getLocalForecastForToday(), skinTypeStream, spfStream, isOnReflectiveSurfaceStream
     ) { uvPrediction, skinType, spf, isOnReflectiveSurface ->
-        if (uvPrediction.isNotEmpty()) {
-            SunTrackerSettings(
-                uvPrediction = uvPrediction,
-                hardcodedSkinType = skinType,
-                spf = spf,
-                isOnReflectiveSurface = isOnReflectiveSurface
-            )
-        } else {
-            Timber.e("collected null: uvPrediction: ${uvPrediction.isEmpty()}")
-            null
+        when (uvPrediction) {
+            is DataResult.Error -> {
+                Timber.e("uvPrediction error: ${uvPrediction.exception}")
+                null
+            }
+            is DataResult.Loading -> {
+                Timber.i("uvPrediction loading")
+                null
+            }
+            is DataResult.Success -> {
+                SunTrackerSettings(
+                    uvPrediction = uvPrediction.data,
+                    hardcodedSkinType = skinType,
+                    spf = spf,
+                    isOnReflectiveSurface = isOnReflectiveSurface
+                )
+            }
         }
     }
 
