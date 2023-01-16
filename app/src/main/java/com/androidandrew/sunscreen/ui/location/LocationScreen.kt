@@ -60,11 +60,12 @@ fun LocationScreenWithState(
                 contentScale = ContentScale.FillBounds
             )
         }
-        Box(modifier = modifier.padding(bottom = 64.dp)) {
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = modifier.padding(bottom = 64.dp)) {
             LocationBarWithState(
                 uiState = locationBarState,
-                onEvent = onLocationBarEvent,
-                modifier = modifier.align(Alignment.BottomCenter)
+                onEvent = onLocationBarEvent
             )
         }
     }
