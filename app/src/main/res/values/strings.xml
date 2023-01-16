@@ -30,6 +30,7 @@
     <string name="current_location">Enter the ZIP code of your current location</string>
     <string name="skip">Skip</string>
     <string name="search">Search</string>
+    <string name="location_background_content_description">Woman wearing a hat walking on the beach on a sunny day</string>
 
     <!-- Burn Time section -->
     <string name="could_burn">You could burn in</string>
