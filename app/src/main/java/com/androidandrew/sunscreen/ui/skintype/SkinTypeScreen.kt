@@ -37,8 +37,8 @@ fun SkinTypeScreen(
 
     Column(
         modifier = modifier
-            .padding(16.dp)
             .verticalScroll(state = rememberScrollState())
+            .padding(16.dp)
     ) {
         Text(
             text = stringResource(R.string.skin_type_instructions),
