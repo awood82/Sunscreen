@@ -7,8 +7,9 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
@@ -50,21 +51,35 @@ class LocationViewModelTest {
 
     @Test
     fun onSearchLocation_whenValidZipCode_savesItToRepo_andSetsLocationValid() = runTest {
+        val collectedIsLocationValid = mutableListOf<Boolean>()
         createViewModel()
+
+        val collectJob = launch(UnconfinedTestDispatcher()) {
+            vm.isLocationValid.collect { collectedIsLocationValid.add(it) }
+        }
 
         vm.onEvent(LocationBarEvent.LocationSearched("10001"))
 
-        assertTrue(vm.isLocationValid.first())
+        assertTrue(collectedIsLocationValid.first())
         assertEquals("10001", userSettingsRepo.getLocation())
+
+        collectJob.cancel()
     }
 
     @Test
     fun onSearchLocation_whenInvalidZipCode_doesNotSaveItToRepo_andDoesNotNavigate() = runTest {
+        val collectedIsLocationValid = mutableListOf<Boolean>()
         createViewModel()
+
+        val collectJob = launch(UnconfinedTestDispatcher()) {
+            vm.isLocationValid.collect { collectedIsLocationValid.add(it) }
+        }
 
         vm.onEvent(LocationBarEvent.LocationSearched("1"))
 
-        assertFalse(vm.isLocationValid.first())
+        assertTrue(collectedIsLocationValid.isEmpty())
         assertEquals("", userSettingsRepo.getLocation())
+
+        collectJob.cancel()
     }
 }

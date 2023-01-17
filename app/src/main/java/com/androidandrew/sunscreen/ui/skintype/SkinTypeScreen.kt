@@ -27,10 +27,10 @@ fun SkinTypeScreen(
     onSkinTypeSelected: () -> Unit,
     viewModel: SkinTypeViewModel = koinViewModel()
 ) {
-    val isSkinTypeSelected by viewModel.isSkinTypeSelected.collectAsStateWithLifecycle()
+    val isSkinTypeSelected by viewModel.isSkinTypeSelected.collectAsStateWithLifecycle(initialValue = false)
 
     if (isSkinTypeSelected) {
-        LaunchedEffect(true) {
+        LaunchedEffect(Unit) {
             onSkinTypeSelected()
         }
     }

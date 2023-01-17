@@ -6,8 +6,9 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -55,8 +56,16 @@ class SkinTypeViewModelTest {
 
     @Test
     fun whenSkinType_isSelected_stateIsUpdated() = runTest {
+        val collectedIsSkinTypeSelected = mutableListOf<Boolean>()
+
+        val collectJob = launch(UnconfinedTestDispatcher()) {
+            vm.isSkinTypeSelected.collect { collectedIsSkinTypeSelected.add(it) }
+        }
+
         vm.onEvent(SkinTypeEvent.Selected(4))
 
-        assertTrue(vm.isSkinTypeSelected.first())
+        assertTrue(collectedIsSkinTypeSelected.first())
+
+        collectJob.cancel()
     }
 }

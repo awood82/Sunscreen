@@ -15,8 +15,8 @@ class LocationViewModel(
     private val _locationBarState = MutableStateFlow(LocationBarState(""))
     val locationBarState = _locationBarState.asStateFlow()
 
-    private val _isLocationValid = MutableStateFlow(false)
-    val isLocationValid = _isLocationValid.asStateFlow()
+    private val _isLocationValid = MutableSharedFlow<Boolean>()
+    val isLocationValid = _isLocationValid.asSharedFlow()
 
     fun onEvent(event: LocationBarEvent) {
         when (event) {
@@ -33,7 +33,7 @@ class LocationViewModel(
         if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
                 userSettingsRepo.setLocation(zipLocation)
-                _isLocationValid.update { true }
+                _isLocationValid.emit(true)
             }
         }
     }

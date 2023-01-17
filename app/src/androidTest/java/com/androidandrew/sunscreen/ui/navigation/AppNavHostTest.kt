@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.androidandrew.sharedtest.util.FakeData
@@ -13,10 +13,8 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.SunscreenApp
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.koin.androidx.compose.get
@@ -24,7 +22,7 @@ import org.koin.androidx.compose.get
 class AppNavHostTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var navController: TestNavHostController
 
@@ -74,6 +72,28 @@ class AppNavHostTest {
         assertDestinationIs(AppDestination.Main.name)
     }
 
+    @Test
+    fun backButton_onMainScreen_afterOnboarding_doesNotReturnToOnboardingScreens() {
+        navigateThroughOnboardingFlow()
+
+        navigateBack()
+
+        val navDestination = getCurrentNavDestination() ?: ""
+        assertTrue(
+            (navDestination != AppDestination.Location.name) or
+            (composeTestRule.activityRule.scenario.state == Lifecycle.State.DESTROYED)
+        )
+    }
+
+    @Test
+    fun backButton_onSkinTypeScreen_returnsToLocationScreen() {
+        navigateToSkinTypeScreen()
+
+        navigateBack()
+
+        assertDestinationIs(AppDestination.Location.name)
+    }
+
 
     private fun performLocationSearch(zip: String) {
         composeTestRule.onNodeWithStringId(R.string.current_location).apply {
@@ -91,6 +111,19 @@ class AppNavHostTest {
     private fun navigateToSkinTypeScreen() {
         navigateToLocationScreen()
         performLocationSearch(FakeData.zip)
+    }
+
+    private fun navigateThroughOnboardingFlow() {
+        navigateToSkinTypeScreen()
+        composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        awaitIdle()
+    }
+
+    private fun navigateBack() {
+        composeTestRule.activityRule.scenario.onActivity {
+            it.onBackPressedDispatcher.onBackPressed()
+        }
+        awaitIdle()
     }
 
     private fun assertDestinationIs(name: String) {

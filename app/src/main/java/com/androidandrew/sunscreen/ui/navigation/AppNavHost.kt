@@ -44,7 +44,11 @@ fun AppNavHost(
             Timber.d("Loading SkinTypeScreen")
             SkinTypeScreen(
                 onSkinTypeSelected = {
-                    navController.navigate(AppDestination.Main.name)
+                    navController.navigate(AppDestination.Main.name) {
+                        popUpTo(AppDestination.Main.name) {
+                            inclusive = true
+                        }
+                    }
                 },
                 modifier = modifier
             )

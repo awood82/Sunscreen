@@ -47,7 +47,7 @@ fun MainScreen(
     when (appState) {
         AppState.Loading -> {}
         AppState.NotOnboarded -> {
-            LaunchedEffect(appState) {
+            LaunchedEffect(Unit) {
                 onNotOnboarded()
             }
         }
