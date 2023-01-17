@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.androidandrew.sharedtest.network.FakeEpaService
-import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import kotlinx.coroutines.runBlocking
@@ -21,11 +20,12 @@ class MainScreenTest {
     private val fakeService = FakeEpaService
     private val fakeUserSettingsRepo: UserSettingsRepository by inject(UserSettingsRepository::class.java)
 
+    // TODO: Why isn't the repository reset, even if FakeDatabaseWrapper.clearDatabase() is called?
     @Test
     fun init_ifNetworkError_showsErrorSnackbar() {
         runBlocking {
             fakeUserSettingsRepo.setIsOnboarded(true)
-            fakeUserSettingsRepo.setLocation(FakeData.zip)
+            fakeUserSettingsRepo.setLocation("78910") // Pick unused value since database might not be reset
         }
         val errorMessage = "An error has occurred"
         fakeService.exception = IOException(errorMessage)
