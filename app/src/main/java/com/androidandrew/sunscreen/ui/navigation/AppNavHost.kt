@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.androidandrew.sunscreen.ui.clothing.ClothingScreen
 import com.androidandrew.sunscreen.ui.location.LocationScreen
 import com.androidandrew.sunscreen.ui.main.MainScreen
 import com.androidandrew.sunscreen.ui.skintype.SkinTypeScreen
@@ -44,6 +45,15 @@ fun AppNavHost(
             Timber.d("Loading SkinTypeScreen")
             SkinTypeScreen(
                 onSkinTypeSelected = {
+                    navController.navigate(AppDestination.Clothing.name)
+                },
+                modifier = modifier
+            )
+        }
+        composable(route = AppDestination.Clothing.name) {
+            Timber.d("Loading ClothingScreen")
+            ClothingScreen(
+                onClothingSelected = {
                     navController.navigate(AppDestination.Main.name) {
                         popUpTo(AppDestination.Main.name) {
                             inclusive = true

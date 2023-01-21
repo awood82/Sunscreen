@@ -29,6 +29,7 @@ class UserSettingsRepositoryTest {
     private val isOnboarded = true
     private val location = "12345"
     private val skinType = 6
+    private val clothing = 2
     private val spf = 15
     private val isOnSnowOrWater = true
 
@@ -53,18 +54,21 @@ class UserSettingsRepositoryTest {
         repository.setIsOnboarded(isOnboarded)
         repository.setLocation(location)
         repository.setSkinType(skinType)
+        repository.setClothing(clothing)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
         val actualIsOnboarded = repository.getIsOnboarded()
         val actualLocation = repository.getLocation()
         val actualSkinType = repository.getSkinType()
+        val actualClothing = repository.getClothing()
         val actualSpf = repository.getSpf()
         val actualIsOnSnowOrWater = repository.getIsOnSnowOrWater()
 
         assertEquals(isOnboarded, actualIsOnboarded)
         assertEquals(location, actualLocation)
         assertEquals(skinType, actualSkinType)
+        assertEquals(clothing, actualClothing)
         assertEquals(spf, actualSpf)
         assertEquals(isOnSnowOrWater, actualIsOnSnowOrWater)
     }
@@ -74,18 +78,21 @@ class UserSettingsRepositoryTest {
         val isOnboardedFlow = repository.getIsOnboardedFlow()
         val locationFlow = repository.getLocationFlow()
         val skinTypeFlow = repository.getSkinTypeFlow()
+        val clothingFlow = repository.getClothingFlow()
         val spfFlow = repository.getSpfFlow()
         val isOnSnowOrWaterFlow = repository.getIsOnSnowOrWaterFlow()
 
         repository.setIsOnboarded(isOnboarded)
         repository.setLocation(location)
         repository.setSkinType(skinType)
+        repository.setClothing(clothing)
         repository.setSpf(spf)
         repository.setIsOnSnowOrWater(isOnSnowOrWater)
 
         assertEquals(isOnboarded, isOnboardedFlow.first())
         assertEquals(location, locationFlow.first())
         assertEquals(skinType, skinTypeFlow.first())
+        assertEquals(clothing, clothingFlow.first())
         assertEquals(spf, spfFlow.first())
         assertEquals(isOnSnowOrWater, isOnSnowOrWaterFlow.first())
     }
@@ -95,12 +102,14 @@ class UserSettingsRepositoryTest {
         val isOnboarded = repository.getIsOnboarded()
         val location = repository.getLocation()
         val skinType = repository.getSkinType()
+        val clothing = repository.getClothing()
         val spf = repository.getSpf()
         val isOnSnowOrWater = repository.getIsOnSnowOrWater()
 
         assertNotNull(isOnboarded)
         assertNotNull(location)
         assertNotNull(skinType)
+        assertNotNull(clothing)
         assertNotNull(spf)
         assertNotNull(isOnSnowOrWater)
     }
@@ -110,12 +119,14 @@ class UserSettingsRepositoryTest {
         val isOnboarded = repository.getIsOnboardedFlow()
         val location = repository.getLocationFlow()
         val skinType = repository.getSkinTypeFlow()
+        val clothing = repository.getClothingFlow()
         val spf = repository.getSpfFlow()
         val isOnSnowOrWater = repository.getIsOnSnowOrWaterFlow()
 
         assertNotNull(isOnboarded.first())
         assertNotNull(location.first())
         assertNotNull(skinType.first())
+        assertNotNull(clothing.first())
         assertNotNull(spf.first())
         assertNotNull(isOnSnowOrWater.first())
     }

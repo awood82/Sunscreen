@@ -26,6 +26,16 @@
     <string name="type_6_description">Very resistant skin. Never burns. Deeply pigmented.</string>
     <string name="type_6_example">Darkest brown skin.\nDark brown eyes.\nBlack hair.</string>
 
+    <!-- Clothing selection -->
+    <string name="clothing_screen_title">Clothing</string>
+    <string name="clothing_screen_instructions">The amount of skin exposed to the sun affects Vitamin D absorption\n
+    If you are only tracking sunburn, you may skip this step, or pick a default option.</string>
+    <string name="clothing_shorts_no_shirt">Shorts, no shirt</string>
+    <string name="clothing_pants_no_shirt">Pants, no shirt</string>
+    <string name="clothing_shorts_t_shirt">Shorts, T-shirt</string>
+    <string name="clothing_pants_t_shirt">Pants, T-shirt</string>
+    <string name="clothing_pants_long_sleeve_shirt">Pants, Long sleeve shirt</string>
+
     <!-- Location screen -->
     <string name="current_location">Enter the ZIP code of your current location</string>
     <string name="skip">Skip</string>

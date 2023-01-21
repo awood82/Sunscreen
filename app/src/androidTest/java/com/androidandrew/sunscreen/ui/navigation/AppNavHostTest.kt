@@ -64,10 +64,19 @@ class AppNavHostTest {
     }
 
     @Test
-    fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToMainScreen() {
+    fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToClothingScreen() {
         navigateToSkinTypeScreen()
 
         composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+
+        assertDestinationIs(AppDestination.Clothing.name)
+    }
+
+    @Test
+    fun clothingScreen_whenClothingIsSelected_navigatesToMainScreen() {
+        navigateToClothingScreen()
+
+        composeTestRule.onNodeWithStringId(R.string.clothing_shorts_t_shirt).performClick()
 
         assertDestinationIs(AppDestination.Main.name)
     }
@@ -94,6 +103,15 @@ class AppNavHostTest {
         assertDestinationIs(AppDestination.Location.name)
     }
 
+    @Test
+    fun backButton_onClothingScreen_returnsToSkinTypeScreen() {
+        navigateToClothingScreen()
+
+        navigateBack()
+
+        assertDestinationIs(AppDestination.SkinType.name)
+    }
+
 
     private fun performLocationSearch(zip: String) {
         composeTestRule.onNodeWithStringId(R.string.current_location).apply {
@@ -113,9 +131,15 @@ class AppNavHostTest {
         performLocationSearch(FakeData.zip)
     }
 
-    private fun navigateThroughOnboardingFlow() {
+    private fun navigateToClothingScreen() {
         navigateToSkinTypeScreen()
         composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        awaitIdle()
+    }
+
+    private fun navigateThroughOnboardingFlow() {
+        navigateToClothingScreen()
+        composeTestRule.onNodeWithStringId(R.string.clothing_shorts_t_shirt).performClick()
         awaitIdle()
     }
 

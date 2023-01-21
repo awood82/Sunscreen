@@ -1,30 +1,28 @@
-package com.androidandrew.sunscreen.ui.skintype
+package com.androidandrew.sunscreen.ui.clothing
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
+import com.androidandrew.sunscreen.domain.UvFactor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class SkinTypeViewModelTest {
+class ClothingViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var vm: SkinTypeViewModel
+    private lateinit var vm: ClothingViewModel
     private lateinit var fakeDatabaseHolder: FakeDatabaseWrapper
     private lateinit var userSettingsRepo: UserSettingsRepository
 
@@ -35,7 +33,7 @@ class SkinTypeViewModelTest {
             fakeDatabaseHolder.clearDatabase()
         }
         userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
-        vm = SkinTypeViewModel(userSettingsRepo)
+        vm = ClothingViewModel(userSettingsRepo)
     }
 
     @After
@@ -46,24 +44,26 @@ class SkinTypeViewModelTest {
     }
 
     @Test
-    fun whenSkinType_isSelected_itIsSavedToRepo_andOnboardingisNotCompleteYet() = runTest {
-        vm.onEvent(SkinTypeEvent.Selected(4))
+    fun whenClothing_isSelected_itIsSavedToRepo_andOnboardingisComplete() = runTest {
+        vm.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_NO_SHIRT))
 
-        assertEquals(4, userSettingsRepo.getSkinType())
-        assertFalse(userSettingsRepo.getIsOnboarded())
+        assertEquals(2, userSettingsRepo.getClothing())
+        assertTrue(userSettingsRepo.getIsOnboarded())
     }
 
+    // TODO: whenSkipped...
+
     @Test
-    fun whenSkinType_isSelected_stateIsUpdated() = runTest {
-        val collectedIsSkinTypeSelected = mutableListOf<Boolean>()
+    fun whenClothing_isSelected_stateIsUpdated() = runTest {
+        val collectedIsClothingSelected = mutableListOf<Boolean>()
 
         val collectJob = launch(UnconfinedTestDispatcher()) {
-            vm.isSkinTypeSelected.collect { collectedIsSkinTypeSelected.add(it) }
+            vm.isClothingSelected.collect { collectedIsClothingSelected.add(it) }
         }
 
-        vm.onEvent(SkinTypeEvent.Selected(4))
+        vm.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_LONG_SLEEVE_SHIRT))
 
-        assertTrue(collectedIsSkinTypeSelected.first())
+        assertTrue(collectedIsClothingSelected.first())
 
         collectJob.cancel()
     }

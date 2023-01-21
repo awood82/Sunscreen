@@ -10,5 +10,6 @@ enum class AppDestination(
 ) {
     Location(titleResId = R.string.location_title, args = emptyList()),
     SkinType(titleResId = R.string.skin_type_title, args = emptyList()),
+    Clothing(titleResId = R.string.clothing_screen_title, args = emptyList()),
     Main(titleResId = R.string.app_name, args = emptyList())
 }

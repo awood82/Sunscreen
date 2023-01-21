@@ -14,12 +14,14 @@ class UserSettingsRepositoryImpl(
         const val IS_ONBOARDED = 1L
         const val LOCATION = 2L
         const val SKIN_TYPE = 3L
+        const val CLOTHING = 4L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
 
         private const val DEFAULT_IS_ONBOARDED = false
         private const val DEFAULT_LOCATION = ""
         private const val MY_HARDCODED_SKIN_TYPE = 2 // TODO: Remove this hardcoded value b/c skin type must be set before tracking is possible. The others can use defaults.
+        private const val DEFAULT_CLOTHING = 4 // TODO: Domain contains Clothing.PANTS_T_SHIRT
         private const val NO_SUNSCREEN = 0
         private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
     }
@@ -61,6 +63,19 @@ class UserSettingsRepositoryImpl(
     }
     override suspend fun setSkinType(skinType: Int) {
         writeSetting(SKIN_TYPE, skinType.toString())
+    }
+
+    override fun getClothingFlow(): Flow<Int> {
+        return readIntSettingFlow(CLOTHING)
+            .map {
+                it ?: DEFAULT_CLOTHING
+            }
+    }
+    override suspend fun getClothing(): Int {
+        return readIntSetting(CLOTHING) ?: DEFAULT_CLOTHING
+    }
+    override suspend fun setClothing(clothing: Int) {
+        writeSetting(CLOTHING, clothing.toString())
     }
 
     override fun getSpfFlow(): Flow<Int> {

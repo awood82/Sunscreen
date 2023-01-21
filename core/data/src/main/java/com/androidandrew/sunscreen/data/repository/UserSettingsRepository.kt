@@ -15,6 +15,10 @@ interface UserSettingsRepository {
     suspend fun getSkinType(): Int
     suspend fun setSkinType(skinType: Int)
 
+    fun getClothingFlow(): Flow<Int>
+    suspend fun getClothing(): Int
+    suspend fun setClothing(clothing: Int)
+
     fun getSpfFlow(): Flow<Int>
     suspend fun getSpf(): Int
     suspend fun setSpf(spf: Int)

@@ -17,6 +17,7 @@ import com.androidandrew.sunscreen.tracksunexposure.SunTracker
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.ui.main.MainViewModel
 import com.androidandrew.sunscreen.ui.chart.UvChartFormatter
+import com.androidandrew.sunscreen.ui.clothing.ClothingViewModel
 import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.ui.skintype.SkinTypeViewModel
 import com.androidandrew.sunscreen.util.LocationUtil
@@ -44,6 +45,7 @@ val serviceModule = module {
 val viewModelModule = module {
     viewModel { LocationViewModel(get(), get()) }
     viewModel { SkinTypeViewModel(get()) }
+    viewModel { ClothingViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
