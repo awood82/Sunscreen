@@ -6,16 +6,6 @@ import com.androidandrew.sunscreen.model.UserClothing
 
 object UvFactor {
 
-    enum class Clothing {
-        NAKED,
-        SHORTS_NO_SHIRT,
-        PANTS_NO_SHIRT,
-        SHORTS_T_SHIRT,
-        PANTS_T_SHIRT,
-        SHORTS_LONG_SLEEVE_SHIRT,
-        PANTS_LONG_SLEEVE_SHIRT
-    }
-
     /**
      * Use "Rule of 9s" to approximate % of body
      * Head and neck = 9%
@@ -39,22 +29,6 @@ object UvFactor {
             ClothingBottom.PANTS -> exposed -= 36
         }
         return exposed
-    }
-
-    @Deprecated(
-        message = "Use the function that takes a UserClothing argument instead",
-        replaceWith = ReplaceWith("getSkinExposedFactor")
-    )
-    fun getSkinExposedFactor(clothing: Clothing): Double {
-        return when (clothing) {
-            Clothing.NAKED -> 100.0
-            Clothing.SHORTS_NO_SHIRT -> 82.0
-            Clothing.PANTS_NO_SHIRT -> 64.0
-            Clothing.SHORTS_T_SHIRT -> 40.0
-            Clothing.PANTS_T_SHIRT -> 23.0
-            Clothing.SHORTS_LONG_SLEEVE_SHIRT -> 27.0
-            Clothing.PANTS_LONG_SLEEVE_SHIRT -> 11.0
-        }
     }
 
     fun getSkinBlockFactor(type: Int): Int {
