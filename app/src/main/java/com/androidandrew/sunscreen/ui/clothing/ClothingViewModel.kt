@@ -4,7 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
-import com.androidandrew.sunscreen.domain.UvFactor
+import com.androidandrew.sunscreen.model.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -37,23 +37,15 @@ class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : 
 
     @VisibleForTesting
     private suspend fun saveClothesToRepository() {
-        // TODO: Maybe change how values are stored in repo
-        val toSave = if (_topClothingItem == null || _bottomClothingItem == null) {
-            UvFactor.Clothing.SHORTS_T_SHIRT // default
-        } else if (_topClothingItem == ClothingTop.NOTHING && _bottomClothingItem == ClothingBottom.NOTHING) {
-            UvFactor.Clothing.NAKED
-        } else if (_topClothingItem == ClothingTop.NOTHING && _bottomClothingItem == ClothingBottom.SHORTS) {
-            UvFactor.Clothing.SHORTS_NO_SHIRT
-        } else if (_topClothingItem == ClothingTop.NOTHING && _bottomClothingItem == ClothingBottom.PANTS) {
-            UvFactor.Clothing.PANTS_NO_SHIRT
-        } else if (_topClothingItem == ClothingTop.T_SHIRT && _bottomClothingItem == ClothingBottom.PANTS) {
-            UvFactor.Clothing.PANTS_T_SHIRT
-        } else if (_topClothingItem == ClothingTop.LONG_SLEEVE_SHIRT && _bottomClothingItem == ClothingBottom.PANTS) {
-            UvFactor.Clothing.PANTS_LONG_SLEEVE_SHIRT
-        } else {
-            UvFactor.Clothing.SHORTS_T_SHIRT
-        }
-        userSettingsRepo.setClothing(toSave.ordinal)
+        val toSave = convertClothingForRepo()
+        userSettingsRepo.setClothing(toSave)
+    }
+
+    private fun convertClothingForRepo(): UserClothing {
+        return UserClothing(
+            top = _topClothingItem ?: defaultTop,
+            bottom = _bottomClothingItem ?: defaultBottom
+        )
     }
 
     private suspend fun exitOnboarding() {

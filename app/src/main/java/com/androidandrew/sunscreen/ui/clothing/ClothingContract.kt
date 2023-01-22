@@ -1,17 +1,6 @@
 package com.androidandrew.sunscreen.ui.clothing
 
-interface ClothingRegion
-enum class ClothingTop : ClothingRegion {
-    NOTHING,
-    T_SHIRT,
-    LONG_SLEEVE_SHIRT
-}
-
-enum class ClothingBottom : ClothingRegion {
-    NOTHING,
-    SHORTS,
-    PANTS
-}
+import com.androidandrew.sunscreen.model.ClothingRegion
 
 sealed interface ClothingEvent {
     data class TopSelected(val clothing: ClothingRegion) : ClothingEvent

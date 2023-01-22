@@ -3,6 +3,9 @@ package com.androidandrew.sunscreen.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sunscreen.model.ClothingBottom
+import com.androidandrew.sunscreen.model.ClothingTop
+import com.androidandrew.sunscreen.model.UserClothing
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -29,7 +32,7 @@ class UserSettingsRepositoryTest {
     private val isOnboarded = true
     private val location = "12345"
     private val skinType = 6
-    private val clothing = 2
+    private val clothing = UserClothing(top = ClothingTop.LONG_SLEEVE_SHIRT, bottom = ClothingBottom.PANTS)
     private val spf = 15
     private val isOnSnowOrWater = true
 

@@ -23,6 +23,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.model.ClothingRegion
+import com.androidandrew.sunscreen.model.ClothingTop
 import com.androidandrew.sunscreen.ui.skintype.ColoredCircleShape
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 

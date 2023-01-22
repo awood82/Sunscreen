@@ -20,6 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.model.ClothingBottom
+import com.androidandrew.sunscreen.model.ClothingTop
+import com.androidandrew.sunscreen.model.defaultBottom
+import com.androidandrew.sunscreen.model.defaultTop
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -86,7 +90,7 @@ private fun ClothingScreen(
                 )
             ),
             onClick = { onEvent(ClothingEvent.TopSelected(it)) },
-            initiallySelectedIndex = 1
+            initiallySelectedIndex = defaultTop.dbValue
         )
         ClothingRow(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -108,7 +112,7 @@ private fun ClothingScreen(
                 )
             ),
             onClick = { onEvent(ClothingEvent.BottomSelected(it)) },
-            initiallySelectedIndex = 1
+            initiallySelectedIndex = defaultBottom.dbValue
         )
 
         Spacer(modifier = Modifier.size(16.dp))

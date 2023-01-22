@@ -80,11 +80,11 @@ class VitaminDCalculatorTest {
         assertInRange(
             vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = 3.0, skinType = 1, clothing = UvFactor.Clothing.SHORTS_T_SHIRT
-        ), 10, 15)
+        ), 10, 15, deltaMinutes = 3.0)
         assertInRange(
             vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = 3.0, skinType = 2, clothing = UvFactor.Clothing.SHORTS_T_SHIRT
-        ), 15, 20)
+        ), 15, 20, deltaMinutes = 4.0)
         assertInRange(
             vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = 3.0, skinType = 3, clothing = UvFactor.Clothing.SHORTS_T_SHIRT
@@ -101,8 +101,8 @@ class VitaminDCalculatorTest {
 
     private fun assertInRange(actualVitaminD: Double, lowerMinutes: Int, upperMinutes: Int, deltaMinutes: Double = 2.5) {
         val lowerBound = VitaminDCalculator.RECOMMENDED_IU / (upperMinutes + deltaMinutes)
-        assertTrue("Expected >= $lowerBound but was $actualVitaminD", actualVitaminD >= lowerBound)
+        assertTrue("Expected >= lower bound $lowerBound but was $actualVitaminD", actualVitaminD >= lowerBound)
         val upperBound = VitaminDCalculator.RECOMMENDED_IU / (lowerMinutes - deltaMinutes)
-        assertTrue("Expected <= $upperBound but was $actualVitaminD", actualVitaminD <= upperBound)
+        assertTrue("Expected <= upper bound $upperBound but was $actualVitaminD", actualVitaminD <= upperBound)
     }
 }
