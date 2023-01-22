@@ -35,6 +35,17 @@ fun SkinTypeScreen(
         }
     }
 
+    SkinTypeScreenWithoutViewModel(
+        modifier = modifier,
+        onEvent = { viewModel.onEvent(it) }
+    )
+}
+
+@Composable
+private fun SkinTypeScreenWithoutViewModel(
+    onEvent: (SkinTypeEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .verticalScroll(state = rememberScrollState())
@@ -50,7 +61,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_1_example),
             color = SkinType1,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(1))
+                onEvent(SkinTypeEvent.Selected(1))
             }
         )
         FitzpatrickSkinTypeRow(
@@ -59,7 +70,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_2_example),
             color = SkinType2,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(2))
+                onEvent(SkinTypeEvent.Selected(2))
             }
         )
         FitzpatrickSkinTypeRow(
@@ -68,7 +79,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_3_example),
             color = SkinType3,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(3))
+                onEvent(SkinTypeEvent.Selected(3))
             }
         )
         FitzpatrickSkinTypeRow(
@@ -77,7 +88,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_4_example),
             color = SkinType4,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(4))
+                onEvent(SkinTypeEvent.Selected(4))
             }
         )
         FitzpatrickSkinTypeRow(
@@ -86,7 +97,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_5_example),
             color = SkinType5,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(5))
+                onEvent(SkinTypeEvent.Selected(5))
             }
         )
         FitzpatrickSkinTypeRow(
@@ -95,7 +106,7 @@ fun SkinTypeScreen(
             example = stringResource(R.string.type_6_example),
             color = SkinType6,
             modifier = Modifier.clickable {
-                viewModel.onEvent(SkinTypeEvent.Selected(6))
+                onEvent(SkinTypeEvent.Selected(6))
             }
         )
     }
@@ -106,8 +117,8 @@ fun SkinTypeScreen(
 @Composable
 fun SkinTypeScreenPreview() {
     SunscreenTheme {
-        SkinTypeScreen(
-            onSkinTypeSelected = {}
+        SkinTypeScreenWithoutViewModel(
+            onEvent = {}
         )
     }
 }

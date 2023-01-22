@@ -38,9 +38,9 @@ fun ClothingRow(
     clothingItems: List<ClothingItemData>,
     onClick: (region: ClothingRegion) -> Unit,
     modifier: Modifier = Modifier,
-    initiallySelectedIndex: Int? = null
+    initiallySelectedIndex: Int
 ) {
-    var selectedIndex: Int? by rememberSaveable { mutableStateOf(initiallySelectedIndex) }
+    var selectedIndex by rememberSaveable { mutableStateOf(initiallySelectedIndex) }
 
     LazyRow(modifier = modifier) {
         items(
@@ -57,9 +57,7 @@ fun ClothingRow(
                         onClick(item.id)
                     }
                 ),
-                isSelected = selectedIndex?.let {
-                    clothingItems[it].id == item.id
-                } ?: false
+                isSelected = clothingItems[selectedIndex].id == item.id
             )
         }
     }
@@ -101,7 +99,8 @@ fun ClothingRowPreview() {
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some),
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some, Color.Cyan)
             ),
-            onClick = {}
+            onClick = {},
+            initiallySelectedIndex = 0
         )
     }
 }

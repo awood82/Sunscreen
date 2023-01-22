@@ -38,7 +38,7 @@ fun ClothingScreen(
         }
     }
 
-    ClothingScreenUi(
+    ClothingScreenWithoutViewModel(
         onEvent = { viewModel.onEvent(it) },
         modifier = modifier
     )
@@ -46,7 +46,7 @@ fun ClothingScreen(
 
 // Define this without the ViewModel so that the Preview can render in Android Studio
 @Composable
-fun ClothingScreenUi(
+private fun ClothingScreenWithoutViewModel(
     onEvent: (ClothingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -85,7 +85,8 @@ fun ClothingScreenUi(
                     contentDescriptionId = R.string.clothing_top_covered
                 )
             ),
-            onClick = { onEvent(ClothingEvent.TopSelected(it)) }
+            onClick = { onEvent(ClothingEvent.TopSelected(it)) },
+            initiallySelectedIndex = 1
         )
         ClothingRow(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -106,7 +107,8 @@ fun ClothingScreenUi(
                     contentDescriptionId = R.string.clothing_bottom_covered
                 )
             ),
-            onClick = { onEvent(ClothingEvent.BottomSelected(it)) }
+            onClick = { onEvent(ClothingEvent.BottomSelected(it)) },
+            initiallySelectedIndex = 1
         )
 
         Spacer(modifier = Modifier.size(16.dp))
@@ -126,7 +128,7 @@ fun ClothingScreenUi(
 @Composable
 fun ClothingScreenPreview() {
     SunscreenTheme {
-        ClothingScreenUi(
+        ClothingScreenWithoutViewModel(
             onEvent = {}
         )
     }
