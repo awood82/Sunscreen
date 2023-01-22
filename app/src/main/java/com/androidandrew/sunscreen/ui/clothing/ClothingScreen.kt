@@ -1,16 +1,18 @@
 package com.androidandrew.sunscreen.ui.clothing
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.domain.UvFactor
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -26,17 +27,29 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ClothingScreen(
     modifier: Modifier = Modifier,
-    onClothingSelected: () -> Unit,
+    onContinuePressed: () -> Unit,
     viewModel: ClothingViewModel = koinViewModel()
 ) {
-    val isClothingSelected by viewModel.isClothingSelected.collectAsStateWithLifecycle(initialValue = false)
+    val isContinuePressed by viewModel.isContinuePressed.collectAsStateWithLifecycle(initialValue = false)
 
-    if (isClothingSelected) {
+    if (isContinuePressed) {
         LaunchedEffect(Unit) {
-            onClothingSelected()
+            onContinuePressed()
         }
     }
 
+    ClothingScreenUi(
+        onEvent = { viewModel.onEvent(it) },
+        modifier = modifier
+    )
+}
+
+// Define this without the ViewModel so that the Preview can render in Android Studio
+@Composable
+fun ClothingScreenUi(
+    onEvent: (ClothingEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .verticalScroll(state = rememberScrollState())
@@ -50,50 +63,61 @@ fun ClothingScreen(
             text = stringResource(R.string.clothing_screen_instructions),
             style = MaterialTheme.typography.headlineSmall
         )
-        // TODO: Add Skip button
-        ClothingRow(
-            description = stringResource(R.string.clothing_shorts_no_shirt),
-            modifier = Modifier.clickable {
-                viewModel.onEvent(ClothingEvent.Selected(UvFactor.Clothing.SHORTS_NO_SHIRT))
-            }
-        )
-        ClothingRow(
-            description = stringResource(R.string.clothing_pants_no_shirt),
-            modifier = Modifier.clickable {
-                viewModel.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_NO_SHIRT))
-            }
-        )
-        ClothingRow(
-            description = stringResource(R.string.clothing_shorts_t_shirt),
-            modifier = Modifier.clickable {
-                viewModel.onEvent(ClothingEvent.Selected(UvFactor.Clothing.SHORTS_T_SHIRT))
-            }
-        )
-        ClothingRow(
-            description = stringResource(R.string.clothing_pants_t_shirt),
-            modifier = Modifier.clickable {
-                viewModel.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_T_SHIRT))
-            }
-        )
-        ClothingRow(
-            description = stringResource(R.string.clothing_pants_long_sleeve_shirt),
-            modifier = Modifier.clickable {
-                viewModel.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_LONG_SLEEVE_SHIRT))
-            }
-        )
-    }
-}
 
-@Composable
-fun ClothingRow(
-    description: String,
-    modifier: Modifier = Modifier
-) {
-    Row(modifier = modifier) {
-        Text(
-            text = description,
-            style = MaterialTheme.typography.headlineSmall
+        Spacer(modifier = Modifier.size(16.dp))
+
+        ClothingRow(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            clothingItems = listOf(
+                ClothingItemData(
+                    id = ClothingTop.NOTHING,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_top_nothing
+                ),
+                ClothingItemData(
+                    id = ClothingTop.T_SHIRT,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_top_some
+                ),
+                ClothingItemData(
+                    id = ClothingTop.LONG_SLEEVE_SHIRT,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_top_covered
+                )
+            ),
+            onClick = { onEvent(ClothingEvent.TopSelected(it)) }
         )
+        ClothingRow(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            clothingItems = listOf(
+                ClothingItemData(
+                    id = ClothingBottom.NOTHING,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_bottom_nothing
+                ),
+                ClothingItemData(
+                    id = ClothingBottom.SHORTS,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_bottom_some
+                ),
+                ClothingItemData(
+                    id = ClothingBottom.PANTS,
+                    drawableId = R.drawable.ic_launcher_foreground,
+                    contentDescriptionId = R.string.clothing_bottom_covered
+                )
+            ),
+            onClick = { onEvent(ClothingEvent.BottomSelected(it)) }
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            onClick = { onEvent(ClothingEvent.ContinuePressed) }
+        ) {
+            Text(stringResource(id = R.string.clothing_screen_done))
+        }
     }
 }
 
@@ -102,8 +126,8 @@ fun ClothingRow(
 @Composable
 fun ClothingScreenPreview() {
     SunscreenTheme {
-        ClothingScreen(
-            onClothingSelected = {}
+        ClothingScreenUi(
+            onEvent = {}
         )
     }
 }

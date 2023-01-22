@@ -1,7 +1,20 @@
 package com.androidandrew.sunscreen.ui.clothing
 
-import com.androidandrew.sunscreen.domain.UvFactor
+interface ClothingRegion
+enum class ClothingTop : ClothingRegion {
+    NOTHING,
+    T_SHIRT,
+    LONG_SLEEVE_SHIRT
+}
+
+enum class ClothingBottom : ClothingRegion {
+    NOTHING,
+    SHORTS,
+    PANTS
+}
 
 sealed interface ClothingEvent {
-    data class Selected(val clothing: UvFactor.Clothing) : ClothingEvent
+    data class TopSelected(val clothing: ClothingRegion) : ClothingEvent
+    data class BottomSelected(val clothing: ClothingRegion) : ClothingEvent
+    object ContinuePressed : ClothingEvent
 }

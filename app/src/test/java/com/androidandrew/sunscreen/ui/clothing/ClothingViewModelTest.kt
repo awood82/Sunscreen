@@ -44,26 +44,65 @@ class ClothingViewModelTest {
     }
 
     @Test
-    fun whenClothing_isSelected_itIsSavedToRepo_andOnboardingisComplete() = runTest {
-        vm.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_NO_SHIRT))
+    fun topAndBottomCombos_mapToUvFactor() = runTest {
+        val default = UvFactor.Clothing.SHORTS_T_SHIRT
 
-        assertEquals(2, userSettingsRepo.getClothing())
-        assertTrue(userSettingsRepo.getIsOnboarded())
+        // Nothing selected initially. Use default.
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(default.ordinal, userSettingsRepo.getClothing())
+
+        // Selecting only one option will still use default.
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.NOTHING))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(default.ordinal, userSettingsRepo.getClothing())
+
+        // Once top and bottom are selected, map to a combo.
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.NOTHING))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.NAKED.ordinal, userSettingsRepo.getClothing())
+
+        // Keep shirt off, put shorts on
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.SHORTS))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.SHORTS_NO_SHIRT.ordinal, userSettingsRepo.getClothing())
+
+        // Keep shirt off, put pants on
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.PANTS))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.PANTS_NO_SHIRT.ordinal, userSettingsRepo.getClothing())
+
+        // Put on T-shirt, keep pants on
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.T_SHIRT))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.PANTS_T_SHIRT.ordinal, userSettingsRepo.getClothing())
+
+        // Put on long sleeve shirt, keep pants on
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.LONG_SLEEVE_SHIRT))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.PANTS_LONG_SLEEVE_SHIRT.ordinal, userSettingsRepo.getClothing())
+
+        // Put on shorts and a T-shirt
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.T_SHIRT))
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.SHORTS))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+        assertEquals(UvFactor.Clothing.SHORTS_T_SHIRT.ordinal, userSettingsRepo.getClothing())
     }
 
-    // TODO: whenSkipped...
-
     @Test
-    fun whenClothing_isSelected_stateIsUpdated() = runTest {
-        val collectedIsClothingSelected = mutableListOf<Boolean>()
+    fun continueButton_whenPressed_savesStateToRepo_andOnboardingIsComplete() = runTest {
+        val collectedIsContinueSelected = mutableListOf<Boolean>()
 
         val collectJob = launch(UnconfinedTestDispatcher()) {
-            vm.isClothingSelected.collect { collectedIsClothingSelected.add(it) }
+            vm.isContinuePressed.collect { collectedIsContinueSelected.add(it) }
         }
 
-        vm.onEvent(ClothingEvent.Selected(UvFactor.Clothing.PANTS_LONG_SLEEVE_SHIRT))
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.LONG_SLEEVE_SHIRT))
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.PANTS))
+        vm.onEvent(ClothingEvent.ContinuePressed)
 
-        assertTrue(collectedIsClothingSelected.first())
+        assertTrue(collectedIsContinueSelected.first())
+        assertEquals(5, userSettingsRepo.getClothing())
+        assertTrue(userSettingsRepo.getIsOnboarded())
 
         collectJob.cancel()
     }

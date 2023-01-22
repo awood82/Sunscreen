@@ -53,7 +53,7 @@ fun AppNavHost(
         composable(route = AppDestination.Clothing.name) {
             Timber.d("Loading ClothingScreen")
             ClothingScreen(
-                onClothingSelected = {
+                onContinuePressed = {
                     navController.navigate(AppDestination.Main.name) {
                         popUpTo(AppDestination.Main.name) {
                             inclusive = true

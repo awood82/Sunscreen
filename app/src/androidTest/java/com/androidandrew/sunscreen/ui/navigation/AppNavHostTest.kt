@@ -13,6 +13,7 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.SunscreenApp
+import com.androidandrew.sunscreen.util.onNodeWithContentDescriptionId
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Rule
@@ -73,10 +74,10 @@ class AppNavHostTest {
     }
 
     @Test
-    fun clothingScreen_whenClothingIsSelected_navigatesToMainScreen() {
+    fun clothingScreen_whenContinueIsPressed_navigatesToMainScreen() {
         navigateToClothingScreen()
 
-        composeTestRule.onNodeWithStringId(R.string.clothing_shorts_t_shirt).performClick()
+        composeTestRule.onNodeWithStringId(R.string.clothing_screen_done).performClick()
 
         assertDestinationIs(AppDestination.Main.name)
     }
@@ -139,7 +140,12 @@ class AppNavHostTest {
 
     private fun navigateThroughOnboardingFlow() {
         navigateToClothingScreen()
-        composeTestRule.onNodeWithStringId(R.string.clothing_shorts_t_shirt).performClick()
+        composeTestRule.apply {
+            onNodeWithContentDescriptionId(R.string.clothing_top_some).performClick()
+            onNodeWithContentDescriptionId(R.string.clothing_bottom_some).performClick()
+            onNodeWithStringId(R.string.clothing_screen_done).performClick()
+        }
+
         awaitIdle()
     }
 
