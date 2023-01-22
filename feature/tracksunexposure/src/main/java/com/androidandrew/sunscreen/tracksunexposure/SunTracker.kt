@@ -32,11 +32,12 @@ class SunTracker(
     private lateinit var settings: SunTrackerSettings
 //    private val uvPredictionStream = getLocalForecastForToday()
     private val skinTypeStream = userSettingsRepository.getSkinTypeFlow()
+    private val clothingStream = userSettingsRepository.getClothingFlow()
     private val spfStream = userSettingsRepository.getSpfFlow()
     private val isOnReflectiveSurfaceStream = userSettingsRepository.getIsOnSnowOrWaterFlow()
     private val settingsStream = combine(
-        getLocalForecastForToday(), skinTypeStream, spfStream, isOnReflectiveSurfaceStream
-    ) { uvPrediction, skinType, spf, isOnReflectiveSurface ->
+        getLocalForecastForToday(), skinTypeStream, clothingStream, spfStream, isOnReflectiveSurfaceStream
+    ) { uvPrediction, skinType, clothing, spf, isOnReflectiveSurface ->
         when (uvPrediction) {
             is DataResult.Error -> {
                 Timber.e("uvPrediction error: ${uvPrediction.exception}")
@@ -50,6 +51,7 @@ class SunTracker(
                 SunTrackerSettings(
                     uvPrediction = uvPrediction.data,
                     skinType = skinType,
+                    clothing = clothing,
                     spf = spf,
                     isOnReflectiveSurface = isOnReflectiveSurface
                 )
@@ -130,7 +132,7 @@ class SunTracker(
         return vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
             skinType = settings.skinType,
-            clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.SHORTS), // TODO: Add to settings
+            clothing = settings.clothing,
             spf = settings.spf,
             altitudeInKm = 0
         ) / TimeUnit.MINUTES.toSeconds(1)

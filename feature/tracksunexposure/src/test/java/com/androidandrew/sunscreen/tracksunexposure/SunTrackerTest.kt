@@ -10,6 +10,7 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepositoryImpl
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.model.UserTracking
+import com.androidandrew.sunscreen.model.defaultUserClothing
 import com.androidandrew.sunscreen.model.trim
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +47,7 @@ class SunTrackerTest {
     private val settings = SunTrackerSettings(
         uvPrediction = FakeUvPredictions.forecast.trim(),
         skinType = 1,
+        clothing = defaultUserClothing,
         spf = 1,
         isOnReflectiveSurface = true
     )
