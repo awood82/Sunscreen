@@ -10,28 +10,32 @@ class UvFactorTest {
 
     @Test
     fun getSkinExposedFactor_fromClothing_followsRuleOfNines() {
-        val delta = 0.01
-        val leewayDelta = 0.05
+        val delta = 1.0
+        val leewayDelta = 5.0
 
         // Naked is close to 100% skin exposed
         var clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.NOTHING)
-        assertEquals(1.0, UvFactor.getSkinExposedFactor(clothing), delta)
+        assertEquals(100.0, UvFactor.getSkinExposedFactor(clothing), delta)
 
         // Shorts have some leeway
         clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.SHORTS)
-        assertEquals(1.0 - 0.18, UvFactor.getSkinExposedFactor(clothing), leewayDelta)
+        assertEquals(100.0 - 18, UvFactor.getSkinExposedFactor(clothing), leewayDelta)
 
         // Pants cover ~36% (18 * 2)
         clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.PANTS)
-        assertEquals(1.0 - 0.36, UvFactor.getSkinExposedFactor(clothing), delta)
+        assertEquals(100.0 - 36, UvFactor.getSkinExposedFactor(clothing), delta)
 
         // Long-sleeve shirts cover ~54% (18 * 3)
         clothing = UserClothing(top = ClothingTop.LONG_SLEEVE_SHIRT, bottom = ClothingBottom.NOTHING)
-        assertEquals(1.0 - 0.54, UvFactor.getSkinExposedFactor(clothing), delta)
+        assertEquals(100.0 - 54, UvFactor.getSkinExposedFactor(clothing), delta)
 
         // T-Shirts have some leeway
         clothing = UserClothing(top = ClothingTop.T_SHIRT, bottom = ClothingBottom.NOTHING)
-        assertEquals(1.0 - 0.18, UvFactor.getSkinExposedFactor(clothing), leewayDelta)
+        assertEquals(100.0 - 40, UvFactor.getSkinExposedFactor(clothing), leewayDelta)
+
+        // Face and neck allow 9-10%
+        clothing = UserClothing(top = ClothingTop.LONG_SLEEVE_SHIRT, bottom = ClothingBottom.PANTS)
+        assertEquals(9.5, UvFactor.getSkinExposedFactor(clothing), delta)
     }
 
     @Test

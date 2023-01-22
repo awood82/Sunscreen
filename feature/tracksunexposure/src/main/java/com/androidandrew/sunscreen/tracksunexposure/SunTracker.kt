@@ -5,12 +5,10 @@ import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
-import com.androidandrew.sunscreen.model.getUvNow
-import com.androidandrew.sunscreen.domain.UvFactor
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
-import com.androidandrew.sunscreen.model.UserTracking
+import com.androidandrew.sunscreen.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -132,7 +130,7 @@ class SunTracker(
         return vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
             skinType = settings.hardcodedSkinType,
-            clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
+            clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.SHORTS), // TODO: Add to settings
             spf = settings.spf,
             altitudeInKm = 0
         ) / TimeUnit.MINUTES.toSeconds(1)

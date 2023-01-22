@@ -24,18 +24,19 @@ object UvFactor {
      * Chest and upper back = 18%
      * Abs and lower back = 18%
      * So shorts cover ~18%, pants ~36%, T-shirt ~40%, long-sleeve shirt ~54%
+     * @return In range [0, 100]
      */
     fun getSkinExposedFactor(clothing: UserClothing): Double {
-        var exposed = 0.99 // The last 1% is usually covered
+        var exposed = 99.0 // The last 1% is usually covered
         when (clothing.top) {
             ClothingTop.NOTHING -> {}
-            ClothingTop.T_SHIRT -> exposed -= 0.4  // Some leeway allowed here. 36% plus a bit for sleeves
-            ClothingTop.LONG_SLEEVE_SHIRT -> exposed -= 0.54
+            ClothingTop.T_SHIRT -> exposed -= 40  // Some leeway allowed here. 36% plus a bit for sleeves
+            ClothingTop.LONG_SLEEVE_SHIRT -> exposed -= 54
         }
         when (clothing.bottom) {
             ClothingBottom.NOTHING -> {}
-            ClothingBottom.SHORTS -> exposed -= 0.18  // Some leeway allowed here
-            ClothingBottom.PANTS -> exposed -= 0.36
+            ClothingBottom.SHORTS -> exposed -= 18  // Some leeway allowed here
+            ClothingBottom.PANTS -> exposed -= 36
         }
         return exposed
     }
