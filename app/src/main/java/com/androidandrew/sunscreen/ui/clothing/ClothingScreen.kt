@@ -38,7 +38,7 @@ fun ClothingScreen(
         }
     }
 
-    ClothingScreenWithoutViewModel(
+    ClothingScreen(
         onEvent = { viewModel.onEvent(it) },
         modifier = modifier
     )
@@ -46,7 +46,7 @@ fun ClothingScreen(
 
 // Define this without the ViewModel so that the Preview can render in Android Studio
 @Composable
-private fun ClothingScreenWithoutViewModel(
+private fun ClothingScreen(
     onEvent: (ClothingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -128,7 +128,7 @@ private fun ClothingScreenWithoutViewModel(
 @Composable
 fun ClothingScreenPreview() {
     SunscreenTheme {
-        ClothingScreenWithoutViewModel(
+        ClothingScreen(
             onEvent = {}
         )
     }

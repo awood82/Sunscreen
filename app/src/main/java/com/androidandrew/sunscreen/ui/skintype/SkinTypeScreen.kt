@@ -35,14 +35,14 @@ fun SkinTypeScreen(
         }
     }
 
-    SkinTypeScreenWithoutViewModel(
+    SkinTypeScreen(
         modifier = modifier,
         onEvent = { viewModel.onEvent(it) }
     )
 }
 
 @Composable
-private fun SkinTypeScreenWithoutViewModel(
+private fun SkinTypeScreen(
     onEvent: (SkinTypeEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -117,7 +117,7 @@ private fun SkinTypeScreenWithoutViewModel(
 @Composable
 fun SkinTypeScreenPreview() {
     SunscreenTheme {
-        SkinTypeScreenWithoutViewModel(
+        SkinTypeScreen(
             onEvent = {}
         )
     }
