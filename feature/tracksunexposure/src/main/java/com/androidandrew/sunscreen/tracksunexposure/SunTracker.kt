@@ -49,7 +49,7 @@ class SunTracker(
             is DataResult.Success -> {
                 SunTrackerSettings(
                     uvPrediction = uvPrediction.data,
-                    hardcodedSkinType = skinType,
+                    skinType = skinType,
                     spf = spf,
                     isOnReflectiveSurface = isOnReflectiveSurface
                 )
@@ -119,7 +119,7 @@ class SunTracker(
     private fun getBurnProgress(): Double {
         return sunburnCalculator.computeSunUnitsInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
-            skinType = settings.hardcodedSkinType,
+            skinType = settings.skinType,
             spf = settings.spf,
             altitudeInKm = 0,
             isOnSnowOrWater = settings.isOnReflectiveSurface
@@ -129,7 +129,7 @@ class SunTracker(
     private fun getVitaminDProgress(): Double {
         return vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
-            skinType = settings.hardcodedSkinType,
+            skinType = settings.skinType,
             clothing = UserClothing(top = ClothingTop.NOTHING, bottom = ClothingBottom.SHORTS), // TODO: Add to settings
             spf = settings.spf,
             altitudeInKm = 0

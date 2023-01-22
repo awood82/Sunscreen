@@ -45,7 +45,7 @@ class SunTrackerTest {
 
     private val settings = SunTrackerSettings(
         uvPrediction = FakeUvPredictions.forecast.trim(),
-        hardcodedSkinType = 1,
+        skinType = 1,
         spf = 1,
         isOnReflectiveSurface = true
     )
@@ -133,7 +133,7 @@ class SunTrackerTest {
         runBlocking {
             userSettingsRepo.setLocation(FakeData.zip)
             hourlyForecastRepo.setForecast(FakeEpaService.forecast)
-            userSettingsRepo.setSkinType(settings.hardcodedSkinType)
+            userSettingsRepo.setSkinType(settings.skinType)
             userSettingsRepo.setSpf(settings.spf)
             userSettingsRepo.setIsOnSnowOrWater(settings.isOnReflectiveSurface)
         }
