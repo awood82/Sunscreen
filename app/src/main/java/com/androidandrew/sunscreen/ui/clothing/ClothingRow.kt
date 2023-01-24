@@ -5,13 +5,14 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,7 +45,10 @@ fun ClothingRow(
 ) {
     var selectedIndex by rememberSaveable { mutableStateOf(initiallySelectedIndex) }
 
-    LazyRow(modifier = modifier) {
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
         items(
             items = clothingItems,
             key = { item -> item.id }
@@ -76,16 +80,15 @@ fun ClothingItem(
     Box(
         contentAlignment = Alignment.Center,
         modifier = if (isSelected) {
-            modifier.border(4.dp, Color.Red)
+            modifier.border(4.dp, Color.Red).padding(8.dp)
         } else {
-            modifier
+            modifier.padding(8.dp)
         }
     ) {
         ColoredCircleShape(color = backgroundColor)
         Image(
             painter = painterResource(id = drawableId),
-            contentDescription = stringResource(id = contentDescriptionId),
-            modifier = modifier.clip(CircleShape)
+            contentDescription = stringResource(id = contentDescriptionId)
         )
     }
 }
@@ -109,13 +112,26 @@ fun ClothingRowPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ClothingItemPreview() {
+fun ClothingItemSelectedPreview() {
     SunscreenTheme {
         ClothingItem(
             drawableId = R.drawable.ic_launcher_foreground,
             contentDescriptionId = R.string.clothing_top_some,
             backgroundColor = Color.Red,
             isSelected = true
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ClothingItemUnselectedPreview() {
+    SunscreenTheme {
+        ClothingItem(
+            drawableId = R.drawable.ic_launcher_foreground,
+            contentDescriptionId = R.string.clothing_top_some,
+            backgroundColor = Color.Red,
+            isSelected = false
         )
     }
 }

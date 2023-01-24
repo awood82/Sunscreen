@@ -28,8 +28,7 @@
 
     <!-- Clothing selection -->
     <string name="clothing_screen_title">Clothing</string>
-    <string name="clothing_screen_instructions">The amount of skin exposed to the sun affects Vitamin D absorption\n
-    If you are only tracking sunburn, you may skip this step, or pick a default option.</string>
+    <string name="clothing_screen_instructions">The amount of skin exposed to the sun affects Vitamin D absorption.\nIf you are only tracking sunburn, you may skip this step, or use the default option.</string>
     <string name="clothing_screen_done">Continue</string>
     <!-- Tops -->
     <string name="clothing_top_nothing">Bare chest or bikini</string>

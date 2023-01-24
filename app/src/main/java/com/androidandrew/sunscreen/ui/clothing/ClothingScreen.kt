@@ -65,7 +65,7 @@ private fun ClothingScreen(
         )
         Text(
             text = stringResource(R.string.clothing_screen_instructions),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.bodyLarge
         )
 
         Spacer(modifier = Modifier.size(16.dp))
@@ -75,17 +75,17 @@ private fun ClothingScreen(
             clothingItems = listOf(
                 ClothingItemData(
                     id = ClothingTop.NOTHING,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.top_little,
                     contentDescriptionId = R.string.clothing_top_nothing
                 ),
                 ClothingItemData(
                     id = ClothingTop.T_SHIRT,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.top_t_shirt,
                     contentDescriptionId = R.string.clothing_top_some
                 ),
                 ClothingItemData(
                     id = ClothingTop.LONG_SLEEVE_SHIRT,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.top_long_shirt,
                     contentDescriptionId = R.string.clothing_top_covered
                 )
             ),
@@ -97,17 +97,17 @@ private fun ClothingScreen(
             clothingItems = listOf(
                 ClothingItemData(
                     id = ClothingBottom.NOTHING,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.bottom_little,
                     contentDescriptionId = R.string.clothing_bottom_nothing
                 ),
                 ClothingItemData(
                     id = ClothingBottom.SHORTS,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.bottom_shorts,
                     contentDescriptionId = R.string.clothing_bottom_some
                 ),
                 ClothingItemData(
                     id = ClothingBottom.PANTS,
-                    drawableId = R.drawable.ic_launcher_foreground,
+                    drawableId = R.drawable.bottom_pants,
                     contentDescriptionId = R.string.clothing_bottom_covered
                 )
             ),
