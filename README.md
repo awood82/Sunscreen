@@ -34,5 +34,5 @@ Tag -> 1e1d4f4 (select_skin_type)
 https://bitbucket.org/awood82/sunscreen/commits/1e1d4f43108968035884f31d7b22799d12c12a7a
 
 Screen to select clothing for Vitamin D absorption
-Tag -> 78bc7bc (select_clothing)
-https://bitbucket.org/awood82/sunscreen/commits/78bc7bc817b393ac06f4fe6608eb93ad4411eaa7
+Tag -> 11f9e6d (select_clothing)
+https://bitbucket.org/awood82/sunscreen/commits/11f9e6d0d509dd9a02bfd0559321fd17b16df5d3
