@@ -16,7 +16,6 @@ class SkinTypeViewModel(private val userSettingsRepo: UserSettingsRepository) : 
             is SkinTypeEvent.Selected -> {
                 viewModelScope.launch {
                     userSettingsRepo.setSkinType(event.skinType)
-                    userSettingsRepo.setIsOnboarded(true)
                     _isSkinTypeSelected.emit(true)
                 }
             }

@@ -2,8 +2,11 @@ package com.androidandrew.sunscreen.data.repository
 
 import com.androidandrew.sunscreen.database.*
 import com.androidandrew.sunscreen.database.entity.UserSettingEntity
+import com.androidandrew.sunscreen.model.UserClothing
+import com.androidandrew.sunscreen.model.defaultUserClothing
+import com.androidandrew.sunscreen.model.toDatabaseValue
+import com.androidandrew.sunscreen.model.toUserClothing
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class UserSettingsRepositoryImpl(
@@ -14,12 +17,14 @@ class UserSettingsRepositoryImpl(
         const val IS_ONBOARDED = 1L
         const val LOCATION = 2L
         const val SKIN_TYPE = 3L
+        const val CLOTHING = 4L
         const val SPF = 10L
         const val IS_ON_SNOW_OR_WATER = 11L
 
         private const val DEFAULT_IS_ONBOARDED = false
         private const val DEFAULT_LOCATION = ""
         private const val MY_HARDCODED_SKIN_TYPE = 2 // TODO: Remove this hardcoded value b/c skin type must be set before tracking is possible. The others can use defaults.
+        private val DEFAULT_CLOTHING = defaultUserClothing
         private const val NO_SUNSCREEN = 0
         private const val DEFAULT_IS_ON_SNOW_OR_WATER = false
     }
@@ -61,6 +66,19 @@ class UserSettingsRepositoryImpl(
     }
     override suspend fun setSkinType(skinType: Int) {
         writeSetting(SKIN_TYPE, skinType.toString())
+    }
+
+    override fun getClothingFlow(): Flow<UserClothing> {
+        return readIntSettingFlow(CLOTHING)
+            .map {
+                it?.toUserClothing() ?: DEFAULT_CLOTHING
+            }
+    }
+    override suspend fun getClothing(): UserClothing {
+        return readIntSetting(CLOTHING)?.toUserClothing() ?: DEFAULT_CLOTHING
+    }
+    override suspend fun setClothing(clothing: UserClothing) {
+        writeSetting(CLOTHING, clothing.toDatabaseValue().toString())
     }
 
     override fun getSpfFlow(): Flow<Int> {

@@ -13,6 +13,7 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.SunscreenApp
+import com.androidandrew.sunscreen.util.onNodeWithContentDescriptionId
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Rule
@@ -64,10 +65,19 @@ class AppNavHostTest {
     }
 
     @Test
-    fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToMainScreen() {
+    fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToClothingScreen() {
         navigateToSkinTypeScreen()
 
         composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+
+        assertDestinationIs(AppDestination.Clothing.name)
+    }
+
+    @Test
+    fun clothingScreen_whenContinueIsPressed_navigatesToMainScreen() {
+        navigateToClothingScreen()
+
+        composeTestRule.onNodeWithStringId(R.string.clothing_screen_done).performClick()
 
         assertDestinationIs(AppDestination.Main.name)
     }
@@ -94,6 +104,15 @@ class AppNavHostTest {
         assertDestinationIs(AppDestination.Location.name)
     }
 
+    @Test
+    fun backButton_onClothingScreen_returnsToSkinTypeScreen() {
+        navigateToClothingScreen()
+
+        navigateBack()
+
+        assertDestinationIs(AppDestination.SkinType.name)
+    }
+
 
     private fun performLocationSearch(zip: String) {
         composeTestRule.onNodeWithStringId(R.string.current_location).apply {
@@ -113,9 +132,20 @@ class AppNavHostTest {
         performLocationSearch(FakeData.zip)
     }
 
-    private fun navigateThroughOnboardingFlow() {
+    private fun navigateToClothingScreen() {
         navigateToSkinTypeScreen()
         composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        awaitIdle()
+    }
+
+    private fun navigateThroughOnboardingFlow() {
+        navigateToClothingScreen()
+        composeTestRule.apply {
+            onNodeWithContentDescriptionId(R.string.clothing_top_some).performClick()
+            onNodeWithContentDescriptionId(R.string.clothing_bottom_some).performClick()
+            onNodeWithStringId(R.string.clothing_screen_done).performClick()
+        }
+
         awaitIdle()
     }
 

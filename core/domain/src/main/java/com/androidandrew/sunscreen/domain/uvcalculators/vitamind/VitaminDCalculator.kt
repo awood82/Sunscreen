@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.domain.uvcalculators.vitamind
 
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
 import com.androidandrew.sunscreen.domain.UvFactor
+import com.androidandrew.sunscreen.model.UserClothing
 import kotlin.math.pow
 
 class VitaminDCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
@@ -17,8 +18,8 @@ class VitaminDCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
      * Uses a ratio estimated from time to sunburn in:
      * https://www.climate-policy-watcher.org/ultraviolet-radiation-2/calculation-of-optimal-times-for-exposure-to-sunlight.html
      */
-    fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, clothing: UvFactor.Clothing,
-                                     spf: Int = ConvertSpfUseCase.MIN_SPF, altitudeInKm: Int = 0): Double {
+    fun computeIUVitaminDInOneMinute(uvIndex: Double, skinType: Int, clothing: UserClothing,
+        spf: Int = ConvertSpfUseCase.MIN_SPF, altitudeInKm: Int = 0): Double {
         if (uvIndex <= 0.0) {
             return 0.0
         }

@@ -21,4 +21,18 @@ Offline-first repository
 Tag-> 8878f4c (offline_first_repository)
 https://bitbucket.org/awood82/sunscreen/commits/8878f4c5ba53531fedc15cf096346788edfc8955
 
-Service using Repositories to communicate instead -> TODO
+Service using Repositories to communicate instead
+Tag -> 3e2d6cc (service_uses_repo_no_binder)
+https://bitbucket.org/awood82/sunscreen/commits/3e2d6cc3be23b076b5fccd546b1ed61083d96169
+
+Error messages
+Tag -> e690704 (error_messages)
+https://bitbucket.org/awood82/sunscreen/commits/e6907047be72a8b6e285a71ce7978dfe8c1f0be1
+
+Screen to select skin type
+Tag -> 1e1d4f4 (select_skin_type)
+https://bitbucket.org/awood82/sunscreen/commits/1e1d4f43108968035884f31d7b22799d12c12a7a
+
+Screen to select clothing for Vitamin D absorption
+Tag -> 78bc7bc (select_clothing)
+https://bitbucket.org/awood82/sunscreen/commits/78bc7bc817b393ac06f4fe6608eb93ad4411eaa7

@@ -11,8 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,11 +46,11 @@ class SkinTypeViewModelTest {
     }
 
     @Test
-    fun whenSkinType_isSelected_itIsSavedToRepo_andOnboardingisComplete() = runTest {
+    fun whenSkinType_isSelected_itIsSavedToRepo_andOnboardingisNotCompleteYet() = runTest {
         vm.onEvent(SkinTypeEvent.Selected(4))
 
         assertEquals(4, userSettingsRepo.getSkinType())
-        assertTrue(userSettingsRepo.getIsOnboarded())
+        assertFalse(userSettingsRepo.getIsOnboarded())
     }
 
     @Test

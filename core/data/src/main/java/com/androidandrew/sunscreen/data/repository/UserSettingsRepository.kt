@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.data.repository
 
+import com.androidandrew.sunscreen.model.UserClothing
 import kotlinx.coroutines.flow.Flow
 
 interface UserSettingsRepository {
@@ -14,6 +15,10 @@ interface UserSettingsRepository {
     fun getSkinTypeFlow(): Flow<Int>
     suspend fun getSkinType(): Int
     suspend fun setSkinType(skinType: Int)
+
+    fun getClothingFlow(): Flow<UserClothing>
+    suspend fun getClothing(): UserClothing
+    suspend fun setClothing(clothing: UserClothing)
 
     fun getSpfFlow(): Flow<Int>
     suspend fun getSpf(): Int

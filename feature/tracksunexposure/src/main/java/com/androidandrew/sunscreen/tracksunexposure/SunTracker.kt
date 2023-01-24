@@ -5,12 +5,10 @@ import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserTrackingRepository
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
-import com.androidandrew.sunscreen.model.getUvNow
-import com.androidandrew.sunscreen.domain.UvFactor
 import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCase
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
-import com.androidandrew.sunscreen.model.UserTracking
+import com.androidandrew.sunscreen.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -34,11 +32,12 @@ class SunTracker(
     private lateinit var settings: SunTrackerSettings
 //    private val uvPredictionStream = getLocalForecastForToday()
     private val skinTypeStream = userSettingsRepository.getSkinTypeFlow()
+    private val clothingStream = userSettingsRepository.getClothingFlow()
     private val spfStream = userSettingsRepository.getSpfFlow()
     private val isOnReflectiveSurfaceStream = userSettingsRepository.getIsOnSnowOrWaterFlow()
     private val settingsStream = combine(
-        getLocalForecastForToday(), skinTypeStream, spfStream, isOnReflectiveSurfaceStream
-    ) { uvPrediction, skinType, spf, isOnReflectiveSurface ->
+        getLocalForecastForToday(), skinTypeStream, clothingStream, spfStream, isOnReflectiveSurfaceStream
+    ) { uvPrediction, skinType, clothing, spf, isOnReflectiveSurface ->
         when (uvPrediction) {
             is DataResult.Error -> {
                 Timber.e("uvPrediction error: ${uvPrediction.exception}")
@@ -51,7 +50,8 @@ class SunTracker(
             is DataResult.Success -> {
                 SunTrackerSettings(
                     uvPrediction = uvPrediction.data,
-                    hardcodedSkinType = skinType,
+                    skinType = skinType,
+                    clothing = clothing,
                     spf = spf,
                     isOnReflectiveSurface = isOnReflectiveSurface
                 )
@@ -121,7 +121,7 @@ class SunTracker(
     private fun getBurnProgress(): Double {
         return sunburnCalculator.computeSunUnitsInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
-            skinType = settings.hardcodedSkinType,
+            skinType = settings.skinType,
             spf = settings.spf,
             altitudeInKm = 0,
             isOnSnowOrWater = settings.isOnReflectiveSurface
@@ -131,8 +131,8 @@ class SunTracker(
     private fun getVitaminDProgress(): Double {
         return vitaminDCalculator.computeIUVitaminDInOneMinute(
             uvIndex = settings.uvPrediction.getUvNow(clock.toTime()),
-            skinType = settings.hardcodedSkinType,
-            clothing = UvFactor.Clothing.SHORTS_NO_SHIRT,
+            skinType = settings.skinType,
+            clothing = settings.clothing,
             spf = settings.spf,
             altitudeInKm = 0
         ) / TimeUnit.MINUTES.toSeconds(1)
