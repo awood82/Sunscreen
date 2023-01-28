@@ -36,7 +36,10 @@ fun UvTrackingWithState(
                 colorResource(R.color.progress_burn_center),
                 colorResource(R.color.progress_burn_end)
             ),
-            trackColor = colorResource(R.color.progress_background_end),
+            trackColors = listOf(
+                colorResource(R.color.progress_background_start),
+                colorResource(R.color.progress_background_end)
+            ),
             textColor = colorResource(R.color.black),
             label = stringResource(R.string.sunburn),
             progressText = stringResource(R.string.sunburn_progress, uiState.sunburnProgressAmount)
@@ -48,7 +51,10 @@ fun UvTrackingWithState(
                 colorResource(R.color.progress_vitamin_d_start),
                 colorResource(R.color.progress_vitamin_d_end)
             ),
-            trackColor = colorResource(R.color.progress_background_end),
+            trackColors = listOf(
+                colorResource(R.color.progress_background_start),
+                colorResource(R.color.progress_background_end)
+            ),
             textColor = colorResource(R.color.black),
             label = stringResource(R.string.vitamin_d),
             progressText = stringResource(R.string.vitamin_d_progress, uiState.vitaminDProgressAmount)

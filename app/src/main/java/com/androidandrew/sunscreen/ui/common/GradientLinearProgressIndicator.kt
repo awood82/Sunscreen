@@ -16,18 +16,19 @@ import androidx.compose.ui.unit.dp
 fun GradientLinearProgressIndicator(
     progress: Float,
     progressColors: List<Color>,
-    trackColor: Color,
+    trackColors: List<Color>,
     modifier: Modifier = Modifier
 ) {
-    val brush = Brush.horizontalGradient(progressColors)
+    val foregroundBrush = Brush.horizontalGradient(progressColors)
+    val backgroundBrush = Brush.horizontalGradient(trackColors)
     Box(
         modifier = modifier
-            .background(trackColor)
+            .background(backgroundBrush)
             .fillMaxWidth()
     ) {
         Box(
             modifier = modifier
-                .background(brush)
+                .background(foregroundBrush)
                 .fillMaxWidth(progress)
         )
     }
@@ -36,12 +37,38 @@ fun GradientLinearProgressIndicator(
 
 @Preview(showBackground = true)
 @Composable
-fun GradientLinearProgressIndicatorPreview() {
+fun GradientLinearProgressIndicatorEmptyPreview() {
+    MaterialTheme {
+        GradientLinearProgressIndicator(
+            progress = 0.0f,
+            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = listOf(Color.LightGray, Color.DarkGray),
+            modifier = Modifier.height(32.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GradientLinearProgressIndicatorPartialPreview() {
     MaterialTheme {
         GradientLinearProgressIndicator(
             progress = 0.6f,
             progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColor = Color.Gray,
+            trackColors = listOf(Color.DarkGray, Color.LightGray),
+            modifier = Modifier.height(32.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GradientLinearProgressIndicatorFullPreview() {
+    MaterialTheme {
+        GradientLinearProgressIndicator(
+            progress = 1.0f,
+            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = listOf(Color.DarkGray, Color.LightGray),
             modifier = Modifier.height(32.dp)
         )
     }

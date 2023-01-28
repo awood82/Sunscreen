@@ -19,7 +19,7 @@ fun LabeledProgressTracker(
     progress: Float,
     modifier: Modifier = Modifier,
     progressColors: List<Color> = listOf(ProgressIndicatorDefaults.linearColor, ProgressIndicatorDefaults.linearColor),
-    trackColor: Color = ProgressIndicatorDefaults.linearTrackColor,
+    trackColors: List<Color> = listOf(ProgressIndicatorDefaults.linearTrackColor, ProgressIndicatorDefaults.linearTrackColor),
     textColor: Color = MaterialTheme.colorScheme.onPrimary,
     label: String = "",
     progressText: String = ""
@@ -33,7 +33,7 @@ fun LabeledProgressTracker(
         GradientLinearProgressIndicator(
             progress = progress,
             progressColors = progressColors,
-            trackColor = trackColor,
+            trackColors = trackColors,
             modifier = Modifier
                 .fillMaxHeight()
         )
@@ -63,7 +63,7 @@ fun ProgressTrackerPreview() {
         LabeledProgressTracker(
             progress = 0.6f,
             progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColor = Color.Gray,
+            trackColors = listOf(Color.LightGray, Color.DarkGray),
             textColor = Color.Black,
             label = "Sunburn",
             progressText = "60%"

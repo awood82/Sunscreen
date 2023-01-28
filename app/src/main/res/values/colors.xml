@@ -8,7 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="progress_background_start">#FF999999</color>
+    <color name="progress_background_start">#FFAAAAAA</color>
     <color name="progress_background_end">#FF707070</color>
     <color name="progress_burn_start">@color/white</color>
     <color name="progress_burn_center">#FFFFFF00</color>
