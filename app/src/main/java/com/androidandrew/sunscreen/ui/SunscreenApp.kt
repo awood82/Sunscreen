@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -16,6 +17,8 @@ import timber.log.Timber
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SunscreenApp(
+    useWideLayout: Boolean,
+    @SuppressLint("ModifierParameter")
     modifier: Modifier = Modifier.semantics { testTagsAsResourceId = true },
     navController: NavHostController = rememberNavController()
 ) {
@@ -52,7 +55,11 @@ fun SunscreenApp(
                 .padding(innerPadding)
         ) {
             Timber.d("Loading AppNavHost")
-            AppNavHost(navController = navController, onError = { snackbarMessage = it }, modifier = modifier)
+            AppNavHost(
+                navController = navController,
+                useWideLayout = useWideLayout,
+                onError = { snackbarMessage = it },
+                modifier = modifier)
         }
     }
 }
