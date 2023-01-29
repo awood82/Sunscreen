@@ -39,3 +39,8 @@ fun ComposeContentTestRule.onNodeWithContentDescriptionId(@StringRes id: Int) : 
     return onNodeWithContentDescription(activity.getString(id))
 //    return (this as AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>).activity.onNodeWithContentDescriptionId(id)
 }
+
+fun ComposeContentTestRule.setOrientation(orientation: Int) {
+    val activity = (this as AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>).activity
+    activity.requestedOrientation = orientation
+}

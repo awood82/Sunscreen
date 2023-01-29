@@ -37,7 +37,7 @@ class AppNavHostTest {
 
             navController = TestNavHostController(LocalContext.current)
             navController.navigatorProvider.addNavigator(ComposeNavigator())
-            SunscreenApp(navController = navController)
+            SunscreenApp(useWideLayout = false, navController = navController)
         }
     }
 

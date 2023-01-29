@@ -43,7 +43,7 @@ class MainScreenUiAutomatorTest {
             }
 
             SunscreenTheme {
-                SunscreenApp()
+                SunscreenApp(useWideLayout = false)
             }
         }
         uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
