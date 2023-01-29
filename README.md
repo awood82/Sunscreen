@@ -36,3 +36,7 @@ https://bitbucket.org/awood82/sunscreen/commits/1e1d4f43108968035884f31d7b22799d
 Screen to select clothing for Vitamin D absorption
 Tag -> 11f9e6d (select_clothing)
 https://bitbucket.org/awood82/sunscreen/commits/11f9e6d0d509dd9a02bfd0559321fd17b16df5d3
+
+"Tablet layout" support
+Tag -> a0a3f71 (tablet_layout)
+https://bitbucket.org/awood82/sunscreen/commits/a0aef71ae14f88d651e08ea29413d96c762a9916
