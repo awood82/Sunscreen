@@ -3,10 +3,12 @@ package com.androidandrew.sunscreen.ui.chart
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -58,10 +60,10 @@ fun UvChart(
     )
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun UvChartNoDataPreview() {
-//    MaterialTheme {
-//        UvChartWithState(UvChartUiState.NoData)
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun UvChartNoDataPreview() {
+    MaterialTheme {
+        UvChartWithState(UvChartUiState.NoData)
+    }
+}

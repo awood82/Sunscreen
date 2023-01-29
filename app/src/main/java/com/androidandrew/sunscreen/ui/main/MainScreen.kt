@@ -1,15 +1,14 @@
 package com.androidandrew.sunscreen.ui.main
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
@@ -32,6 +31,7 @@ import org.koin.androidx.compose.koinViewModel
 fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = koinViewModel(),
+    useWideLayout: Boolean,
     onNotOnboarded: () -> Unit,
     onError: (String) -> Unit
 ) {
@@ -55,6 +55,7 @@ fun MainScreen(
         }
         AppState.Onboarded -> {
             MainScreenWithState(
+                useWideLayout = useWideLayout,
                 locationBarState = locationBarState,
                 onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
                 burnTimeUiState = burnTimeUiState,
@@ -69,6 +70,7 @@ fun MainScreen(
 
 @Composable
 private fun MainScreenWithState(
+    useWideLayout: Boolean,
     locationBarState: LocationBarState,
     onLocationBarEvent: (LocationBarEvent) -> Unit,
     burnTimeUiState: BurnTimeUiState,
@@ -77,25 +79,73 @@ private fun MainScreenWithState(
     onUvTrackingEvent: (UvTrackingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
-        BurnTimeWithState(uiState = burnTimeUiState)
-        UvChartWithState(uvChartUiState)
-        UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
+    if (useWideLayout) {
+        Row(
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
+                BurnTimeWithState(uiState = burnTimeUiState)
+                UvChartWithState(uvChartUiState)
+            }
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
+            }
+        }
+    } else {
+        Column(
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
+            BurnTimeWithState(uiState = burnTimeUiState)
+            UvChartWithState(uvChartUiState)
+            UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
+fun MainScreenVerticalPreview() {
     SunscreenTheme {
         MainScreenWithState(
+            useWideLayout = false,
+            locationBarState = LocationBarState("12345"),
+            onLocationBarEvent = {},
+            burnTimeUiState = BurnTimeUiState.Unknown,
+            uvChartUiState = UvChartUiState.NoData,
+            uvTrackingState = UvTrackingState.initialState,
+            onUvTrackingEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, device = Devices.TABLET)
+@Composable
+fun MainScreenHorizontalPreview() {
+    SunscreenTheme {
+        MainScreenWithState(
+            useWideLayout = true,
             locationBarState = LocationBarState("12345"),
             onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,

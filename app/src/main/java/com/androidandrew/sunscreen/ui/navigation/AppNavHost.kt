@@ -15,6 +15,7 @@ import timber.log.Timber
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    useWideLayout: Boolean,
     onError: (String) -> Unit,
     startDestination: String = AppDestination.Main.name
 ) {
@@ -25,6 +26,7 @@ fun AppNavHost(
         composable(route = AppDestination.Main.name) {
             Timber.d("Loading MainScreen")
             MainScreen(
+                useWideLayout = useWideLayout,
                 onNotOnboarded = {
                     navController.navigate(AppDestination.Location.name)
                 },

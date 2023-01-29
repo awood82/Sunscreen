@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+
 package com.androidandrew.sunscreen.di
 
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.core.app.NotificationCompat
 import com.androidandrew.sunscreen.MainActivity
 import com.androidandrew.sunscreen.data.di.repositoryModule
