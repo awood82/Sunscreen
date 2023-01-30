@@ -1,16 +1,16 @@
 package com.androidandrew.sunscreen.ui.main
 
 import android.content.pm.ActivityInfo
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import com.androidandrew.sharedtest.network.FakeEpaService
+import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.util.onNodeWithStringId
 import com.androidandrew.sunscreen.util.setOrientation
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.util.onNodeWithContentDescriptionId
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -66,6 +66,27 @@ class MainScreenTest {
             }
         } finally {
             composeTestRule.setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        }
+    }
+
+
+    @Test
+    fun search_showsLoadingIndicator() {
+        runBlocking {
+            fakeUserSettingsRepo.setIsOnboarded(true)
+        }
+
+        composeTestRule.setContent {
+            SunscreenApp(useWideLayout = false)
+        }
+
+        composeTestRule.apply {
+            onNodeWithStringId(R.string.current_location).performTextReplacement(FakeData.zip)
+            onNodeWithContentDescriptionId(R.string.search).performClick()
+        }
+
+        composeTestRule.apply {
+            onNodeWithTag("Loading").assertIsDisplayed()
         }
     }
 }

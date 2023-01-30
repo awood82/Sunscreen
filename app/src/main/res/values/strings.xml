@@ -4,6 +4,9 @@
     <string name="location_title">Select Location</string>
     <string name="skin_type_title">Select Skin Type</string>
 
+    <!-- General -->
+    <string name="loading">Loading</string>
+
     <!-- Skin type selection -->
     <string name="skin_type_instructions">Select the skin type that most closely resembles your own.</string>
     <!-- Skin types -->
