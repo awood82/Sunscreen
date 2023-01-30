@@ -59,6 +59,7 @@ class MainViewModel(
             spf = spf
         )
     }
+    private var lastLocationSearched = ""
 
     // User Tracking
     private val _isCurrentlyTracking = MutableStateFlow(false)
@@ -112,7 +113,9 @@ class MainViewModel(
                 true -> {
                     Timber.d("Setup completed")
                     startTimers()
-                    _locationBarState.update { it.copy(typedSoFar = _location.firstOrNull() ?: "") }
+                    val startingLocation = _location.firstOrNull() ?: ""
+                    _locationBarState.update { it.copy(typedSoFar = startingLocation) }
+                    lastLocationSearched = startingLocation
                     _spfToDisplay.update { convertSpfUseCase.forDisplay(userSettingsRepo.getSpf()) }
 //                    viewModelScope.launch {
 //                        getLocalForecastForToday().collect {
@@ -273,12 +276,14 @@ class MainViewModel(
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 displayLoading()
-                Timber.d("Updating location ($location) in repo")
-                userSettingsRepo.setLocation(location)
                 // We need to force a refresh in case there was a network error before,
                 // and the user is searching for the same location,
                 // otherwise the Use Case won't see a location change and new data won't be loaded.
-                getLocalForecastForToday.forceRefresh(location)
+                getLocalForecastForToday.refresh(
+                    location = location,
+                    force = location == lastLocationSearched
+                )
+                lastLocationSearched = location
             }
         }
     }

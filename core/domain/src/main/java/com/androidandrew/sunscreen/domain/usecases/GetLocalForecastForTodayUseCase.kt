@@ -35,8 +35,11 @@ class GetLocalForecastForTodayUseCase(
             }
     }
 
-    suspend fun forceRefresh(location: String) {
-        userSettingsRepository.setLocation("")
+    suspend fun refresh(location: String, force: Boolean = false) {
+        Timber.d("Updating location ($location) in repo, force = $force")
+        if (force) {
+            userSettingsRepository.setLocation("")
+        }
         userSettingsRepository.setLocation(location)
     }
 }
