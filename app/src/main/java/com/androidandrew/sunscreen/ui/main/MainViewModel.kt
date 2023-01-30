@@ -59,6 +59,7 @@ class MainViewModel(
             spf = spf
         )
     }
+    private var lastLocationSearched = ""
 
     // User Tracking
     private val _isCurrentlyTracking = MutableStateFlow(false)
@@ -67,16 +68,21 @@ class MainViewModel(
     private val _lastDateUsed = MutableStateFlow(getDateToday())
     private val _lastLocalTimeUsed = MutableStateFlow(LocalTime.now(clock))
 
-    // Errors
-    private val _errorMessage = MutableStateFlow("")
-    val errorMessage = _errorMessage.asStateFlow()
+    // Loading, Errors, and done loading
+    private val _forecastState = MutableStateFlow<ForecastState>(ForecastState.Loading)
+    val forecastState = _forecastState.asStateFlow()
 
     // Forecast
-//    private val _uvPrediction = MutableStateFlow<UvPrediction>(emptyList())
     private val _uvPrediction = getLocalForecastForToday().map {
         when (it) {
-            is DataResult.Success -> it.data
-            is DataResult.Loading -> emptyList()
+            is DataResult.Success -> {
+                _forecastState.update { ForecastState.Done }
+                it.data
+            }
+            is DataResult.Loading -> {
+                displayLoading()
+                emptyList()
+            }
             is DataResult.Error -> {
                 val error = it.exception
                 Timber.e("ViewModel got the error: $error")
@@ -88,11 +94,15 @@ class MainViewModel(
         scope = viewModelScope, started = SharingStarted.WhileSubscribed(), replay = 1
     )
 
+    private fun displayLoading() {
+        _forecastState.update { ForecastState.Loading }
+    }
+
     private fun displayError(throwable: Throwable) {
-        _errorMessage.update { throwable.message ?: "Unknown Error" }
+        _forecastState.update { ForecastState.Error(throwable.message ?: "Unknown Error") }
         viewModelScope.launch {
             delay(2_000)
-            _errorMessage.update { "" }
+            _forecastState.update { ForecastState.Done }
         }
     }
 
@@ -103,7 +113,9 @@ class MainViewModel(
                 true -> {
                     Timber.d("Setup completed")
                     startTimers()
-                    _locationBarState.update { it.copy(typedSoFar = _location.firstOrNull() ?: "") }
+                    val startingLocation = _location.firstOrNull() ?: ""
+                    _locationBarState.update { it.copy(typedSoFar = startingLocation) }
+                    lastLocationSearched = startingLocation
                     _spfToDisplay.update { convertSpfUseCase.forDisplay(userSettingsRepo.getSpf()) }
 //                    viewModelScope.launch {
 //                        getLocalForecastForToday().collect {
@@ -263,12 +275,15 @@ class MainViewModel(
     private fun onSearchLocation(location: String) {
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
-                Timber.d("Updating location ($location) in repo")
-                userSettingsRepo.setLocation(location)
+                displayLoading()
                 // We need to force a refresh in case there was a network error before,
                 // and the user is searching for the same location,
                 // otherwise the Use Case won't see a location change and new data won't be loaded.
-                getLocalForecastForToday.forceRefresh(location)
+                getLocalForecastForToday.refresh(
+                    location = location,
+                    force = location == lastLocationSearched
+                )
+                lastLocationSearched = location
             }
         }
     }

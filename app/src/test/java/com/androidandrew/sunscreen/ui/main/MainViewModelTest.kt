@@ -214,7 +214,8 @@ class MainViewModelTest {
 
         searchZip("12345")
 
-        assertEquals("Network error", vm.errorMessage.first())
+        val forecast = vm.forecastState.first()
+        assertEquals("Network error", (forecast as ForecastState.Error).message)
     }
 
     @Test
@@ -225,7 +226,8 @@ class MainViewModelTest {
 
         triggerLocationUpdate()
 
-        assertEquals("Network error", vm.errorMessage.first())
+        val forecast = vm.forecastState.first()
+        assertEquals("Network error", (forecast as ForecastState.Error).message)
     }
 
     @Test
@@ -382,6 +384,21 @@ class MainViewModelTest {
         vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         assertTrue(userSettingsRepo.getIsOnSnowOrWaterFlow().first())
+    }
+
+    @Test
+    fun duringSearch_loading_isDisplayed() = runTest {
+        createViewModel()
+
+        val zip = FakeData.zip
+        vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
+
+        assertEquals(ForecastState.Loading, vm.forecastState.first())
+
+        triggerLocationUpdate()
+
+        assertEquals(ForecastState.Done, vm.forecastState.first())
     }
 
     @Test

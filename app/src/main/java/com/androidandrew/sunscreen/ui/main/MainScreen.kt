@@ -3,11 +3,14 @@ package com.androidandrew.sunscreen.ui.main
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +27,7 @@ import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
+import com.androidandrew.sunscreen.R
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
@@ -42,9 +46,14 @@ fun MainScreen(
     val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
     val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
-    val errorMessage: String by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val forecastState: ForecastState by viewModel.forecastState.collectAsStateWithLifecycle()
 
-    onError(errorMessage)
+    onError(
+        when (val state = forecastState) {
+            is ForecastState.Error -> state.message
+            else -> ""
+        }
+    )
 
     when (appState) {
         AppState.Loading -> {}
@@ -64,9 +73,24 @@ fun MainScreen(
                 onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
                 modifier = modifier
             )
+            if (forecastState is ForecastState.Loading) {
+                LoadingOverlay(modifier)
+            }
         }
     }
 }
+
+@Composable
+private fun LoadingOverlay(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        CircularProgressIndicator(
+            modifier = modifier
+                .align(Alignment.Center)
+                .testTag(stringResource(R.string.loading)),
+        )
+    }
+}
+
 
 @Composable
 private fun MainScreenWithState(
@@ -153,5 +177,13 @@ fun MainScreenHorizontalPreview() {
             uvTrackingState = UvTrackingState.initialState,
             onUvTrackingEvent = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoadingPreview() {
+    SunscreenTheme {
+        LoadingOverlay()
     }
 }

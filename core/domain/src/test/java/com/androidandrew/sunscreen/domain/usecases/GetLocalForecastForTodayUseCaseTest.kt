@@ -102,7 +102,7 @@ class GetLocalForecastForTodayUseCaseTest {
         assertTrue(actualForecast is DataResult.Error)
 
         fakeUvService.exception = null
-        useCase.forceRefresh(FakeData.zip)
+        useCase.refresh(FakeData.zip, force = true)
 
         assertTrue(actualForecast is DataResult.Success)
         assertEquals(FakeUvPredictions.forecast.trim(), (actualForecast as DataResult.Success).data)

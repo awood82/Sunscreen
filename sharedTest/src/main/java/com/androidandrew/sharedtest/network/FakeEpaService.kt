@@ -4,6 +4,7 @@ import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.network.EpaService
 import com.androidandrew.sunscreen.network.model.DailyUvIndexForecast
 import com.androidandrew.sunscreen.network.model.HourlyUvIndexForecast
+import kotlinx.coroutines.delay
 
 object FakeEpaService : EpaService {
 
@@ -37,9 +38,11 @@ object FakeEpaService : EpaService {
     var forecast: DailyUvIndexForecast = sampleDailyUvForecast
     var exception: Exception? = null
     var networkRequestCount = 0
+    var delayMs = 0L
 
     override suspend fun getUvForecast(zipCode: String): Result<DailyUvIndexForecast> {
         networkRequestCount++
+        delay(delayMs)
         return when (exception) {
             null -> Result.success(forecast)
             else -> Result.failure(exception!!)
