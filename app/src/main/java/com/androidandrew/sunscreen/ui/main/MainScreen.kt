@@ -117,7 +117,6 @@ private fun MainScreenWithState(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
-                BurnTimeWithState(uiState = burnTimeUiState)
                 UvChartWithState(uvChartUiState)
             }
             Column(
@@ -129,6 +128,7 @@ private fun MainScreenWithState(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
+                BurnTimeWithState(uiState = burnTimeUiState)
                 UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
             }
         }
@@ -167,6 +167,22 @@ fun MainScreenVerticalPreview() {
 @Preview(showBackground = true, device = Devices.TABLET)
 @Composable
 fun MainScreenHorizontalPreview() {
+    SunscreenTheme {
+        MainScreenWithState(
+            useWideLayout = true,
+            locationBarState = LocationBarState("12345"),
+            onLocationBarEvent = {},
+            burnTimeUiState = BurnTimeUiState.Unknown,
+            uvChartUiState = UvChartUiState.NoData,
+            uvTrackingState = UvTrackingState.initialState,
+            onUvTrackingEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, device = Devices.FOLDABLE)
+@Composable
+fun MainScreenFoldablePreview() {
     SunscreenTheme {
         MainScreenWithState(
             useWideLayout = true,

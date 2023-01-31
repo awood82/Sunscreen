@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.androidandrew.sunscreen.ui.SunscreenApp
@@ -21,8 +23,11 @@ class MainActivity : ComponentActivity() {
 
         Timber.d("Loading SunscreenApp")
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
+
             val configuration = LocalConfiguration.current
             val useWideLayout = configuration.orientation != Configuration.ORIENTATION_PORTRAIT
+                    || windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium
 
             SunscreenTheme {
                 SunscreenApp(useWideLayout = useWideLayout)
