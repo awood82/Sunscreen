@@ -1,6 +1,6 @@
 package com.androidandrew.sunscreen.ui.navigation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,6 +19,8 @@ fun AppNavHost(
     onError: (String) -> Unit,
     startDestination: String = AppDestination.Main.name
 ) {
+    var returntoMainScreen by remember { mutableStateOf(false) }
+
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -31,6 +33,12 @@ fun AppNavHost(
                     navController.navigate(AppDestination.Location.name)
                 },
                 onError = onError,
+                onChangeSetting = {
+                    if (it != AppDestination.Main) {
+                        returntoMainScreen = true
+                        navController.navigate(it.name)
+                    }
+                },
                 modifier = modifier
             )
         }
@@ -47,7 +55,11 @@ fun AppNavHost(
             Timber.d("Loading SkinTypeScreen")
             SkinTypeScreen(
                 onSkinTypeSelected = {
-                    navController.navigate(AppDestination.Clothing.name)
+                    if (returntoMainScreen) {
+                        navController.navigate(AppDestination.Main.name)
+                    } else {
+                        navController.navigate(AppDestination.Clothing.name)
+                    }
                 },
                 modifier = modifier
             )

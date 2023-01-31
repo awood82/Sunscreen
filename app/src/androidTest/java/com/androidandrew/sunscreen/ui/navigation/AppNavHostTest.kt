@@ -68,7 +68,7 @@ class AppNavHostTest {
     fun skinTypeScreen_whenSkinTypeIsSelected_navigatesToClothingScreen() {
         navigateToSkinTypeScreen()
 
-        composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        selectSkinType()
 
         assertDestinationIs(AppDestination.Clothing.name)
     }
@@ -77,7 +77,33 @@ class AppNavHostTest {
     fun clothingScreen_whenContinueIsPressed_navigatesToMainScreen() {
         navigateToClothingScreen()
 
-        composeTestRule.onNodeWithStringId(R.string.clothing_screen_done).performClick()
+        selectClothing()
+
+        assertDestinationIs(AppDestination.Main.name)
+    }
+
+    @Test
+    fun mainScreen_ifSkinTypeButtonIsClicked_navigatesToSkinScreen_andSelectingReturnsToMain() {
+        setupNavController(withOnboarded = true)
+
+        clickSkinTypeSetting()
+
+        assertDestinationIs(AppDestination.SkinType.name)
+
+        selectSkinType()
+
+        assertDestinationIs(AppDestination.Main.name)
+    }
+
+    @Test
+    fun mainScreen_ifClothingButtonIsClicked_navigatesToSkinScreen_andSelectingReturnsToMain() {
+        setupNavController(withOnboarded = true)
+
+        clickClothingSetting()
+
+        assertDestinationIs(AppDestination.Clothing.name)
+
+        selectClothing()
 
         assertDestinationIs(AppDestination.Main.name)
     }
@@ -114,6 +140,10 @@ class AppNavHostTest {
     }
 
 
+    private fun navigateToLocationScreen() {
+        setupNavController(withOnboarded = false)
+    }
+
     private fun performLocationSearch(zip: String) {
         composeTestRule.onNodeWithStringId(R.string.current_location).apply {
             performTextInput(zip)
@@ -123,19 +153,23 @@ class AppNavHostTest {
         awaitIdle()
     }
 
-    private fun navigateToLocationScreen() {
-        setupNavController(withOnboarded = false)
-    }
-
     private fun navigateToSkinTypeScreen() {
         navigateToLocationScreen()
         performLocationSearch(FakeData.zip)
     }
 
+    private fun selectSkinType() {
+        composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+    }
+
     private fun navigateToClothingScreen() {
         navigateToSkinTypeScreen()
-        composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        selectSkinType()
         awaitIdle()
+    }
+
+    private fun selectClothing() {
+        composeTestRule.onNodeWithStringId(R.string.clothing_screen_done).performClick()
     }
 
     private fun navigateThroughOnboardingFlow() {
@@ -147,6 +181,14 @@ class AppNavHostTest {
         }
 
         awaitIdle()
+    }
+
+    private fun clickSkinTypeSetting() {
+        composeTestRule.onNodeWithText("Skin").performClick()
+    }
+
+    private fun clickClothingSetting() {
+        composeTestRule.onNodeWithText("Clothes").performClick()
     }
 
     private fun navigateBack() {

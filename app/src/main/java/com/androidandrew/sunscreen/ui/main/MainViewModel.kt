@@ -19,6 +19,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -128,6 +129,8 @@ class MainViewModel(
                 false -> AppState.NotOnboarded
             }
         }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = AppState.Loading)
+
+    val settingsState = MutableStateFlow(AppDestination.Main)
 
     private val _locationBarState = MutableStateFlow(LocationBarState(typedSoFar = ""))
     val locationBarState = _locationBarState
@@ -305,6 +308,20 @@ class MainViewModel(
                     userSettingsRepo.setIsOnSnowOrWater(event.isOnSnowOrWater)
                 }
             }
+            is UvTrackingEvent.SkinTypeClicked -> {
+                changeSettingsScreen(AppDestination.SkinType)
+            }
+            is UvTrackingEvent.ClothingClicked -> {
+                changeSettingsScreen(AppDestination.Clothing)
+            }
+        }
+    }
+
+    private fun changeSettingsScreen(destination: AppDestination) {
+        settingsState.update { destination }
+        viewModelScope.launch {
+            delay(1_000)
+            settingsState.update { AppDestination.Main }
         }
     }
 

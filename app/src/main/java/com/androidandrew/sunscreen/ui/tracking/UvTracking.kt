@@ -64,6 +64,18 @@ fun UvTrackingWithState(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Button(
+                onClick = { onEvent(UvTrackingEvent.SkinTypeClicked) }
+            ) {
+                Text("Skin")
+            }
+
+            Button(
+                onClick = { onEvent(UvTrackingEvent.ClothingClicked) }
+            ) {
+                Text("Clothes")
+            }
+
             OutlinedTextField(
                 label = { Text(stringResource(R.string.spf)) },
                 singleLine = true,
