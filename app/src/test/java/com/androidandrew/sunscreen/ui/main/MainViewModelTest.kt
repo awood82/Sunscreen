@@ -17,6 +17,7 @@ import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -384,6 +385,24 @@ class MainViewModelTest {
         vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
 
         assertTrue(userSettingsRepo.getIsOnSnowOrWaterFlow().first())
+    }
+
+    @Test
+    fun onSkinTypeClicked_updatesSettings() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SkinTypeClicked)
+
+        assertEquals(AppDestination.SkinType, vm.settingsState.first())
+    }
+
+    @Test
+    fun onClothingClicked_updatesSettings() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.ClothingClicked)
+
+        assertEquals(AppDestination.Clothing, vm.settingsState.first())
     }
 
     @Test

@@ -3,6 +3,7 @@
     <string name="app_name">Sunscreen</string>
     <string name="location_title">Select Location</string>
     <string name="skin_type_title">Select Skin Type</string>
+    <string name="clothing_screen_title">Select Clothing</string>
 
     <!-- General -->
     <string name="loading">Loading</string>
@@ -30,7 +31,6 @@
     <string name="type_6_example">Darkest brown skin.\nDark brown eyes.\nBlack hair.</string>
 
     <!-- Clothing selection -->
-    <string name="clothing_screen_title">Clothing</string>
     <string name="clothing_screen_instructions">The amount of skin exposed to the sun affects Vitamin D absorption.\nIf you are only tracking sunburn, you may skip this step, or use the default option.</string>
     <string name="clothing_screen_done">Continue</string>
     <!-- Tops -->
