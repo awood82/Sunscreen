@@ -184,11 +184,11 @@ class AppNavHostTest {
     }
 
     private fun clickSkinTypeSetting() {
-        composeTestRule.onNodeWithText("Skin").performClick()
+        composeTestRule.onNodeWithContentDescriptionId(R.string.skin_type_title).performClick()
     }
 
     private fun clickClothingSetting() {
-        composeTestRule.onNodeWithText("Clothes").performClick()
+        composeTestRule.onNodeWithContentDescriptionId(R.string.clothing_screen_title).performClick()
     }
 
     private fun navigateBack() {

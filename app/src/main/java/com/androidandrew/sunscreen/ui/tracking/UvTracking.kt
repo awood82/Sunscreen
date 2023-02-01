@@ -3,6 +3,8 @@
 package com.androidandrew.sunscreen.ui.tracking
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -11,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.common.LabeledProgressTracker
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UvTrackingWithState(
     uiState: UvTrackingState,
@@ -64,17 +68,23 @@ fun UvTrackingWithState(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { onEvent(UvTrackingEvent.SkinTypeClicked) }
-            ) {
-                Text("Skin")
-            }
+            Image(
+                painterResource(R.drawable.skin_icon),
+                contentDescription = stringResource(R.string.skin_type_title),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(48.dp)
+                    .clickable { onEvent(UvTrackingEvent.SkinTypeClicked) }
+            )
 
-            Button(
-                onClick = { onEvent(UvTrackingEvent.ClothingClicked) }
-            ) {
-                Text("Clothes")
-            }
+            Image(
+                painterResource(R.drawable.shirt_icon),
+                contentDescription = stringResource(R.string.clothing_screen_title),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(48.dp)
+                    .clickable { onEvent(UvTrackingEvent.ClothingClicked) }
+            )
 
             OutlinedTextField(
                 label = { Text(stringResource(R.string.spf)) },
