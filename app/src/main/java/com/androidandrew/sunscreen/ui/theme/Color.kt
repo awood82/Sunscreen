@@ -17,3 +17,13 @@ val SkinType3 = Color(0xFFD1A07C)
 val SkinType4 = Color(0xFFBB7750)
 val SkinType5 = Color(0xFFA6602A)
 val SkinType6 = Color(0xFF3B1F16)
+
+// Progress Bar colors
+val ProgressBackgroundStart = Color(0xFFAAAAAA)
+val ProgressBackgroundEnd = Color(0xFF707070)
+val ProgressBurnStart = Color(0xFFFFFFFF)
+val ProgressBurnCenter = Color(0xFFFFFF00)
+val ProgressBurnEnd = Color(0xFFFF0000)
+val ProgressVitaminDStart = Color(0xFFFFFFFF)
+val ProgressVitaminDEnd = Color(0xFF00BB00)
+val OnProgressBar = Color(0xFF000000)
