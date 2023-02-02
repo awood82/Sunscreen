@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -20,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.common.LabeledProgressTracker
+import com.androidandrew.sunscreen.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,15 +36,15 @@ fun UvTrackingWithState(
         LabeledProgressTracker(
             progress = uiState.sunburnProgressPercent0to1,
             progressColors = listOf(
-                colorResource(R.color.progress_burn_start),
-                colorResource(R.color.progress_burn_center),
-                colorResource(R.color.progress_burn_end)
+                ProgressBurnStart,
+                ProgressBurnCenter,
+                ProgressBurnEnd
             ),
             trackColors = listOf(
-                colorResource(R.color.progress_background_start),
-                colorResource(R.color.progress_background_end)
+                ProgressBackgroundStart,
+                ProgressBackgroundEnd
             ),
-            textColor = colorResource(R.color.black),
+            textColor = OnProgressBar,
             label = stringResource(R.string.sunburn),
             progressText = stringResource(R.string.sunburn_progress, uiState.sunburnProgressAmount)
         )
@@ -52,14 +52,14 @@ fun UvTrackingWithState(
         LabeledProgressTracker(
             progress = uiState.vitaminDProgressPercent0to1,
             progressColors = listOf(
-                colorResource(R.color.progress_vitamin_d_start),
-                colorResource(R.color.progress_vitamin_d_end)
+                ProgressVitaminDStart,
+                ProgressVitaminDEnd
             ),
             trackColors = listOf(
-                colorResource(R.color.progress_background_start),
-                colorResource(R.color.progress_background_end)
+                ProgressBackgroundStart,
+                ProgressBackgroundEnd
             ),
-            textColor = colorResource(R.color.black),
+            textColor = OnProgressBar,
             label = stringResource(R.string.vitamin_d),
             progressText = stringResource(R.string.vitamin_d_progress, uiState.vitaminDProgressAmount)
         )
