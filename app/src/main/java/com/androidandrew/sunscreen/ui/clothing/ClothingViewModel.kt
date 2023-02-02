@@ -5,25 +5,35 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.model.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : ViewModel() {
 
-    private val _isClothingSelected = MutableSharedFlow<Boolean>()
-    val isContinuePressed = _isClothingSelected.asSharedFlow()
+    private val _isClothingDone = MutableSharedFlow<Boolean>()
+    val isClothingDone = _isClothingDone.asSharedFlow()
 
-    private var _topClothingItem: ClothingTop? = null
-    private var _bottomClothingItem: ClothingBottom? = null
+    private val _clothing = MutableStateFlow(defaultUserClothing)
+    val clothingState = _clothing.map {
+        ClothingState(
+            selectedTop = it.top,
+            selectedBottom = it.bottom
+        )
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = defaultUserClothing.asClothingState())
+
+    init {
+        viewModelScope.launch {
+            _clothing.update { userSettingsRepo.getClothing() }
+        }
+    }
 
     fun onEvent(event: ClothingEvent) {
         when (event) {
             is ClothingEvent.TopSelected -> {
-                _topClothingItem = event.clothing as ClothingTop
+                _clothing.update { it.copy(top = event.clothing as ClothingTop) }
             }
             is ClothingEvent.BottomSelected -> {
-                _bottomClothingItem = event.clothing as ClothingBottom
+                _clothing.update { it.copy(bottom = event.clothing as ClothingBottom) }
             }
             is ClothingEvent.ContinuePressed -> {
                 viewModelScope.launch {
@@ -37,15 +47,7 @@ class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : 
 
     @VisibleForTesting
     private suspend fun saveClothesToRepository() {
-        val toSave = convertClothingForRepo()
-        userSettingsRepo.setClothing(toSave)
-    }
-
-    private fun convertClothingForRepo(): UserClothing {
-        return UserClothing(
-            top = _topClothingItem ?: defaultTop,
-            bottom = _bottomClothingItem ?: defaultBottom
-        )
+        userSettingsRepo.setClothing(_clothing.value)
     }
 
     private suspend fun exitOnboarding() {
@@ -53,6 +55,6 @@ class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : 
     }
 
     private suspend fun notifyClothingSelectionIsDone() {
-        _isClothingSelected.emit(true)
+        _isClothingDone.emit(true)
     }
 }

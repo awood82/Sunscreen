@@ -7,6 +7,7 @@ import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.model.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -33,7 +34,6 @@ class ClothingViewModelTest {
             fakeDatabaseHolder.clearDatabase()
         }
         userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
-        vm = ClothingViewModel(userSettingsRepo)
     }
 
     @After
@@ -43,8 +43,13 @@ class ClothingViewModelTest {
         }
     }
 
+    private fun createViewModel() {
+        vm = ClothingViewModel(userSettingsRepo)
+    }
+
     @Test
     fun topAndBottomCombos_mapToUvFactor() = runTest {
+        createViewModel()
         // Nothing selected initially. Use default.
         vm.onEvent(ClothingEvent.ContinuePressed)
         assertEquals(defaultUserClothing, userSettingsRepo.getClothing())
@@ -67,10 +72,11 @@ class ClothingViewModelTest {
 
     @Test
     fun continueButton_whenPressed_savesStateToRepo_andOnboardingIsComplete() = runTest {
+        createViewModel()
         val collectedIsContinueSelected = mutableListOf<Boolean>()
 
         val collectJob = launch(UnconfinedTestDispatcher()) {
-            vm.isContinuePressed.collect { collectedIsContinueSelected.add(it) }
+            vm.isClothingDone.collect { collectedIsContinueSelected.add(it) }
         }
 
         vm.onEvent(ClothingEvent.TopSelected(ClothingTop.LONG_SLEEVE_SHIRT))
@@ -83,5 +89,32 @@ class ClothingViewModelTest {
         assertTrue(userSettingsRepo.getIsOnboarded())
 
         collectJob.cancel()
+    }
+
+    @Test
+    fun initialSelectedItems_whenClothingIsInRepo_overridesDefaults() = runTest {
+        val clothing = UserClothing(
+            top = ClothingTop.LONG_SLEEVE_SHIRT,
+            bottom = ClothingBottom.PANTS
+        )
+        assertNotEquals(defaultUserClothing, clothing)
+        userSettingsRepo.setClothing(clothing)
+        createViewModel()
+
+        val clothingState = vm.clothingState.first()
+        assertEquals(clothing.top, clothingState.selectedTop)
+        assertEquals(clothing.bottom, clothingState.selectedBottom)
+    }
+
+    @Test
+    fun clothingItems_whenSelected_updateState() = runTest {
+        createViewModel()
+
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.LONG_SLEEVE_SHIRT))
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.PANTS))
+
+        val clothingState = vm.clothingState.first()
+        assertEquals(ClothingTop.LONG_SLEEVE_SHIRT, clothingState.selectedTop)
+        assertEquals(ClothingBottom.PANTS, clothingState.selectedBottom)
     }
 }
