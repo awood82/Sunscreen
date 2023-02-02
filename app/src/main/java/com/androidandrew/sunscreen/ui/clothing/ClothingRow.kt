@@ -37,7 +37,7 @@ data class ClothingItemData(
 )
 
 @Composable
-fun ClothingRow(
+fun ClothingRowRememberSelection(
     clothingItems: List<ClothingItemData>,
     onClick: (region: ClothingRegion) -> Unit,
     modifier: Modifier = Modifier,
@@ -45,6 +45,26 @@ fun ClothingRow(
 ) {
     var selectedIndex by rememberSaveable { mutableStateOf(initiallySelectedIndex) }
 
+    ClothingRow(
+        clothingItems = clothingItems,
+        onClick = { region ->
+            val selectedItem = clothingItems.find {
+                it.id == region
+            }
+            selectedIndex = clothingItems.indexOf(selectedItem)
+            onClick(region)
+        },
+        selectedIndex = selectedIndex
+    )
+}
+
+@Composable
+fun ClothingRow(
+    clothingItems: List<ClothingItemData>,
+    onClick: (region: ClothingRegion) -> Unit,
+    modifier: Modifier = Modifier,
+    selectedIndex: Int
+) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -59,7 +79,6 @@ fun ClothingRow(
                 backgroundColor = item.backgroundColor ?: Color.White,
                 modifier = modifier.clickable(
                     onClick = {
-                        selectedIndex = clothingItems.indexOf(item)
                         onClick(item.id)
                     }
                 ),
@@ -80,7 +99,9 @@ fun ClothingItem(
     Box(
         contentAlignment = Alignment.Center,
         modifier = if (isSelected) {
-            modifier.border(4.dp, Color.Red).padding(8.dp)
+            modifier
+                .border(4.dp, Color.Red)
+                .padding(8.dp)
         } else {
             modifier.padding(8.dp)
         }
@@ -105,7 +126,7 @@ fun ClothingRowPreview() {
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some, Color.Cyan)
             ),
             onClick = {},
-            initiallySelectedIndex = 0
+            selectedIndex = 0
         )
     }
 }

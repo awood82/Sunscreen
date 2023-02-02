@@ -20,10 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
-import com.androidandrew.sunscreen.model.ClothingBottom
-import com.androidandrew.sunscreen.model.ClothingTop
-import com.androidandrew.sunscreen.model.defaultBottom
-import com.androidandrew.sunscreen.model.defaultTop
+import com.androidandrew.sunscreen.model.*
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -34,15 +31,17 @@ fun ClothingScreen(
     onContinuePressed: () -> Unit,
     viewModel: ClothingViewModel = koinViewModel()
 ) {
-    val isContinuePressed by viewModel.isContinuePressed.collectAsStateWithLifecycle(initialValue = false)
+    val isClothingDone by viewModel.isClothingDone.collectAsStateWithLifecycle(initialValue = false)
+    val clothingState by viewModel.clothingState.collectAsStateWithLifecycle()
 
-    if (isContinuePressed) {
+    if (isClothingDone) {
         LaunchedEffect(Unit) {
             onContinuePressed()
         }
     }
 
     ClothingScreen(
+        state = clothingState,
         onEvent = { viewModel.onEvent(it) },
         modifier = modifier
     )
@@ -51,6 +50,7 @@ fun ClothingScreen(
 // Define this without the ViewModel so that the Preview can render in Android Studio
 @Composable
 private fun ClothingScreen(
+    state: ClothingState,
     onEvent: (ClothingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -90,7 +90,7 @@ private fun ClothingScreen(
                 )
             ),
             onClick = { onEvent(ClothingEvent.TopSelected(it)) },
-            initiallySelectedIndex = defaultTop.dbValue
+            selectedIndex = state.selectedTop.dbValue
         )
         ClothingRow(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -112,7 +112,7 @@ private fun ClothingScreen(
                 )
             ),
             onClick = { onEvent(ClothingEvent.BottomSelected(it)) },
-            initiallySelectedIndex = defaultBottom.dbValue
+            selectedIndex = state.selectedBottom.dbValue
         )
 
         Spacer(modifier = Modifier.size(16.dp))
@@ -133,6 +133,7 @@ private fun ClothingScreen(
 fun ClothingScreenPreview() {
     SunscreenTheme {
         ClothingScreen(
+            state = defaultUserClothing.asClothingState(),
             onEvent = {}
         )
     }
