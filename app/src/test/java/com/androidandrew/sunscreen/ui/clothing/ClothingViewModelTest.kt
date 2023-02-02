@@ -105,4 +105,16 @@ class ClothingViewModelTest {
         assertEquals(clothing.top, clothingState.selectedTop)
         assertEquals(clothing.bottom, clothingState.selectedBottom)
     }
+
+    @Test
+    fun clothingItems_whenSelected_updateState() = runTest {
+        createViewModel()
+
+        vm.onEvent(ClothingEvent.TopSelected(ClothingTop.LONG_SLEEVE_SHIRT))
+        vm.onEvent(ClothingEvent.BottomSelected(ClothingBottom.PANTS))
+
+        val clothingState = vm.clothingState.first()
+        assertEquals(ClothingTop.LONG_SLEEVE_SHIRT, clothingState.selectedTop)
+        assertEquals(ClothingBottom.PANTS, clothingState.selectedBottom)
+    }
 }
