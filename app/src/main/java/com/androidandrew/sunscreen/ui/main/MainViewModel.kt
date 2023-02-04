@@ -102,7 +102,7 @@ class MainViewModel(
     private fun displayError(throwable: Throwable) {
         _forecastState.update { ForecastState.Error(throwable.message ?: "Unknown Error") }
         viewModelScope.launch {
-            delay(2_000)
+            delay(1_000)
             _forecastState.update { ForecastState.Done }
         }
     }
@@ -320,7 +320,7 @@ class MainViewModel(
     private fun changeSettingsScreen(destination: AppDestination) {
         settingsState.update { destination }
         viewModelScope.launch {
-            delay(1_000)
+            delay(100)
             settingsState.update { AppDestination.Main }
         }
     }

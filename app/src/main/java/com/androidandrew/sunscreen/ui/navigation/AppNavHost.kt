@@ -56,7 +56,7 @@ fun AppNavHost(
             SkinTypeScreen(
                 onSkinTypeSelected = {
                     if (returntoMainScreen) {
-                        navController.navigate(AppDestination.Main.name)
+                        navController.popBackStack()
                     } else {
                         navController.navigate(AppDestination.Clothing.name)
                     }
@@ -68,9 +68,13 @@ fun AppNavHost(
             Timber.d("Loading ClothingScreen")
             ClothingScreen(
                 onContinuePressed = {
-                    navController.navigate(AppDestination.Main.name) {
-                        popUpTo(AppDestination.Main.name) {
-                            inclusive = true
+                    if (returntoMainScreen) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(AppDestination.Main.name) {
+                            popUpTo(AppDestination.Main.name) {
+                                inclusive = true
+                            }
                         }
                     }
                 },
