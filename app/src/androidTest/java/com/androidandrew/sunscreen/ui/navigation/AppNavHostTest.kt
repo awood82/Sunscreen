@@ -2,6 +2,7 @@ package com.androidandrew.sunscreen.ui.navigation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.annotation.StringRes
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -14,6 +15,7 @@ import com.androidandrew.sunscreen.util.onNodeWithStringId
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.util.onNodeWithContentDescriptionId
+import com.androidandrew.sunscreen.util.waitUntilExists
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Rule
@@ -57,7 +59,7 @@ class AppNavHostTest {
 
     @Test
     fun locationScreen_whenValidLocationIsSearched_navigatesToSkinTypeScreen() {
-        navigateToLocationScreen()
+        startWithLocationScreenInOnboardingFlow()
 
         performLocationSearch(FakeData.zip)
 
@@ -109,6 +111,34 @@ class AppNavHostTest {
     }
 
     @Test
+    fun mainScreen_ifSkinTypeIsClicked_whenTrackingIsOn_afterReturningToMainScreen_trackingButtonSaysTracking() {
+        setupNavController(withOnboarded = true)
+        performLocationSearch(FakeData.zip)
+        clickTrackingButton()
+
+        assertThatStopTrackingIsVisible()
+        clickSkinTypeSetting()
+        selectSkinType()
+
+        waitUntilMainScreenIsVisibleAfterLocationSearch()
+        assertThatStopTrackingIsVisible()
+    }
+
+    @Test
+    fun mainScreen_ifClothingButtonIsClicked_whenTrackingIsOn_afterReturningToMainScreen_trackingButtonSaysTracking() {
+        setupNavController(withOnboarded = true)
+        performLocationSearch(FakeData.zip)
+        clickTrackingButton()
+
+        assertThatStopTrackingIsVisible()
+        clickClothingSetting()
+        selectClothing()
+
+        waitUntilMainScreenIsVisibleAfterLocationSearch()
+        assertThatStopTrackingIsVisible()
+    }
+
+    @Test
     fun backButton_onMainScreen_afterOnboarding_doesNotReturnToOnboardingScreens() {
         navigateThroughOnboardingFlow()
 
@@ -140,7 +170,7 @@ class AppNavHostTest {
     }
 
 
-    private fun navigateToLocationScreen() {
+    private fun startWithLocationScreenInOnboardingFlow() {
         setupNavController(withOnboarded = false)
     }
 
@@ -154,18 +184,18 @@ class AppNavHostTest {
     }
 
     private fun navigateToSkinTypeScreen() {
-        navigateToLocationScreen()
+        startWithLocationScreenInOnboardingFlow()
         performLocationSearch(FakeData.zip)
     }
 
     private fun selectSkinType() {
         composeTestRule.onNodeWithStringId(R.string.type_1_title).performClick()
+        awaitIdle()
     }
 
     private fun navigateToClothingScreen() {
         navigateToSkinTypeScreen()
         selectSkinType()
-        awaitIdle()
     }
 
     private fun selectClothing() {
@@ -185,10 +215,17 @@ class AppNavHostTest {
 
     private fun clickSkinTypeSetting() {
         composeTestRule.onNodeWithContentDescriptionId(R.string.skin_type_title).performClick()
+        composeTestRule.waitUntilExists(hasText(getString(R.string.type_1_title)))
     }
 
     private fun clickClothingSetting() {
         composeTestRule.onNodeWithContentDescriptionId(R.string.clothing_screen_title).performClick()
+        composeTestRule.waitUntilExists(hasText(getString(R.string.clothing_screen_title)))
+    }
+
+    private fun clickTrackingButton() {
+        composeTestRule.onNodeWithStringId(R.string.start_tracking).performClick()
+        composeTestRule.waitUntilExists(hasText(getString(R.string.stop_tracking)))
     }
 
     private fun navigateBack() {
@@ -196,6 +233,14 @@ class AppNavHostTest {
             it.onBackPressedDispatcher.onBackPressed()
         }
         awaitIdle()
+    }
+
+    private fun waitUntilMainScreenIsVisibleAfterLocationSearch() {
+        composeTestRule.waitUntilExists(hasText(text = "Tracking", substring = true).and(isEnabled()))
+    }
+
+    private fun assertThatStopTrackingIsVisible() {
+        composeTestRule.onNodeWithStringId(R.string.stop_tracking).assertIsDisplayed()
     }
 
     private fun assertDestinationIs(name: String) {
@@ -225,5 +270,9 @@ class AppNavHostTest {
         runBlocking {
             composeTestRule.awaitIdle()
         }
+    }
+
+    private fun getString(@StringRes id: Int): String {
+        return composeTestRule.activity.getString(id)
     }
 }

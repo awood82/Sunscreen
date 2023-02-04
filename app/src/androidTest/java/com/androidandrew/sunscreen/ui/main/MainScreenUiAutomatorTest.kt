@@ -69,7 +69,7 @@ class MainScreenUiAutomatorTest {
 
         // Return to the app under test
         uiDevice.pressRecentApps()
-        runBlocking { delay(100) }
+        runBlocking { delay(3000) }
         val middleOfScreen = uiDevice.getClickPosition(50f, 50f)
         uiDevice.click(middleOfScreen.x, middleOfScreen.y)
 
