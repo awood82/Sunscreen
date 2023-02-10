@@ -28,6 +28,8 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.common.OnePaneLayout
+import com.androidandrew.sunscreen.ui.common.TwoPaneLayout
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import org.koin.androidx.compose.koinViewModel
 
@@ -111,47 +113,27 @@ private fun MainScreenWithState(
     modifier: Modifier = Modifier
 ) {
     if (useWideLayout) {
-        Row(
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
+        TwoPaneLayout(
+            modifier = modifier,
+            contentAtStart = {
                 LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
                 UvChartWithState(uvChartUiState)
-            }
-            Column(
-                modifier = modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
+            },
+            contentAtEnd = {
                 BurnTimeWithState(uiState = burnTimeUiState)
                 UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
             }
-        }
+        )
     } else {
-        Column(
-            modifier = modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
-            BurnTimeWithState(uiState = burnTimeUiState)
-            UvChartWithState(uvChartUiState)
-            UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
-        }
+        OnePaneLayout(
+            modifier = modifier,
+            content = {
+                LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
+                BurnTimeWithState(uiState = burnTimeUiState)
+                UvChartWithState(uvChartUiState)
+                UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
+            }
+        )
     }
 }
 
