@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class UvChartFormatterTest {
 
-    private val fakeEntries = listOf<Entry>(
+    private val fakeEntries = listOf(
         Entry(8f, 3.0f),
         Entry(10f, 5.0f) )
 

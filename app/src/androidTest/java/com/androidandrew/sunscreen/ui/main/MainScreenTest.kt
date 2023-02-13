@@ -4,7 +4,6 @@ import android.content.pm.ActivityInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.androidandrew.sharedtest.network.FakeEpaService
-import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.util.onNodeWithStringId

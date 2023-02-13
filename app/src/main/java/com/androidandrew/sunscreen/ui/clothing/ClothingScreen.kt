@@ -17,18 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.model.*
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun ClothingScreen(
-    modifier: Modifier = Modifier,
     onContinuePressed: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: ClothingViewModel = koinViewModel()
 ) {
     val isClothingDone by viewModel.isClothingDone.collectAsStateWithLifecycle(initialValue = false)

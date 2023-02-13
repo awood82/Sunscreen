@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    lintChecks("com.slack.lint.compose:compose-lint-checks:$lintCheckVersion")
 
     implementation "androidx.core:core-ktx:$coreVersion"
     implementation "androidx.appcompat:appcompat:$appCompatVersion"

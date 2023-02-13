@@ -18,14 +18,14 @@ class RepeatingTimerTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @get:Rule
-    val mainCoroutineRule = MainDispatcherRule()
+    val mainDispatcherRule = MainDispatcherRule()
 
     private var count = 0
 
     private var repeatingTimer = RepeatingTimer(
         initialDelayMillis = TimeUnit.SECONDS.toMillis(1),
         repeatPeriodMillis = TimeUnit.SECONDS.toMillis(2),
-        defaultDispatcher = mainCoroutineRule.testDispatcher,
+        defaultDispatcher = mainDispatcherRule.testDispatcher,
         action = { count++ }
     )
 
@@ -54,7 +54,7 @@ class RepeatingTimerTest {
         repeatingTimer = RepeatingTimer(
             initialDelayMillis = TimeUnit.SECONDS.toMillis(1),
             repeatPeriodMillis = TimeUnit.SECONDS.toMillis(2),
-            defaultDispatcher = mainCoroutineRule.testDispatcher,
+            defaultDispatcher = mainDispatcherRule.testDispatcher,
             action = { count++ }
         )
         repeatingTimer.start()

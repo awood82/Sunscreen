@@ -2,8 +2,6 @@ package com.androidandrew.sunscreen.ui.clothing
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.performScrollTo
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.util.onNodeWithContentDescriptionId
 import com.androidandrew.sunscreen.util.onNodeWithStringId

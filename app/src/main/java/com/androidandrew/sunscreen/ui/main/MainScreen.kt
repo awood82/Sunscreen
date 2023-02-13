@@ -1,8 +1,6 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,8 +11,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
@@ -33,15 +29,14 @@ import com.androidandrew.sunscreen.ui.common.TwoPaneLayout
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier,
-    viewModel: MainViewModel = koinViewModel(),
     useWideLayout: Boolean,
     onNotOnboarded: () -> Unit,
     onError: (String) -> Unit,
-    onChangeSetting: (AppDestination) -> Unit
+    onChangeSetting: (AppDestination) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel = koinViewModel()
 ) {
     // Uses repeatOnLifecycle under the hood. Reduces boilerplate.
     // https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
@@ -91,7 +86,7 @@ fun MainScreen(
 
 @Composable
 private fun LoadingOverlay(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         CircularProgressIndicator(
             modifier = modifier
                 .align(Alignment.Center)

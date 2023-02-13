@@ -19,7 +19,7 @@ import timber.log.Timber
 fun SunscreenApp(
     useWideLayout: Boolean,
     @SuppressLint("ModifierParameter")
-    modifier: Modifier = Modifier.semantics { testTagsAsResourceId = true },
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
 //    val backStackEntry by navController.currentBackStackEntryAsState()
@@ -53,13 +53,14 @@ fun SunscreenApp(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .semantics { testTagsAsResourceId = true }
         ) {
             Timber.d("Loading AppNavHost")
             AppNavHost(
                 navController = navController,
                 useWideLayout = useWideLayout,
-                onError = { snackbarMessage = it },
-                modifier = modifier)
+                onError = { snackbarMessage = it }
+            )
         }
     }
 }

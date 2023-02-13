@@ -2,7 +2,6 @@ package com.androidandrew.sunscreen.service
 
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import androidx.core.app.NotificationCompat
 import io.mockk.mockk
 import io.mockk.slot

@@ -3,7 +3,6 @@ package com.androidandrew.sunscreen.data.repository
 import com.androidandrew.sunscreen.database.UserTrackingDao
 import com.androidandrew.sunscreen.model.UserTracking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class UserTrackingRepositoryImpl(
