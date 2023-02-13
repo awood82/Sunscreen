@@ -12,7 +12,7 @@ import com.androidandrew.sunscreen.domain.usecases.GetLocalForecastForTodayUseCa
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.UserTracking
 import com.androidandrew.sunscreen.service.SunTrackerServiceController
-import com.androidandrew.sunscreen.testing.MainCoroutineRule
+import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.chart.UvChartUiState
@@ -50,7 +50,7 @@ class MainViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @get:Rule
-    val mainCoroutineRule = MainCoroutineRule()
+    val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var vm: MainViewModel
     private val spfUseCase = ConvertSpfUseCase()

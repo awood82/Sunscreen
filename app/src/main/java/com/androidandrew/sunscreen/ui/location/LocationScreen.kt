@@ -13,13 +13,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LocationScreen(
     onLocationValid: () -> Unit,
@@ -29,20 +27,17 @@ fun LocationScreen(
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
     val isLocationValid by viewModel.isLocationValid.collectAsStateWithLifecycle(initialValue = false)
 
-    when (isLocationValid) {
-        true -> {
-            LaunchedEffect(Unit) {
-                onLocationValid()
-            }
-        }
-        false -> {
-            LocationScreenWithState(
-                locationBarState = locationBarState,
-                onLocationBarEvent = { viewModel.onEvent(it) },
-                modifier = modifier
-            )
+    if (isLocationValid) {
+        LaunchedEffect(Unit) {
+            onLocationValid()
         }
     }
+
+    LocationScreenWithState(
+        locationBarState = locationBarState,
+        onLocationBarEvent = { viewModel.onEvent(it) },
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -62,7 +57,7 @@ fun LocationScreenWithState(
         }
         Box(
             contentAlignment = Alignment.BottomCenter,
-            modifier = modifier.padding(bottom = 64.dp)) {
+            modifier = Modifier.padding(bottom = 64.dp)) {
             LocationBarWithState(
                 uiState = locationBarState,
                 onEvent = onLocationBarEvent

@@ -13,10 +13,10 @@ import timber.log.Timber
 
 @Composable
 fun AppNavHost(
-    modifier: Modifier = Modifier,
     navController: NavHostController,
     useWideLayout: Boolean,
     onError: (String) -> Unit,
+    modifier: Modifier = Modifier,
     startDestination: String = AppDestination.Main.name
 ) {
     var returntoMainScreen by remember { mutableStateOf(false) }

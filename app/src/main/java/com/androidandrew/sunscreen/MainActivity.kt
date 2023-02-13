@@ -30,7 +30,9 @@ class MainActivity : ComponentActivity() {
                     || windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium
 
             SunscreenTheme {
-                SunscreenApp(useWideLayout = useWideLayout)
+                SunscreenApp(
+                    useWideLayout = useWideLayout
+                )
             }
         }
     }

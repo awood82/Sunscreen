@@ -14,17 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun SkinTypeScreen(
-    modifier: Modifier = Modifier,
     onSkinTypeSelected: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: SkinTypeViewModel = koinViewModel()
 ) {
     val isSkinTypeSelected by viewModel.isSkinTypeSelected.collectAsStateWithLifecycle(initialValue = false)
