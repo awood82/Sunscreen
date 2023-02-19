@@ -6,12 +6,12 @@ plugins {
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdk 33
+    compileSdk project.compileSdkVersion
 
     defaultConfig {
         applicationId "com.androidandrew.sunscreen"
-        minSdk 26
-        targetSdk 32
+        minSdk project.minSdkVersion
+        targetSdk project.targetSdkVersion
         versionCode 1
         versionName "1.0"
 

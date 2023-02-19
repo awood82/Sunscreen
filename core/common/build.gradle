@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace 'com.androidandrew.sunscreen.common'
-    compileSdk 33
+    compileSdk project.compileSdkVersion
 
     defaultConfig {
-        minSdk 26
-        targetSdk 32
+        minSdk project.minSdkVersion
+        targetSdk project.targetSdkVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
