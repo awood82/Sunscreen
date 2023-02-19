@@ -9,7 +9,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-private val BASE_URL = "https://data.epa.gov/"
+private const val BASE_URL = "https://data.epa.gov/"
 
 interface EpaService {
     @GET("efservice/getEnvirofactsUVHOURLY/ZIP/{zipCode}/JSON")

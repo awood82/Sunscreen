@@ -108,7 +108,7 @@ class SunTracker(
         )
     }
 
-    suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
+    private suspend fun updateTracking(burnDelta: Double = 0.0, vitaminDDelta: Double = 0.0) {
         Timber.d("Updating tracking, adding burn=$burnDelta, vitD=$vitaminDDelta")
         userTracking = UserTracking(
             sunburnProgress = userTracking.sunburnProgress.plus(burnDelta),

@@ -3,7 +3,7 @@ package com.androidandrew.sunscreen.util
 class LocationUtil {
 
     companion object {
-        private val ZIP_CODE_LENGTH = 5
+        private const val ZIP_CODE_LENGTH = 5
     }
 
     fun isValidZipCode(location: String): Boolean {

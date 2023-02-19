@@ -26,15 +26,15 @@ fun OnePaneLayout(
 
 @Composable
 fun TwoPaneLayout(
-    modifier: Modifier = Modifier,
     contentAtStart: @Composable () -> Unit,
-    contentAtEnd: @Composable () -> Unit
+    contentAtEnd: @Composable () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .weight(1f)
@@ -45,7 +45,7 @@ fun TwoPaneLayout(
             contentAtStart()
         }
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .weight(1f)

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 class SunburnCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
 
     companion object {
-        val MAX_SUN_UNITS = 100.0
+        const val MAX_SUN_UNITS = 100.0
         val NO_BURN_EXPECTED = TimeUnit.DAYS.toMinutes(1).toDouble()
     }
 

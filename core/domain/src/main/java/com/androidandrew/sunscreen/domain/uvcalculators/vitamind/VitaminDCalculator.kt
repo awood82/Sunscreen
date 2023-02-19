@@ -8,7 +8,7 @@ import kotlin.math.pow
 class VitaminDCalculator(private val convertSpfUseCase: ConvertSpfUseCase) {
 
     companion object {
-        val RECOMMENDED_IU = 1000.0 // Some studies recommend less (400), others more (4000)
+        const val RECOMMENDED_IU = 1000.0 // Some studies recommend less (400), others more (4000)
     }
 
     private val minuteMagicNumber = 33.3333 // Factor to get calculations into minutes
