@@ -1,5 +1,6 @@
 package com.androidandrew.sunscreen.ui.main
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -27,6 +28,8 @@ import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.common.OnePaneLayout
 import com.androidandrew.sunscreen.ui.common.TwoPaneLayout
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -132,48 +135,35 @@ private fun MainScreenWithState(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = Devices.PHONE, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, device = Devices.PHONE, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun MainScreenVerticalPreview() {
+fun MainScreenVerticalNightAndDayPreview() {
     SunscreenTheme {
         MainScreenWithState(
             useWideLayout = false,
             locationBarState = LocationBarState("12345"),
             onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,
-            uvChartUiState = UvChartUiState.NoData,
+            uvChartUiState = chartPreviewData,
             uvTrackingState = UvTrackingState.initialState,
             onUvTrackingEvent = {}
         )
     }
 }
 
+@Preview(showBackground = true, device = Devices.PHONE, widthDp = 800, heightDp = 600)
 @Preview(showBackground = true, device = Devices.TABLET)
-@Composable
-fun MainScreenHorizontalPreview() {
-    SunscreenTheme {
-        MainScreenWithState(
-            useWideLayout = true,
-            locationBarState = LocationBarState("12345"),
-            onLocationBarEvent = {},
-            burnTimeUiState = BurnTimeUiState.Unknown,
-            uvChartUiState = UvChartUiState.NoData,
-            uvTrackingState = UvTrackingState.initialState,
-            onUvTrackingEvent = {}
-        )
-    }
-}
-
 @Preview(showBackground = true, device = Devices.FOLDABLE)
 @Composable
-fun MainScreenFoldablePreview() {
+fun MainScreenWideLayoutPreview() {
     SunscreenTheme {
         MainScreenWithState(
             useWideLayout = true,
             locationBarState = LocationBarState("12345"),
             onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,
-            uvChartUiState = UvChartUiState.NoData,
+            uvChartUiState = chartPreviewData,
             uvTrackingState = UvTrackingState.initialState,
             onUvTrackingEvent = {}
         )
@@ -187,3 +177,16 @@ fun LoadingPreview() {
         LoadingOverlay()
     }
 }
+
+private val chartPreviewData = UvChartUiState.HasData(
+    data = LineDataSet(
+        listOf(
+            Entry(8.0f, 0.0f),
+            Entry(10.0f, 5.0f),
+            Entry(12.0f, 10.0f),
+            Entry(14.0f, 4.0f),
+            Entry(15.0f, 0.0f)
+        ), ""
+    ),
+    xHighlight = 11.0f
+)
