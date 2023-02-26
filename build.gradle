@@ -1,4 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    dependencies {
+        // For Firebase
+        classpath 'com.google.gms:google-services:4.3.15'
+    }
+}
+
 plugins {
     id 'com.android.application' version '7.4.1' apply false
     id 'com.android.library' version '7.4.1' apply false
@@ -20,6 +27,7 @@ ext {
     coreTestVersion = '2.1.0'
     coroutinesTestVersion = '1.6.4'
     coroutinesVersion = '1.5.2'
+    firebaseVersion = '31.2.2'
     junitVersion = '4.13.2'
     junitTestExtVersion = '1.1.4'
     koinVersion= '3.3.2'
