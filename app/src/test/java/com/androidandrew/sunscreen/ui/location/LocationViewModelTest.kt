@@ -3,9 +3,13 @@ package com.androidandrew.sunscreen.ui.location
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import com.androidandrew.sunscreen.util.LocationUtil
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -28,6 +32,7 @@ class LocationViewModelTest {
     private lateinit var vm: LocationViewModel
     private lateinit var fakeDatabaseHolder: FakeDatabaseWrapper
     private lateinit var userSettingsRepo: UserSettingsRepository
+    private val mockAnalytics: EventLogger = mockk(relaxed = true)
 
     @Before
     fun setup() {
@@ -46,7 +51,7 @@ class LocationViewModelTest {
     }
 
     private fun createViewModel() {
-        vm = LocationViewModel(userSettingsRepo, LocationUtil())
+        vm = LocationViewModel(userSettingsRepo, LocationUtil(), mockAnalytics)
     }
 
     @Test
@@ -81,5 +86,31 @@ class LocationViewModelTest {
         assertEquals("", userSettingsRepo.getLocation())
 
         collectJob.cancel()
+    }
+
+    @Test
+    fun init_logsAnalyticsEvents() = runTest {
+        createViewModel()
+
+        verify { mockAnalytics.startTutorial() }
+        verify { mockAnalytics.viewScreen(AppDestination.Location.name) }
+    }
+
+    @Test
+    fun onSearchLocation_ifInvalid_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onEvent(LocationBarEvent.LocationSearched("FAKE"))
+
+        verify { mockAnalytics.searchLocation("FAKE") }
+    }
+
+    @Test
+    fun onSearchLocation_ifValid_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onEvent(LocationBarEvent.LocationSearched("94510"))
+
+        verify { mockAnalytics.searchLocation("94510") }
     }
 }

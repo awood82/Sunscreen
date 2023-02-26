@@ -2,14 +2,17 @@ package com.androidandrew.sunscreen.ui.location
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import com.androidandrew.sunscreen.util.LocationUtil
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class LocationViewModel(
     private val userSettingsRepo: UserSettingsRepository,
-    private val locationUtil: LocationUtil
+    private val locationUtil: LocationUtil,
+    private val analytics: EventLogger
 ) : ViewModel() {
 
     private val _locationBarState = MutableStateFlow(LocationBarState(""))
@@ -17,6 +20,11 @@ class LocationViewModel(
 
     private val _isLocationValid = MutableSharedFlow<Boolean>()
     val isLocationValid = _isLocationValid.asSharedFlow()
+
+    init {
+        analytics.startTutorial()
+        analytics.viewScreen(AppDestination.Location.name)
+    }
 
     fun onEvent(event: LocationBarEvent) {
         when (event) {
@@ -30,6 +38,7 @@ class LocationViewModel(
     }
 
     private fun onSearchLocation(zipLocation: String) {
+        analytics.searchLocation(zipLocation)
         if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
                 userSettingsRepo.setLocation(zipLocation)
