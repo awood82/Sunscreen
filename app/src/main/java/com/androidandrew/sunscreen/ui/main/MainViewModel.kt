@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
@@ -37,7 +38,8 @@ class MainViewModel(
     private val sunburnCalculator: SunburnCalculator,
     private val locationUtil: LocationUtil,
     private val clock: Clock,
-    private val sunTrackerServiceController: SunTrackerServiceController
+    private val sunTrackerServiceController: SunTrackerServiceController,
+    private val analytics: EventLogger
 ) : ViewModel(), DefaultLifecycleObserver {
 
     companion object {
@@ -113,6 +115,7 @@ class MainViewModel(
             when (isOnboarded) {
                 true -> {
                     Timber.d("Setup completed")
+                    analytics.viewScreen(AppDestination.Main.name)
                     startTimers()
                     val startingLocation = _location.firstOrNull() ?: ""
                     _locationBarState.update { it.copy(typedSoFar = startingLocation) }
@@ -276,6 +279,7 @@ class MainViewModel(
     }
 
     private fun onSearchLocation(location: String) {
+        analytics.searchLocation(location)
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 displayLoading()
