@@ -12,4 +12,4 @@ val testModule = module {
     single<Clock> { FakeData.clockDefaultNoon }
 }
 
-val allModules = listOf(domainModule, testDatabaseModule, testNetworkModule, repositoryModule, serviceModule, viewModelModule, appModule, testModule)
+val allModules = listOf(domainModule, testDatabaseModule, testNetworkModule, repositoryModule, serviceModule, analyticsModule, viewModelModule, appModule, testModule)

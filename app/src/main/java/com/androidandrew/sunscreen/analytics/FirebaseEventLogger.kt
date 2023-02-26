@@ -1,0 +1,50 @@
+package com.androidandrew.sunscreen.analytics
+
+import android.os.Bundle
+import com.androidandrew.sunscreen.model.UserClothing
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
+
+class FirebaseEventLogger : EventLogger {
+
+    private val firebaseAnalytics = Firebase.analytics
+
+    override fun startTutorial() {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null)
+    }
+
+    override fun finishTutorial() {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null)
+    }
+
+    override fun viewScreen(name: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, Bundle().apply {
+            putString(FirebaseAnalytics.Param.SCREEN_NAME, name)
+            putString(FirebaseAnalytics.Param.SCREEN_CLASS, name + "Screen")
+        })
+    }
+
+    override fun searchLocation(location: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, Bundle().apply {
+            putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
+        })
+    }
+
+    override fun selectSkinType(skinType: Int) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.JOIN_GROUP, Bundle().apply {
+            putString(FirebaseAnalytics.Param.GROUP_ID, skinType.toString())
+        })
+    }
+
+    override fun selectClothing(clothing: UserClothing) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, "top")
+            putString(FirebaseAnalytics.Param.ITEM_ID, clothing.top.name)
+        })
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, "bottom")
+            putString(FirebaseAnalytics.Param.ITEM_ID, clothing.bottom.name)
+        })
+    }
+}

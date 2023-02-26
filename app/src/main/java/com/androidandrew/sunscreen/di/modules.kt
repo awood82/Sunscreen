@@ -9,6 +9,8 @@ import android.content.Intent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.core.app.NotificationCompat
 import com.androidandrew.sunscreen.MainActivity
+import com.androidandrew.sunscreen.analytics.EventLogger
+import com.androidandrew.sunscreen.analytics.FirebaseEventLogger
 import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.di.databaseModule
 import com.androidandrew.sunscreen.domain.di.domainModule
@@ -45,10 +47,14 @@ val serviceModule = module {
     factory { SunTracker(get(), get(), get(), get()) }
 }
 
+val analyticsModule = module {
+    single<EventLogger> { FirebaseEventLogger() }
+}
+
 val viewModelModule = module {
-    viewModel { LocationViewModel(get(), get()) }
-    viewModel { SkinTypeViewModel(get()) }
-    viewModel { ClothingViewModel(get()) }
+    viewModel { LocationViewModel(get(), get(), get()) }
+    viewModel { SkinTypeViewModel(get(), get()) }
+    viewModel { ClothingViewModel(get(), get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
@@ -59,4 +65,4 @@ val appModule = module {
     factory { UvChartFormatter(androidContext()) }
 }
 
-val allModules = listOf(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
+val allModules = listOf(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, analyticsModule, viewModelModule, appModule)
