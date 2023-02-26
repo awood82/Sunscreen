@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-
 package com.androidandrew.sunscreen.di
 
 import android.app.NotificationManager
@@ -32,6 +30,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.Clock
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 val serviceModule = module {
     single { androidApplication().getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager }
     factory { NotificationCompat.Builder(androidApplication()) }
