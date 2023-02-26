@@ -3,12 +3,17 @@ package com.androidandrew.sunscreen.ui.clothing
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.model.*
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : ViewModel() {
+class ClothingViewModel(
+    private val userSettingsRepo: UserSettingsRepository,
+    private val analytics: EventLogger
+) : ViewModel() {
 
     private val _isClothingDone = MutableSharedFlow<Boolean>()
     val isClothingDone = _isClothingDone.asSharedFlow()
@@ -22,6 +27,7 @@ class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : 
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = defaultUserClothing.asClothingState())
 
     init {
+        analytics.viewScreen(AppDestination.Clothing.name)
         viewModelScope.launch {
             _clothing.update { userSettingsRepo.getClothing() }
         }
@@ -47,10 +53,14 @@ class ClothingViewModel(private val userSettingsRepo: UserSettingsRepository) : 
 
     @VisibleForTesting
     private suspend fun saveClothesToRepository() {
+        analytics.selectClothing(_clothing.value)
         userSettingsRepo.setClothing(_clothing.value)
     }
 
     private suspend fun exitOnboarding() {
+        if (!userSettingsRepo.getIsOnboarded()) {
+            analytics.finishTutorial()
+        }
         userSettingsRepo.setIsOnboarded(true)
     }
 
