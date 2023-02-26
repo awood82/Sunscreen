@@ -19,7 +19,7 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     startDestination: String = AppDestination.Main.name
 ) {
-    var returntoMainScreen by remember { mutableStateOf(false) }
+    var returnToMainScreen by remember { mutableStateOf(false) }
 
     NavHost(
         navController = navController,
@@ -35,7 +35,7 @@ fun AppNavHost(
                 onError = onError,
                 onChangeSetting = {
                     if (it != AppDestination.Main) {
-                        returntoMainScreen = true
+                        returnToMainScreen = true
                         navController.navigate(it.name)
                     }
                 },
@@ -55,7 +55,7 @@ fun AppNavHost(
             Timber.d("Loading SkinTypeScreen")
             SkinTypeScreen(
                 onSkinTypeSelected = {
-                    if (returntoMainScreen) {
+                    if (returnToMainScreen) {
                         navController.popBackStack()
                     } else {
                         navController.navigate(AppDestination.Clothing.name)
@@ -68,7 +68,7 @@ fun AppNavHost(
             Timber.d("Loading ClothingScreen")
             ClothingScreen(
                 onContinuePressed = {
-                    if (returntoMainScreen) {
+                    if (returnToMainScreen) {
                         navController.popBackStack()
                     } else {
                         navController.navigate(AppDestination.Main.name) {
