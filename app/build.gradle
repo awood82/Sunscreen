@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services' // For Firebase
 }
 
 apply plugin: 'kotlin-kapt'
@@ -45,6 +46,11 @@ android {
 dependencies {
     lintChecks("com.slack.lint.compose:compose-lint-checks:$lintCheckVersion")
 
+    // Firebase
+    implementation platform("com.google.firebase:firebase-bom:$firebaseVersion")
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    // Core dependencies
     implementation "androidx.core:core-ktx:$coreVersion"
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
@@ -53,7 +59,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    // Core dependencies. TODO: Features will depend on them instead of the app module
+    // Core module dependencies. TODO: Features will depend on them instead of the app module
     implementation project(":core:common")
     implementation project(":core:model")
     implementation project(':core:domain')
