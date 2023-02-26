@@ -54,7 +54,7 @@ val viewModelModule = module {
     viewModel { LocationViewModel(get(), get(), get()) }
     viewModel { SkinTypeViewModel(get(), get()) }
     viewModel { ClothingViewModel(get(), get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val appModule = module {

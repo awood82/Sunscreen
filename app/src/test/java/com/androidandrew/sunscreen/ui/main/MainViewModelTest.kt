@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
@@ -63,6 +64,7 @@ class MainViewModelTest {
     private lateinit var userTrackingRepo: UserTrackingRepository
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
+    private val mockAnalytics: EventLogger = mockk(relaxed = true)
     private val delta = 0.1
     private lateinit var chartState: UvChartUiState
     private lateinit var collectJob: Job
@@ -106,7 +108,8 @@ class MainViewModelTest {
             sunburnCalculator = sunburnCalculator,
             locationUtil = locationUtil,
             clock = clock,
-            sunTrackerServiceController = serviceController
+            sunTrackerServiceController = serviceController,
+            analytics = mockAnalytics
         )
     }
 
@@ -487,8 +490,8 @@ class MainViewModelTest {
         assertEquals(AppState.Onboarded, vm.appState.first())
     }
 
-    @IsNotOnboarded
     @Test
+    @IsNotOnboarded
     fun init_ifRepoReportsNotOnboarded_isNotOnboarded() = runTest {
 
         createViewModel()
@@ -496,8 +499,8 @@ class MainViewModelTest {
         assertEquals(AppState.NotOnboarded, vm.appState.first())
     }
 
-    @IsNotOnboarded
     @Test
+    @IsNotOnboarded
     fun init_ifRepoReportsLocationButNotOnboarded_isNotOnboarded() = runTest {
         setLocation(FakeData.zip)
 
@@ -543,6 +546,44 @@ class MainViewModelTest {
         assertNotEquals("10001", userSettingsRepo.getLocation())
     }
 
+    @Test
+    @IsNotOnboarded
+    fun init_whenNotOnboarded_doesNotLogAnalyticsEvent_forMainScreen() = runTest {
+        createViewModel()
+
+        triggerOnboardingUpdate()
+
+        verify(exactly = 0) { mockAnalytics.viewScreen(AppDestination.Main.name) }
+    }
+
+    @Test
+    fun init_whenOnboarded_logsAnalyticsEvent_forMainScreen() = runTest {
+        createViewModel()
+
+        triggerOnboardingUpdate()
+
+        verify { mockAnalytics.viewScreen(AppDestination.Main.name) }
+    }
+
+    @Test
+    fun onSearchLocation_ifInvalid_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("FAKE"))
+
+        verify { mockAnalytics.searchLocation("FAKE") }
+    }
+
+    @Test
+    fun onSearchLocation_ifValid_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("94510"))
+
+        verify { mockAnalytics.searchLocation("94510") }
+    }
+
+
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
         val date = getDate().toString()
@@ -561,15 +602,17 @@ class MainViewModelTest {
         userSettingsRepo.setLocation(location)
     }
 
-    private fun searchZip(zip: String) {
+    private suspend fun searchZip(zip: String) {
         vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
         triggerLocationUpdate()
     }
 
-    private fun triggerLocationUpdate() {
-        runBlocking {
-            chartState = vm.uvChartUiState.first()
-        }
+    private suspend fun triggerLocationUpdate() {
+        chartState = vm.uvChartUiState.first()
+    }
+
+    private suspend fun triggerOnboardingUpdate() {
+        vm.appState.first()
     }
 }
