@@ -9,7 +9,11 @@ interface EventLogger {
 
     fun viewScreen(name: String)
 
-    fun searchLocation(location: String)
+    fun selectLocation(location: String)
     fun selectSkinType(skinType: Int)
     fun selectClothing(clothing: UserClothing)
+
+    fun searchLocation(location: String)
+    fun searchSuccess(location: String)
+    fun searchError(location: String, error: String?)
 }

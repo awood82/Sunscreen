@@ -25,15 +25,17 @@ class FirebaseEventLogger : EventLogger {
         })
     }
 
-    override fun searchLocation(location: String) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, Bundle().apply {
-            putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
+    override fun selectLocation(location: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, "location")
+            putString(FirebaseAnalytics.Param.ITEM_ID, location)
         })
     }
 
     override fun selectSkinType(skinType: Int) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.JOIN_GROUP, Bundle().apply {
-            putString(FirebaseAnalytics.Param.GROUP_ID, skinType.toString())
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, "skin_type")
+            putString(FirebaseAnalytics.Param.ITEM_ID, skinType.toString())
         })
     }
 
@@ -46,5 +48,21 @@ class FirebaseEventLogger : EventLogger {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, "bottom")
             putString(FirebaseAnalytics.Param.ITEM_ID, clothing.bottom.name)
         })
+    }
+
+    override fun searchLocation(location: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, Bundle().apply {
+            putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
+        })
+    }
+
+    override fun searchSuccess(location: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_SEARCH_RESULTS, Bundle().apply {
+            putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
+        })
+    }
+
+    override fun searchError(location: String, error: String?) {
+        // TODO: Add Crashlytics?
     }
 }

@@ -569,18 +569,30 @@ class MainViewModelTest {
     fun onSearchLocation_ifInvalid_logsAnalyticsEvent() = runTest {
         createViewModel()
 
-        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("FAKE"))
+        searchZip("INVALID_ZIP_CODE")
 
-        verify { mockAnalytics.searchLocation("FAKE") }
+        verify { mockAnalytics.searchLocation("INVALID_ZIP_CODE") }
     }
 
     @Test
-    fun onSearchLocation_ifValid_logsAnalyticsEvent() = runTest {
+    fun onSearchLocation_ifSuccessful_logsAnalyticsEvents() = runTest {
         createViewModel()
 
-        vm.onLocationBarEvent(LocationBarEvent.LocationSearched("94510"))
+        searchZip(FakeData.zip)
 
-        verify { mockAnalytics.searchLocation("94510") }
+        verify { mockAnalytics.searchLocation(FakeData.zip) }
+        verify { mockAnalytics.searchSuccess(FakeData.zip) }
+    }
+
+    @Test
+    fun onSearchLocation_ifError_logsAnalyticsEvent() = runTest {
+        fakeUvService.exception = IOException("Network error")
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        verify { mockAnalytics.searchLocation(FakeData.zip) }
+        verify { mockAnalytics.searchError(FakeData.zip, "Network error") }
     }
 
 

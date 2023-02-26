@@ -3,6 +3,7 @@ package com.androidandrew.sunscreen.ui.location
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
@@ -100,17 +101,17 @@ class LocationViewModelTest {
     fun onSearchLocation_ifInvalid_logsAnalyticsEvent() = runTest {
         createViewModel()
 
-        vm.onEvent(LocationBarEvent.LocationSearched("FAKE"))
+        vm.onEvent(LocationBarEvent.LocationSearched("INVALID_ZIP_CODE"))
 
-        verify { mockAnalytics.searchLocation("FAKE") }
+        verify { mockAnalytics.selectLocation("INVALID_ZIP_CODE") }
     }
 
     @Test
     fun onSearchLocation_ifValid_logsAnalyticsEvent() = runTest {
         createViewModel()
 
-        vm.onEvent(LocationBarEvent.LocationSearched("94510"))
+        vm.onEvent(LocationBarEvent.LocationSearched(FakeData.zip))
 
-        verify { mockAnalytics.searchLocation("94510") }
+        verify { mockAnalytics.selectLocation(FakeData.zip) }
     }
 }

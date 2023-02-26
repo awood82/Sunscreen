@@ -79,6 +79,7 @@ class MainViewModel(
     private val _uvPrediction = getLocalForecastForToday().map {
         when (it) {
             is DataResult.Success -> {
+                analytics.searchSuccess(lastLocationSearched)
                 _forecastState.update { ForecastState.Done }
                 it.data
             }
@@ -88,6 +89,7 @@ class MainViewModel(
             }
             is DataResult.Error -> {
                 val error = it.exception
+                analytics.searchError(lastLocationSearched, error?.localizedMessage)
                 Timber.e("ViewModel got the error: $error")
                 displayError(error!!)
                 emptyList()

@@ -38,7 +38,7 @@ class LocationViewModel(
     }
 
     private fun onSearchLocation(zipLocation: String) {
-        analytics.searchLocation(zipLocation)
+        analytics.selectLocation(zipLocation)
         if (locationUtil.isValidZipCode(zipLocation)) {
             viewModelScope.launch {
                 userSettingsRepo.setLocation(zipLocation)
