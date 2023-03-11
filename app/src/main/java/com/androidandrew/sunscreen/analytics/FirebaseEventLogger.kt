@@ -5,6 +5,7 @@ import com.androidandrew.sunscreen.model.UserClothing
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import java.util.concurrent.TimeUnit
 
 class FirebaseEventLogger : EventLogger {
 
@@ -88,7 +89,7 @@ class FirebaseEventLogger : EventLogger {
     override fun finishTracking() {
         // TODO: What to log? Time? Burn and IU?
         val elapsedTime = trackingStartTimeMs?.let {
-            System.currentTimeMillis() - it
+            TimeUnit.MINUTES.toMillis((System.currentTimeMillis() - it))
         } ?: -1
         trackingStartTimeMs = null
         firebaseAnalytics.logEvent("tracking_finish", Bundle().apply {
