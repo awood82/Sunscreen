@@ -595,6 +595,35 @@ class MainViewModelTest {
         verify { mockAnalytics.searchError(FakeData.zip, "Network error") }
     }
 
+    @Test
+    fun spf_whenChanged_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("30"))
+
+        verify { mockAnalytics.selectSpf(30) }
+    }
+
+    @Test
+    fun spf_whenOnSnowOrWaterChanged_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
+
+        verify { mockAnalytics.selectReflectiveSurface(true) }
+    }
+
+    @Test
+    fun tracking_logsAnalyticsEvents() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+
+        verify { mockAnalytics.startTracking() }
+        verify { mockAnalytics.finishTracking() }
+    }
+
 
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {

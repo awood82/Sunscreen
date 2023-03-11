@@ -16,4 +16,10 @@ interface EventLogger {
     fun searchLocation(location: String)
     fun searchSuccess(location: String)
     fun searchError(location: String, error: String?)
+
+    fun selectSpf(spf: Int)
+    fun selectReflectiveSurface(isReflective: Boolean)
+
+    fun startTracking()
+    fun finishTracking()
 }

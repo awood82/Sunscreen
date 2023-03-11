@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "414738242687",
+    "project_id": "sunscreen-66850",
+    "storage_bucket": "sunscreen-66850.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414738242687:android:314286b06b4ef2e068f34a",
+        "android_client_info": {
+          "package_name": "com.androidandrew.sunscreen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "414738242687-q5bfu5r3t2dddv3q2doa9i0t2dse1oon.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.androidandrew.sunscreen",
+            "certificate_hash": "64dad719533ddb00cb6e68239540200bc666950f"
+          }
+        },
+        {
+          "client_id": "414738242687-nun2g9j8uns8u9m910e9i7k4n2opgtig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFo97sOsWcthPMu2aQSlZ3Vu_kWRqPjXc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "414738242687-nun2g9j8uns8u9m910e9i7k4n2opgtig.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
