@@ -89,7 +89,7 @@ class FirebaseEventLogger : EventLogger {
     override fun finishTracking() {
         // TODO: What to log? Time? Burn and IU?
         val elapsedTime = trackingStartTimeMs?.let {
-            TimeUnit.MINUTES.toMillis((System.currentTimeMillis() - it))
+            TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - it))
         } ?: -1
         trackingStartTimeMs = null
         firebaseAnalytics.logEvent("tracking_finish", Bundle().apply {
