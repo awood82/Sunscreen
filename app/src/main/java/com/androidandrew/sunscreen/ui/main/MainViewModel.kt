@@ -302,6 +302,7 @@ class MainViewModel(
         when (event) {
             is UvTrackingEvent.TrackingButtonClicked -> onTrackingClicked()
             is UvTrackingEvent.SpfChanged -> {
+                analytics.selectSpf(event.spf.toIntOrNull() ?: 0)
                 _spfToDisplay.update { event.spf }
                 event.spf.toIntOrNull()?.let {
                     viewModelScope.launch {
@@ -310,6 +311,7 @@ class MainViewModel(
                 }
             }
             is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                analytics.selectReflectiveSurface(event.isOnSnowOrWater)
                 viewModelScope.launch {
                     userSettingsRepo.setIsOnSnowOrWater(event.isOnSnowOrWater)
                 }
@@ -334,10 +336,12 @@ class MainViewModel(
     private fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
             true -> {
+                analytics.finishTracking()
                 sunTrackerServiceController.stop()
                 _isCurrentlyTracking.update { false }
             }
             else -> {
+                analytics.startTracking()
                 viewModelScope.launch {
                     sunTrackerServiceController.start()
                     _isCurrentlyTracking.update { true }

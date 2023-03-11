@@ -9,6 +9,7 @@ import com.google.firebase.ktx.Firebase
 class FirebaseEventLogger : EventLogger {
 
     private val firebaseAnalytics = Firebase.analytics
+    private var trackingStartTimeMs: Long? = null
 
     override fun startTutorial() {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null)
@@ -64,5 +65,34 @@ class FirebaseEventLogger : EventLogger {
 
     override fun searchError(location: String, error: String?) {
         // TODO: Add Crashlytics?
+    }
+
+    override fun selectSpf(spf: Int) {
+        firebaseAnalytics.logEvent("select_spf", Bundle().apply {
+            putInt("spf", spf)
+        })
+    }
+
+    override fun selectReflectiveSurface(isReflective: Boolean) {
+        firebaseAnalytics.logEvent("select_reflective_surface", Bundle().apply {
+            putBoolean("is_reflective", isReflective)
+        })
+    }
+
+    override fun startTracking() {
+        // TODO: What to log? Time? Burn and IU?
+        trackingStartTimeMs = System.currentTimeMillis()
+        firebaseAnalytics.logEvent("tracking_start", null)
+    }
+
+    override fun finishTracking() {
+        // TODO: What to log? Time? Burn and IU?
+        val elapsedTime = trackingStartTimeMs?.let {
+            System.currentTimeMillis() - it
+        } ?: -1
+        trackingStartTimeMs = null
+        firebaseAnalytics.logEvent("tracking_finish", Bundle().apply {
+            putLong("time", elapsedTime)
+        })
     }
 }
