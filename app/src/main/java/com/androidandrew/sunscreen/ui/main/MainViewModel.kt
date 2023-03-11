@@ -342,10 +342,8 @@ class MainViewModel(
             }
             else -> {
                 analytics.startTracking()
-                viewModelScope.launch {
-                    sunTrackerServiceController.start()
-                    _isCurrentlyTracking.update { true }
-                }
+                sunTrackerServiceController.start()
+                _isCurrentlyTracking.update { true }
             }
         }
     }
