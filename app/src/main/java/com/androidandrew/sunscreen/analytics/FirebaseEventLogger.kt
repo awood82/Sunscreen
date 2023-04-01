@@ -3,13 +3,12 @@ package com.androidandrew.sunscreen.analytics
 import android.os.Bundle
 import com.androidandrew.sunscreen.model.UserClothing
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import java.util.concurrent.TimeUnit
 
-class FirebaseEventLogger : EventLogger {
+class FirebaseEventLogger(
+    private val firebaseAnalytics: FirebaseAnalytics
+) : EventLogger {
 
-    private val firebaseAnalytics = Firebase.analytics
     private var trackingStartTimeMs: Long? = null
 
     override fun startTutorial() {

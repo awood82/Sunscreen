@@ -24,6 +24,8 @@ import com.androidandrew.sunscreen.ui.clothing.ClothingViewModel
 import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.ui.skintype.SkinTypeViewModel
 import com.androidandrew.sunscreen.util.LocationUtil
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -47,7 +49,8 @@ val serviceModule = module {
 }
 
 val analyticsModule = module {
-    single<EventLogger> { FirebaseEventLogger() }
+    single { Firebase.analytics }
+    single<EventLogger> { FirebaseEventLogger(get()) }
 }
 
 val viewModelModule = module {
