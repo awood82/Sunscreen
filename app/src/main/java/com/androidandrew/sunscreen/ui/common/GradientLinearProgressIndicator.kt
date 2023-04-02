@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -23,13 +24,14 @@ fun GradientLinearProgressIndicator(
     val backgroundBrush = Brush.horizontalGradient(trackColors)
     Box(
         modifier = modifier
-            .background(backgroundBrush)
             .fillMaxWidth()
+            .background(foregroundBrush)
     ) {
         Box(
             modifier = modifier
-                .background(foregroundBrush)
-                .fillMaxWidth(progress)
+                .fillMaxWidth(1.0f - progress)
+                .align(Alignment.CenterEnd)
+                .background(backgroundBrush)
         )
     }
 }
@@ -55,7 +57,7 @@ fun GradientLinearProgressIndicatorPartialPreview() {
         GradientLinearProgressIndicator(
             progress = 0.6f,
             progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.DarkGray, Color.LightGray),
+            trackColors = listOf(Color.LightGray, Color.DarkGray),
             modifier = Modifier.height(32.dp)
         )
     }
@@ -68,7 +70,7 @@ fun GradientLinearProgressIndicatorFullPreview() {
         GradientLinearProgressIndicator(
             progress = 1.0f,
             progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.DarkGray, Color.LightGray),
+            trackColors = listOf(Color.LightGray, Color.DarkGray),
             modifier = Modifier.height(32.dp)
         )
     }
