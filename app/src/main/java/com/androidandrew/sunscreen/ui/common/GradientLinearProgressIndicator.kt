@@ -12,12 +12,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun GradientLinearProgressIndicator(
     progress: Float,
-    progressColors: List<Color>,
-    trackColors: List<Color>,
+    progressColors: ImmutableList<Color>,
+    trackColors: ImmutableList<Color>,
     modifier: Modifier = Modifier
 ) {
     val foregroundBrush = Brush.horizontalGradient(progressColors)
@@ -43,8 +45,8 @@ fun GradientLinearProgressIndicatorEmptyPreview() {
     MaterialTheme {
         GradientLinearProgressIndicator(
             progress = 0.0f,
-            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.LightGray, Color.DarkGray),
+            progressColors = persistentListOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = persistentListOf(Color.LightGray, Color.DarkGray),
             modifier = Modifier.height(32.dp)
         )
     }
@@ -56,8 +58,8 @@ fun GradientLinearProgressIndicatorPartialPreview() {
     MaterialTheme {
         GradientLinearProgressIndicator(
             progress = 0.6f,
-            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.LightGray, Color.DarkGray),
+            progressColors = persistentListOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = persistentListOf(Color.LightGray, Color.DarkGray),
             modifier = Modifier.height(32.dp)
         )
     }
@@ -69,8 +71,8 @@ fun GradientLinearProgressIndicatorFullPreview() {
     MaterialTheme {
         GradientLinearProgressIndicator(
             progress = 1.0f,
-            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.LightGray, Color.DarkGray),
+            progressColors = persistentListOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = persistentListOf(Color.LightGray, Color.DarkGray),
             modifier = Modifier.height(32.dp)
         )
     }

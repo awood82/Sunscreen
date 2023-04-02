@@ -13,13 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun LabeledProgressTracker(
     progress: Float,
     modifier: Modifier = Modifier,
-    progressColors: List<Color> = listOf(ProgressIndicatorDefaults.linearColor, ProgressIndicatorDefaults.linearColor),
-    trackColors: List<Color> = listOf(ProgressIndicatorDefaults.linearTrackColor, ProgressIndicatorDefaults.linearTrackColor),
+    progressColors: ImmutableList<Color> = persistentListOf(ProgressIndicatorDefaults.linearColor, ProgressIndicatorDefaults.linearColor),
+    trackColors: ImmutableList<Color> = persistentListOf(ProgressIndicatorDefaults.linearTrackColor, ProgressIndicatorDefaults.linearTrackColor),
     textColor: Color = MaterialTheme.colorScheme.onPrimary,
     label: String = "",
     progressText: String = ""
@@ -62,8 +64,8 @@ fun ProgressTrackerPreview() {
     MaterialTheme {
         LabeledProgressTracker(
             progress = 0.6f,
-            progressColors = listOf(Color.White, Color.Yellow, Color.Red),
-            trackColors = listOf(Color.LightGray, Color.DarkGray),
+            progressColors = persistentListOf(Color.White, Color.Yellow, Color.Red),
+            trackColors = persistentListOf(Color.LightGray, Color.DarkGray),
             textColor = Color.Black,
             label = "Sunburn",
             progressText = "60%"
