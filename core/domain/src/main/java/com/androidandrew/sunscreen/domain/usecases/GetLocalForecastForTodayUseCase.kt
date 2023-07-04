@@ -26,7 +26,7 @@ class GetLocalForecastForTodayUseCase(
     operator fun invoke(): Flow<DataResult<List<UvPredictionPoint>>> {
         return locationStream
             .map {
-                Timber.i("Use Case: Get local forecast for $it")
+                Timber.i("Use Case: Get local forecast for '$it'")
                 if (it.isEmpty()) {
                     DataResult.Success(emptyList()) // TODO: Use the NiA app's Result.Loading?
                 } else {

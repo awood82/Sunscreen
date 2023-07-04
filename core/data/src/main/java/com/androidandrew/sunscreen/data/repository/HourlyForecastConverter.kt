@@ -13,9 +13,12 @@ import java.time.format.DateTimeFormatter
 
 // Network to DB
 fun DailyUvIndexForecast.asEntity(): List<HourlyForecastEntity> {
-    return this.sortedBy { it.order }.map {
-        it.asEntity()
-    }
+    var firstDate = ""
+    return this
+        .sortedBy { it.order }
+        .map { it.asEntity() }
+        .also { firstDate = it.getOrNull(0)?.date ?: "" }
+        .filter { it.date == firstDate } // Remove the '12AM tomorrow' portion of the response
 }
 
 fun HourlyUvIndexForecast.asEntity(): HourlyForecastEntity {

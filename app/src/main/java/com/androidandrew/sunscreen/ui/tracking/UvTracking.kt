@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.ui.common.LabeledProgressTracker
 import com.androidandrew.sunscreen.ui.theme.*
+import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,12 +36,12 @@ fun UvTrackingWithState(
     ) {
         LabeledProgressTracker(
             progress = uiState.sunburnProgressPercent0to1,
-            progressColors = listOf(
+            progressColors = persistentListOf(
                 ProgressBurnStart,
                 ProgressBurnCenter,
                 ProgressBurnEnd
             ),
-            trackColors = listOf(
+            trackColors = persistentListOf(
                 ProgressBackgroundStart,
                 ProgressBackgroundEnd
             ),
@@ -51,11 +52,11 @@ fun UvTrackingWithState(
 
         LabeledProgressTracker(
             progress = uiState.vitaminDProgressPercent0to1,
-            progressColors = listOf(
+            progressColors = persistentListOf(
                 ProgressVitaminDStart,
                 ProgressVitaminDEnd
             ),
-            trackColors = listOf(
+            trackColors = persistentListOf(
                 ProgressBackgroundStart,
                 ProgressBackgroundEnd
             ),

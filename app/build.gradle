@@ -91,6 +91,8 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     // Compose Navigation
     implementation "androidx.navigation:navigation-compose"
+    // Stability
+    implementation "org.jetbrains.kotlinx:kotlinx-collections-immutable:$immutableVersion"
 
     // Splash screen
     implementation "androidx.core:core-splashscreen:$splashScreenVersion"

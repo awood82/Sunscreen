@@ -28,6 +28,7 @@ ext {
     coroutinesTestVersion = '1.6.4'
     coroutinesVersion = '1.5.2'
     firebaseVersion = '31.2.2'
+    immutableVersion = '0.3.5'
     junitVersion = '4.13.2'
     junitTestExtVersion = '1.1.4'
     koinVersion= '3.3.2'

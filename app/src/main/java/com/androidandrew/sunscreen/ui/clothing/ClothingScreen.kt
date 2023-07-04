@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.R
 import com.androidandrew.sunscreen.model.*
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -70,7 +71,7 @@ private fun ClothingScreen(
 
         ClothingRow(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            clothingItems = listOf(
+            clothingItems = persistentListOf(
                 ClothingItemData(
                     id = ClothingTop.NOTHING,
                     drawableId = R.drawable.top_little,
@@ -92,7 +93,7 @@ private fun ClothingScreen(
         )
         ClothingRow(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            clothingItems = listOf(
+            clothingItems = persistentListOf(
                 ClothingItemData(
                     id = ClothingBottom.NOTHING,
                     drawableId = R.drawable.bottom_little,

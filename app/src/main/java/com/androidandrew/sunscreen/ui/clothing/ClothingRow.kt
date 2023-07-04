@@ -28,6 +28,8 @@ import com.androidandrew.sunscreen.model.ClothingRegion
 import com.androidandrew.sunscreen.model.ClothingTop
 import com.androidandrew.sunscreen.ui.skintype.ColoredCircleShape
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 data class ClothingItemData(
     val id: ClothingRegion,
@@ -38,10 +40,10 @@ data class ClothingItemData(
 
 @Composable
 fun ClothingRowRememberSelection(
-    clothingItems: List<ClothingItemData>,
+    clothingItems: ImmutableList<ClothingItemData>,
     onClick: (region: ClothingRegion) -> Unit,
-    modifier: Modifier = Modifier,
-    initiallySelectedIndex: Int
+    initiallySelectedIndex: Int,
+    modifier: Modifier = Modifier
 ) {
     var selectedIndex by rememberSaveable { mutableStateOf(initiallySelectedIndex) }
 
@@ -60,13 +62,13 @@ fun ClothingRowRememberSelection(
 
 @Composable
 fun ClothingRow(
-    clothingItems: List<ClothingItemData>,
+    clothingItems: ImmutableList<ClothingItemData>,
     onClick: (region: ClothingRegion) -> Unit,
-    modifier: Modifier = Modifier,
-    selectedIndex: Int
+    selectedIndex: Int,
+    modifier: Modifier = Modifier
 ) {
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items(
@@ -120,7 +122,7 @@ fun ClothingItem(
 fun ClothingRowPreview() {
     SunscreenTheme {
         ClothingRow(
-            clothingItems = listOf(
+            clothingItems = persistentListOf(
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some, Color.Red),
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some),
                 ClothingItemData(ClothingTop.T_SHIRT, R.drawable.ic_launcher_foreground, R.string.clothing_top_some, Color.Cyan)
