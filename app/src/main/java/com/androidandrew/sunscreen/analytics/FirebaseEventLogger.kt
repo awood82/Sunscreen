@@ -69,14 +69,14 @@ class FirebaseEventLogger(
     }
 
     override fun searchSuccess(location: String) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event. VIEW_SEARCH_RESULTS, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_SEARCH_RESULTS, Bundle().apply {
             putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
         })
     }
 
     override fun searchError(location: String, error: String?) {
         // TODO: Add Crashlytics?
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event. VIEW_SEARCH_RESULTS, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_SEARCH_RESULTS, Bundle().apply {
             putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
             putString(Param.ERROR_LOCATION.name, location)
             putString(Param.ERROR.name, error)
