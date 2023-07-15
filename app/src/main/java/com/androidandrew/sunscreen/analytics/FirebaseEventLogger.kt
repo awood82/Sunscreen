@@ -51,6 +51,18 @@ class FirebaseEventLogger(
         })
     }
 
+    override fun selectSpf(spf: Int) {
+        firebaseAnalytics.logEvent("select_spf", Bundle().apply {
+            putInt("spf", spf)
+        })
+    }
+
+    override fun selectReflectiveSurface(isReflective: Boolean) {
+        firebaseAnalytics.logEvent("select_reflective_surface", Bundle().apply {
+            putBoolean("is_reflective", isReflective)
+        })
+    }
+
     override fun searchLocation(location: String) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, Bundle().apply {
             putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
@@ -65,18 +77,6 @@ class FirebaseEventLogger(
 
     override fun searchError(location: String, error: String?) {
         // TODO: Add Crashlytics?
-    }
-
-    override fun selectSpf(spf: Int) {
-        firebaseAnalytics.logEvent("select_spf", Bundle().apply {
-            putInt("spf", spf)
-        })
-    }
-
-    override fun selectReflectiveSurface(isReflective: Boolean) {
-        firebaseAnalytics.logEvent("select_reflective_surface", Bundle().apply {
-            putBoolean("is_reflective", isReflective)
-        })
     }
 
     override fun startTracking() {
