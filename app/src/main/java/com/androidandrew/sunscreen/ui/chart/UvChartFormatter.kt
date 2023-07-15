@@ -16,18 +16,18 @@ class UvChartFormatter(context: Context) {
         else -> plotLineColor
     }
     private val uvColors = listOf(
-        Color.parseColor("#FF004400"),
+        Color.parseColor("#FF004400"), // 0
         Color.parseColor("#FF00CC00"),
         Color.parseColor("#FF00CC00"),
+        Color.parseColor("#FFCCCC00"), // 3
         Color.parseColor("#FFCCCC00"),
         Color.parseColor("#FFCCCC00"),
-        Color.parseColor("#FFCCCC00"),
+        Color.parseColor("#FFFF8800"), // 6
         Color.parseColor("#FFFF8800"),
-        Color.parseColor("#FFFF8800"),
+        Color.parseColor("#FFFF0000"), // 8
         Color.parseColor("#FFFF0000"),
         Color.parseColor("#FFFF0000"),
-        Color.parseColor("#FFFF0000"),
-        Color.parseColor("#FFCC00FF"),
+        Color.parseColor("#FFCC00FF"), // 11
         Color.parseColor("#FFCC00FF"),
         Color.parseColor("#FFCC00FF"),
         Color.parseColor("#FFCC00FF")

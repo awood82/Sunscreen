@@ -65,7 +65,7 @@ class MainViewModel(
     private var lastLocationSearched = ""
 
     // User Tracking
-    private val _isCurrentlyTracking = MutableStateFlow(false)
+    private val _isCurrentlyTracking = MutableStateFlow(sunTrackerServiceController.isRunning())
 
     // Time Tracking
     private val _lastDateUsed = MutableStateFlow(getDateToday())

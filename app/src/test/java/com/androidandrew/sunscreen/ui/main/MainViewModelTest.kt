@@ -77,6 +77,7 @@ class MainViewModelTest {
         userTrackingRepo = UserTrackingRepositoryImpl(fakeDatabaseHolder.userTrackingDao)
         userSettingsRepo = UserSettingsRepositoryImpl(fakeDatabaseHolder.userSettingsDao)
         hourlyForecastRepo = HourlyForecastRepositoryImpl(fakeDatabaseHolder.hourlyForecastDao, fakeUvService)
+        every { serviceController.isRunning() } returns false
     }
 
     @After
@@ -170,6 +171,21 @@ class MainViewModelTest {
         searchZip(FakeData.zip)
 
         assertTrue(vm.uvTrackingState.first().isTrackingPossible)
+    }
+
+    @Test
+    fun trackingButton_byDefault_isNotTracking() = runTest {
+        createViewModel()
+
+        assertFalse(vm.uvTrackingState.first().isTracking)
+    }
+
+    @Test
+    fun trackingButton_whenServiceIsRunning_andAppWasKilled_isTracking() = runTest {
+        every { serviceController.isRunning() } returns true
+        createViewModel()
+
+        assertTrue(vm.uvTrackingState.first().isTracking)
     }
 
     @Test

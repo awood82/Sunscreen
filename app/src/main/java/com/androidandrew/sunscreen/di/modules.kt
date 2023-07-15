@@ -43,9 +43,9 @@ val serviceModule = module {
         PendingIntent.getActivity(androidApplication(), 0, resumeAppWhenClicked, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
     factory<INotificationHandler> { (channelId: String) -> DefaultNotificationHandler(channelId, get(), get(), get()) }
-    factory { Intent(androidApplication(), SunTrackerService::class.java) }
-    factory { SunTrackerServiceController(androidApplication(), get()) }
-    factory { SunTracker(get(), get(), get(), get()) }
+    single { Intent(androidApplication(), SunTrackerService::class.java) }
+    single { SunTrackerServiceController(androidApplication(), get()) }
+    single { SunTracker(get(), get(), get(), get()) }
 }
 
 val analyticsModule = module {
