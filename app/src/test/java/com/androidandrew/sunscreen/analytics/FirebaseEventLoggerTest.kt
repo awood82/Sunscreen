@@ -42,13 +42,15 @@ class FirebaseEventLoggerTest {
 
         val bundle = slot<Bundle>()
         verify { analytics.logEvent(Event.TRACKING_FINISH.name, capture(bundle)) }
-        assertEquals(5, bundle.captured.getLong(Param.MINUTES.name))
-        assertEquals(20, bundle.captured.getInt(Param.SUNBURN.name))
-        assertEquals(20, bundle.captured.getInt(Param.VITAMIN_D.name))
+        assertEquals(5, bundle.captured.getLong(Param.ELAPSED_MINUTES.name))
+        assertEquals(20, bundle.captured.getInt(Param.ELAPSED_SUNBURN.name))
+        assertEquals(20, bundle.captured.getInt(Param.ELAPSED_VITAMIN_D.name))
+        assertEquals(30, bundle.captured.getInt(Param.TOTAL_SUNBURN.name))
+        assertEquals(30, bundle.captured.getInt(Param.TOTAL_VITAMIN_D.name))
     }
 
     @Test
-    fun finishTracking_ifStartValuesAreUnknown_logsNegativeOne() {
+    fun finishTracking_ifStartValuesAreUnknown_logsNegativeOneForElapsed() {
         val elapsedTimeInMillis = TimeUnit.MINUTES.toMillis(5)
         val elapsedPercent = 0.2f
         logger.startTracking(
@@ -67,8 +69,10 @@ class FirebaseEventLoggerTest {
 
         val bundle = slot<Bundle>()
         verify { analytics.logEvent(Event.TRACKING_FINISH.name, capture(bundle)) }
-        assertEquals(-1, bundle.captured.getLong(Param.MINUTES.name))
-        assertEquals(-1, bundle.captured.getInt(Param.SUNBURN.name))
-        assertEquals(-1, bundle.captured.getInt(Param.VITAMIN_D.name))
+        assertEquals(-1, bundle.captured.getLong(Param.ELAPSED_MINUTES.name))
+        assertEquals(-1, bundle.captured.getInt(Param.ELAPSED_SUNBURN.name))
+        assertEquals(-1, bundle.captured.getInt(Param.ELAPSED_VITAMIN_D.name))
+        assertEquals(30, bundle.captured.getInt(Param.TOTAL_SUNBURN.name))
+        assertEquals(30, bundle.captured.getInt(Param.TOTAL_VITAMIN_D.name))
     }
 }

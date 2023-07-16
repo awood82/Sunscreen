@@ -112,9 +112,11 @@ class FirebaseEventLogger(
             (currentVitaminDPercent0to1 - it).percentToInt()
         } ?: -1
         firebaseAnalytics.logEvent(Event.TRACKING_FINISH.name, Bundle().apply {
-            putLong(Param.MINUTES.name, elapsedTimeInMinutes)
-            putInt(Param.SUNBURN.name, elapsedSunburn)
-            putInt(Param.VITAMIN_D.name, elapsedVitaminD)
+            putLong(Param.ELAPSED_MINUTES.name, elapsedTimeInMinutes)
+            putInt(Param.ELAPSED_SUNBURN.name, elapsedSunburn)
+            putInt(Param.ELAPSED_VITAMIN_D.name, elapsedVitaminD)
+            putInt(Param.TOTAL_SUNBURN.name, currentSunburnPercent0to1.percentToInt())
+            putInt(Param.TOTAL_VITAMIN_D.name, currentVitaminDPercent0to1.percentToInt())
         })
     }
 
@@ -138,9 +140,11 @@ internal enum class Param(name: String) {
     ERROR_LOCATION("error_location"),
     IS_REFLECTIVE("is_reflective"),
     SPF("spf"),
-    MINUTES("minutes"),
-    SUNBURN("sunburn"),
-    VITAMIN_D("vitamin_d")
+    ELAPSED_MINUTES("elapsed_minutes"),
+    ELAPSED_SUNBURN("elapsed_sunburn"),
+    TOTAL_SUNBURN("total_sunburn"),
+    ELAPSED_VITAMIN_D("elapsed_vitamin_d"),
+    TOTAL_VITAMIN_D("total_vitamin_d")
 }
 
 internal enum class ContentType(name: String) {
