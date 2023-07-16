@@ -65,6 +65,13 @@ class FirebaseEventLogger(
         })
     }
 
+    override fun selectChartHighlight(hour: Int, uv: Int) {
+        firebaseAnalytics.logEvent(Event.CHART_TOUCH.name, Bundle().apply {
+            putInt(Param.X.name, hour)
+            putInt(Param.Y.name, uv)
+        })
+    }
+
     override fun searchLocation(location: String) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, Bundle().apply {
             putString(FirebaseAnalytics.Param.SEARCH_TERM, location)
@@ -129,6 +136,7 @@ class FirebaseEventLogger(
 }
 
 internal enum class Event(name: String) {
+    CHART_TOUCH("chart_touch"),
     SELECT_REFLECTIVE_SURFACE("select_reflective_surface"),
     SELECT_SPF("select_spf"),
     TRACKING_START("tracking_start"),
@@ -144,7 +152,9 @@ internal enum class Param(name: String) {
     ELAPSED_SUNBURN("elapsed_sunburn"),
     TOTAL_SUNBURN("total_sunburn"),
     ELAPSED_VITAMIN_D("elapsed_vitamin_d"),
-    TOTAL_VITAMIN_D("total_vitamin_d")
+    TOTAL_VITAMIN_D("total_vitamin_d"),
+    X("x"),
+    Y("y")
 }
 
 internal enum class ContentType(name: String) {

@@ -12,7 +12,7 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.location.LocationBarState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
@@ -20,6 +20,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
+import com.androidandrew.sunscreen.ui.chart.UvChartEvent
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -161,19 +162,19 @@ class MainViewModel(
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
-    val uvChartUiState: StateFlow<UvChartUiState> = combine(
+    val uvChartUiState: StateFlow<UvChartState> = combine(
         _uvPrediction, _lastLocalTimeUsed
     ) { prediction, time ->
         when (prediction.isEmpty()) {
-            true -> UvChartUiState.NoData
+            true -> UvChartState.NoData
             false -> {
                 val xHighlight = with (time) {
                     (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
                 }
-                UvChartUiState.HasData(prediction.toChartData(), xHighlight)
+                UvChartState.HasData(prediction.toChartData(), xHighlight)
             }
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartState.NoData)
 
     private val _minutesToBurn = combine(
         _userTrackingInfo, _userSettings, _lastLocalTimeUsed, _uvPrediction, _spfToDisplay
@@ -293,6 +294,15 @@ class MainViewModel(
                     force = location == lastLocationSearched
                 )
                 lastLocationSearched = location
+            }
+        }
+    }
+
+    fun onChartEvent(event: UvChartEvent) {
+        Timber.d("onChartEvent: $event")
+        when (event) {
+            is UvChartEvent.Touch -> {
+                analytics.selectChartHighlight(event.xPos, event.yPos)
             }
         }
     }

@@ -10,18 +10,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import timber.log.Timber
+
+private const val UNKNOWN = -1.0f
 
 @Composable
 fun UvChartWithState(
-    uiState: UvChartUiState,
+    uiState: UvChartState,
+    onEvent: (UvChartEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (uiState) {
-        is UvChartUiState.NoData -> UvChart(modifier)
-        is UvChartUiState.HasData -> UvChart(modifier, uiState.data, uiState.xHighlight)
+        is UvChartState.NoData -> {
+            UvChart(
+                modifier = modifier,
+                onValueSelected = { onEvent(UvChartEvent.Touch(it.first.toInt(), it.second.toInt())) }
+            )
+        }
+        is UvChartState.HasData -> {
+            UvChart(
+                modifier = modifier,
+                dataSet = uiState.data,
+                xHighlight = uiState.xHighlight,
+                onValueSelected = { onEvent(UvChartEvent.Touch(it.first.toInt(), it.second.toInt())) }
+            )
+        }
     }
 }
 
@@ -31,7 +49,8 @@ fun UvChart(
     dataSet: LineDataSet? = null,
     xHighlight: Float? = null,
     chartFormatter: UvChartFormatter = UvChartFormatter(LocalContext.current),
-    use24HourTime: Boolean = DateFormat.is24HourFormat(LocalContext.current)
+    use24HourTime: Boolean = DateFormat.is24HourFormat(LocalContext.current),
+    onValueSelected: (Pair<Float, Float>) -> Unit
 ) {
     Timber.e("lineDataSet null? ${dataSet == null}")
     AndroidView(
@@ -41,6 +60,15 @@ fun UvChart(
                     lineChart = this,
                     use24HourTime = use24HourTime
                 )
+                setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                    override fun onValueSelected(e: Entry?, h: Highlight?) {
+                        e?.let {
+                            onValueSelected(Pair(it.x, it.y))
+                        } ?: onValueSelected(Pair(UNKNOWN, UNKNOWN))
+                    }
+
+                    override fun onNothingSelected() {}
+                })
             }
         },
         update = {
@@ -64,6 +92,6 @@ fun UvChart(
 @Composable
 fun UvChartNoDataPreview() {
     MaterialTheme {
-        UvChartWithState(UvChartUiState.NoData)
+        UvChartWithState(UvChartState.NoData, {})
     }
 }

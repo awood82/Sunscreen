@@ -20,6 +20,8 @@ interface EventLogger {
     fun selectSpf(spf: Int)
     fun selectReflectiveSurface(isReflective: Boolean)
 
+    fun selectChartHighlight(hour: Int, uv: Int)
+
     /**
      * Log the current time, sunburn, and vitamin D
      * @param currentTimeInMillis System time in milliseconds

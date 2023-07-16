@@ -6,7 +6,6 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.analytics.EventLogger
-import com.androidandrew.sunscreen.analytics.FirebaseEventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
@@ -17,7 +16,8 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartEvent
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
@@ -67,7 +67,7 @@ class MainViewModelTest {
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
     private val mockAnalytics: EventLogger = mockk(relaxed = true)
     private val delta = 0.1
-    private lateinit var chartState: UvChartUiState
+    private lateinit var chartState: UvChartState
     private lateinit var collectJob: Job
 
     @Before
@@ -258,7 +258,7 @@ class MainViewModelTest {
 
         searchZip(tooShortZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -268,7 +268,7 @@ class MainViewModelTest {
 
         searchZip(tooLongZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -278,7 +278,7 @@ class MainViewModelTest {
 
         searchZip(justRightZip)
 
-        assertTrue(chartState is UvChartUiState.HasData)
+        assertTrue(chartState is UvChartState.HasData)
     }
 
     @Test
@@ -288,7 +288,7 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -298,7 +298,7 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -308,7 +308,7 @@ class MainViewModelTest {
 
         searchZip(longAlphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -495,7 +495,7 @@ class MainViewModelTest {
 
         triggerLocationUpdate()
 
-        assertTrue(chartState is UvChartUiState.HasData)
+        assertTrue(chartState is UvChartState.HasData)
         assertEquals(1, fakeUvService.networkRequestCount)
     }
 
@@ -639,6 +639,15 @@ class MainViewModelTest {
 
         verify { mockAnalytics.startTracking(any(), any(), any()) }
         verify { mockAnalytics.finishTracking(any(), any(), any()) }
+    }
+
+    @Test
+    fun uvChart_touchEvent_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onChartEvent(UvChartEvent.Touch(12, 10))
+
+        verify { mockAnalytics.selectChartHighlight(12, 10) }
     }
 
 
