@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
@@ -15,7 +16,8 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.testing.MainDispatcherRule
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartEvent
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
@@ -63,8 +65,9 @@ class MainViewModelTest {
     private lateinit var userTrackingRepo: UserTrackingRepository
     private val locationUtil = LocationUtil()
     private val serviceController = mockk<SunTrackerServiceController>(relaxed = true)
+    private val mockAnalytics: EventLogger = mockk(relaxed = true)
     private val delta = 0.1
-    private lateinit var chartState: UvChartUiState
+    private lateinit var chartState: UvChartState
     private lateinit var collectJob: Job
 
     @Before
@@ -107,7 +110,8 @@ class MainViewModelTest {
             sunburnCalculator = sunburnCalculator,
             locationUtil = locationUtil,
             clock = clock,
-            sunTrackerServiceController = serviceController
+            sunTrackerServiceController = serviceController,
+            analytics = mockAnalytics
         )
     }
 
@@ -254,7 +258,7 @@ class MainViewModelTest {
 
         searchZip(tooShortZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -264,7 +268,7 @@ class MainViewModelTest {
 
         searchZip(tooLongZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -274,7 +278,7 @@ class MainViewModelTest {
 
         searchZip(justRightZip)
 
-        assertTrue(chartState is UvChartUiState.HasData)
+        assertTrue(chartState is UvChartState.HasData)
     }
 
     @Test
@@ -284,7 +288,7 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -294,7 +298,7 @@ class MainViewModelTest {
 
         searchZip(alphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -304,7 +308,7 @@ class MainViewModelTest {
 
         searchZip(longAlphaZip)
 
-        assertTrue(chartState is UvChartUiState.NoData)
+        assertTrue(chartState is UvChartState.NoData)
     }
 
     @Test
@@ -491,7 +495,7 @@ class MainViewModelTest {
 
         triggerLocationUpdate()
 
-        assertTrue(chartState is UvChartUiState.HasData)
+        assertTrue(chartState is UvChartState.HasData)
         assertEquals(1, fakeUvService.networkRequestCount)
     }
 
@@ -503,8 +507,8 @@ class MainViewModelTest {
         assertEquals(AppState.Onboarded, vm.appState.first())
     }
 
-    @IsNotOnboarded
     @Test
+    @IsNotOnboarded
     fun init_ifRepoReportsNotOnboarded_isNotOnboarded() = runTest {
 
         createViewModel()
@@ -512,8 +516,8 @@ class MainViewModelTest {
         assertEquals(AppState.NotOnboarded, vm.appState.first())
     }
 
-    @IsNotOnboarded
     @Test
+    @IsNotOnboarded
     fun init_ifRepoReportsLocationButNotOnboarded_isNotOnboarded() = runTest {
         setLocation(FakeData.zip)
 
@@ -559,6 +563,94 @@ class MainViewModelTest {
         assertNotEquals("10001", userSettingsRepo.getLocation())
     }
 
+    @Test
+    @IsNotOnboarded
+    fun init_whenNotOnboarded_doesNotLogAnalyticsEvent_forMainScreen() = runTest {
+        createViewModel()
+
+        triggerOnboardingUpdate()
+
+        verify(exactly = 0) { mockAnalytics.viewScreen(AppDestination.Main.name) }
+    }
+
+    @Test
+    fun init_whenOnboarded_logsAnalyticsEvent_forMainScreen() = runTest {
+        createViewModel()
+
+        triggerOnboardingUpdate()
+
+        verify { mockAnalytics.viewScreen(AppDestination.Main.name) }
+    }
+
+    @Test
+    fun onSearchLocation_ifInvalid_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        searchZip("INVALID_ZIP_CODE")
+
+        verify { mockAnalytics.searchLocation("INVALID_ZIP_CODE") }
+    }
+
+    @Test
+    fun onSearchLocation_ifSuccessful_logsAnalyticsEvents() = runTest {
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        verify { mockAnalytics.searchLocation(FakeData.zip) }
+        verify { mockAnalytics.searchSuccess(FakeData.zip) }
+    }
+
+    @Test
+    fun onSearchLocation_ifError_logsAnalyticsEvent() = runTest {
+        fakeUvService.exception = IOException("Network error")
+        createViewModel()
+
+        searchZip(FakeData.zip)
+
+        verify { mockAnalytics.searchLocation(FakeData.zip) }
+        verify { mockAnalytics.searchError(FakeData.zip, "Network error") }
+    }
+
+    @Test
+    fun spf_whenChanged_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.SpfChanged("30"))
+
+        verify { mockAnalytics.selectSpf(30) }
+    }
+
+    @Test
+    fun spf_whenOnSnowOrWaterChanged_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.IsOnSnowOrWaterChanged(true))
+
+        verify { mockAnalytics.selectReflectiveSurface(true) }
+    }
+
+    @Test
+    fun tracking_logsAnalyticsEvents() = runTest {
+        createViewModel()
+
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+        vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
+
+        verify { mockAnalytics.startTracking(any(), any(), any()) }
+        verify { mockAnalytics.finishTracking(any(), any(), any()) }
+    }
+
+    @Test
+    fun uvChart_touchEvent_logsAnalyticsEvent() = runTest {
+        createViewModel()
+
+        vm.onChartEvent(UvChartEvent.Touch(12, 10))
+
+        verify { mockAnalytics.selectChartHighlight(12, 10) }
+    }
+
+
 
     private suspend fun updateTracking(burnProgress: Double, vitaminDProgress: Double) {
         val date = getDate().toString()
@@ -577,15 +669,17 @@ class MainViewModelTest {
         userSettingsRepo.setLocation(location)
     }
 
-    private fun searchZip(zip: String) {
+    private suspend fun searchZip(zip: String) {
         vm.onLocationBarEvent(LocationBarEvent.TextChanged(zip))
         vm.onLocationBarEvent(LocationBarEvent.LocationSearched(zip))
         triggerLocationUpdate()
     }
 
-    private fun triggerLocationUpdate() {
-        runBlocking {
-            chartState = vm.uvChartUiState.first()
-        }
+    private suspend fun triggerLocationUpdate() {
+        chartState = vm.uvChartUiState.first()
+    }
+
+    private suspend fun triggerOnboardingUpdate() {
+        vm.appState.first()
     }
 }

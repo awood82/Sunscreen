@@ -34,7 +34,8 @@ class UvChartTest {
         composeTestRule.setContent {
             SunscreenTheme {
                 UvChartWithState(
-                    uiState = UvChartUiState.NoData
+                    uiState = UvChartState.NoData,
+                    onEvent = {}
                 )
             }
         }
@@ -47,10 +48,11 @@ class UvChartTest {
         composeTestRule.setContent {
             SunscreenTheme {
                 UvChartWithState(
-                    UvChartUiState.HasData(
+                    uiState = UvChartState.HasData(
                         data = fakeData,
                         xHighlight = 10.0f
-                    )
+                    ),
+                    onEvent = {}
                 )
             }
         }

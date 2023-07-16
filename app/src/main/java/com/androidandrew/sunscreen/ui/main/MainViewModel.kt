@@ -1,6 +1,7 @@
 package com.androidandrew.sunscreen.ui.main
 
 import androidx.lifecycle.*
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.common.RepeatingTimer
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
@@ -11,7 +12,7 @@ import com.androidandrew.sunscreen.service.SunTrackerServiceController
 import com.androidandrew.sunscreen.domain.uvcalculators.sunburn.SunburnCalculator
 import com.androidandrew.sunscreen.model.uv.toChartData
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
-import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.location.LocationBarState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
@@ -19,6 +20,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.util.LocationUtil
 import com.androidandrew.sunscreen.domain.uvcalculators.vitamind.VitaminDCalculator
 import com.androidandrew.sunscreen.model.UserSettings
+import com.androidandrew.sunscreen.ui.chart.UvChartEvent
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -37,7 +39,8 @@ class MainViewModel(
     private val sunburnCalculator: SunburnCalculator,
     private val locationUtil: LocationUtil,
     private val clock: Clock,
-    private val sunTrackerServiceController: SunTrackerServiceController
+    private val sunTrackerServiceController: SunTrackerServiceController,
+    private val analytics: EventLogger
 ) : ViewModel(), DefaultLifecycleObserver {
 
     companion object {
@@ -77,6 +80,7 @@ class MainViewModel(
     private val _uvPrediction = getLocalForecastForToday().map {
         when (it) {
             is DataResult.Success -> {
+                analytics.searchSuccess(lastLocationSearched)
                 _forecastState.update { ForecastState.Done }
                 it.data
             }
@@ -86,6 +90,7 @@ class MainViewModel(
             }
             is DataResult.Error -> {
                 val error = it.exception
+                analytics.searchError(lastLocationSearched, error?.localizedMessage)
                 Timber.e("ViewModel got the error: $error")
                 displayError(error!!)
                 emptyList()
@@ -113,6 +118,7 @@ class MainViewModel(
             when (isOnboarded) {
                 true -> {
                     Timber.d("Setup completed")
+                    analytics.viewScreen(AppDestination.Main.name)
                     startTimers()
                     val startingLocation = _location.firstOrNull() ?: ""
                     _locationBarState.update { it.copy(typedSoFar = startingLocation) }
@@ -156,19 +162,19 @@ class MainViewModel(
         )
     }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvTrackingState.initialState)
 
-    val uvChartUiState: StateFlow<UvChartUiState> = combine(
+    val uvChartUiState: StateFlow<UvChartState> = combine(
         _uvPrediction, _lastLocalTimeUsed
     ) { prediction, time ->
         when (prediction.isEmpty()) {
-            true -> UvChartUiState.NoData
+            true -> UvChartState.NoData
             false -> {
                 val xHighlight = with (time) {
                     (hour + minute / TimeUnit.HOURS.toMinutes(1).toDouble()).toFloat()
                 }
-                UvChartUiState.HasData(prediction.toChartData(), xHighlight)
+                UvChartState.HasData(prediction.toChartData(), xHighlight)
             }
         }
-    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartUiState.NoData)
+    }.stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = UvChartState.NoData)
 
     private val _minutesToBurn = combine(
         _userTrackingInfo, _userSettings, _lastLocalTimeUsed, _uvPrediction, _spfToDisplay
@@ -276,6 +282,7 @@ class MainViewModel(
     }
 
     private fun onSearchLocation(location: String) {
+        analytics.searchLocation(location)
         if (locationUtil.isValidZipCode(location)) {
             viewModelScope.launch {
                 displayLoading()
@@ -291,11 +298,21 @@ class MainViewModel(
         }
     }
 
+    fun onChartEvent(event: UvChartEvent) {
+        Timber.d("onChartEvent: $event")
+        when (event) {
+            is UvChartEvent.Touch -> {
+                analytics.selectChartHighlight(event.xPos, event.yPos)
+            }
+        }
+    }
+
     fun onUvTrackingEvent(event: UvTrackingEvent) {
         Timber.d("onUvTrackingEvent: $event")
         when (event) {
             is UvTrackingEvent.TrackingButtonClicked -> onTrackingClicked()
             is UvTrackingEvent.SpfChanged -> {
+                analytics.selectSpf(event.spf.toIntOrNull() ?: 0)
                 _spfToDisplay.update { event.spf }
                 event.spf.toIntOrNull()?.let {
                     viewModelScope.launch {
@@ -304,6 +321,7 @@ class MainViewModel(
                 }
             }
             is UvTrackingEvent.IsOnSnowOrWaterChanged -> {
+                analytics.selectReflectiveSurface(event.isOnSnowOrWater)
                 viewModelScope.launch {
                     userSettingsRepo.setIsOnSnowOrWater(event.isOnSnowOrWater)
                 }
@@ -327,15 +345,23 @@ class MainViewModel(
 
     private fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
+            false -> {
+                analytics.startTracking(
+                    currentTimeInMillis = System.currentTimeMillis(),
+                    currentSunburnPercent0to1 = uvTrackingState.value.sunburnProgressPercent0to1,
+                    currentVitaminDPercent0to1 = uvTrackingState.value.vitaminDProgressPercent0to1
+                )
+                sunTrackerServiceController.start()
+                _isCurrentlyTracking.update { true }
+            }
             true -> {
+                analytics.finishTracking(
+                    currentTimeInMillis = System.currentTimeMillis(),
+                    currentSunburnPercent0to1 = uvTrackingState.value.sunburnProgressPercent0to1,
+                    currentVitaminDPercent0to1 = uvTrackingState.value.vitaminDProgressPercent0to1
+                )
                 sunTrackerServiceController.stop()
                 _isCurrentlyTracking.update { false }
-            }
-            else -> {
-                viewModelScope.launch {
-                    sunTrackerServiceController.start()
-                    _isCurrentlyTracking.update { true }
-                }
             }
         }
     }

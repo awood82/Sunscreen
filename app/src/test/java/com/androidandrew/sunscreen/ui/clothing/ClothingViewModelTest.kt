@@ -3,9 +3,13 @@ package com.androidandrew.sunscreen.ui.clothing
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
+import com.androidandrew.sunscreen.analytics.EventLogger
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepository
 import com.androidandrew.sunscreen.data.repository.UserSettingsRepositoryImpl
 import com.androidandrew.sunscreen.model.*
+import com.androidandrew.sunscreen.ui.navigation.AppDestination
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -26,6 +30,7 @@ class ClothingViewModelTest {
     private lateinit var vm: ClothingViewModel
     private lateinit var fakeDatabaseHolder: FakeDatabaseWrapper
     private lateinit var userSettingsRepo: UserSettingsRepository
+    private val mockAnalytics: EventLogger = mockk(relaxed = true)
 
     @Before
     fun setup() {
@@ -44,7 +49,7 @@ class ClothingViewModelTest {
     }
 
     private fun createViewModel() {
-        vm = ClothingViewModel(userSettingsRepo)
+        vm = ClothingViewModel(userSettingsRepo, mockAnalytics)
     }
 
     @Test
@@ -116,5 +121,48 @@ class ClothingViewModelTest {
         val clothingState = vm.clothingState.first()
         assertEquals(ClothingTop.LONG_SLEEVE_SHIRT, clothingState.selectedTop)
         assertEquals(ClothingBottom.PANTS, clothingState.selectedBottom)
+    }
+
+    @Test
+    fun init_logsAnalyticsEvents() = runTest {
+        createViewModel()
+
+        verify { mockAnalytics.viewScreen(AppDestination.Clothing.name) }
+    }
+
+    @Test
+    fun whenClothing_isSelected_logsAnalyticsEvent() = runTest {
+        val expectedClothing = UserClothing(
+            top = ClothingTop.LONG_SLEEVE_SHIRT,
+            bottom = ClothingBottom.PANTS
+        )
+        createViewModel()
+
+        vm.onEvent(ClothingEvent.TopSelected(expectedClothing.top))
+        vm.onEvent(ClothingEvent.BottomSelected(expectedClothing.bottom))
+        vm.onEvent(ClothingEvent.ContinuePressed)
+
+        verify { mockAnalytics.selectClothing(expectedClothing) }
+    }
+
+    @Test
+    fun whenContinuePressed_ifOnboardingWasNotCompletedBefore_logsAnalyticsEvent() = runTest {
+        userSettingsRepo.setIsOnboarded(false)
+        createViewModel()
+
+        vm.onEvent(ClothingEvent.ContinuePressed)
+
+        verify { mockAnalytics.finishTutorial() }
+    }
+
+    // This would happen if the user selects the clothing button from the main screen after onboarding was complete
+    @Test
+    fun whenContinuePressed_ifOnboardingWasCompletedBefore_doesNotLogAnalyticsEvent() = runTest {
+        userSettingsRepo.setIsOnboarded(true)
+        createViewModel()
+
+        vm.onEvent(ClothingEvent.ContinuePressed)
+
+        verify(exactly = 0) { mockAnalytics.finishTutorial() }
     }
 }

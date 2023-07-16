@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-
 package com.androidandrew.sunscreen.di
 
 import android.app.NotificationManager
@@ -9,6 +7,8 @@ import android.content.Intent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.core.app.NotificationCompat
 import com.androidandrew.sunscreen.MainActivity
+import com.androidandrew.sunscreen.analytics.EventLogger
+import com.androidandrew.sunscreen.analytics.FirebaseEventLogger
 import com.androidandrew.sunscreen.data.di.repositoryModule
 import com.androidandrew.sunscreen.database.di.databaseModule
 import com.androidandrew.sunscreen.domain.di.domainModule
@@ -24,12 +24,15 @@ import com.androidandrew.sunscreen.ui.clothing.ClothingViewModel
 import com.androidandrew.sunscreen.ui.location.LocationViewModel
 import com.androidandrew.sunscreen.ui.skintype.SkinTypeViewModel
 import com.androidandrew.sunscreen.util.LocationUtil
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.Clock
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 val serviceModule = module {
     single { androidApplication().getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager }
     factory { NotificationCompat.Builder(androidApplication()) }
@@ -45,11 +48,16 @@ val serviceModule = module {
     single { SunTracker(get(), get(), get(), get()) }
 }
 
+val analyticsModule = module {
+    single { Firebase.analytics }
+    single<EventLogger> { FirebaseEventLogger(get()) }
+}
+
 val viewModelModule = module {
-    viewModel { LocationViewModel(get(), get()) }
-    viewModel { SkinTypeViewModel(get()) }
-    viewModel { ClothingViewModel(get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { LocationViewModel(get(), get(), get()) }
+    viewModel { SkinTypeViewModel(get(), get()) }
+    viewModel { ClothingViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val appModule = module {
@@ -59,4 +67,4 @@ val appModule = module {
     factory { UvChartFormatter(androidContext()) }
 }
 
-val allModules = listOf(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, viewModelModule, appModule)
+val allModules = listOf(domainModule, databaseModule, networkModule, repositoryModule, serviceModule, analyticsModule, viewModelModule, appModule)

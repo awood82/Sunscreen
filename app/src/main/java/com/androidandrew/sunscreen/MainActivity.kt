@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.androidandrew.sunscreen.ui.SunscreenApp
 import com.androidandrew.sunscreen.ui.theme.SunscreenTheme
-import timber.log.Timber
 
 @ExperimentalMaterial3WindowSizeClassApi
 class MainActivity : ComponentActivity() {
@@ -21,7 +20,6 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        Timber.d("Loading SunscreenApp")
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
 

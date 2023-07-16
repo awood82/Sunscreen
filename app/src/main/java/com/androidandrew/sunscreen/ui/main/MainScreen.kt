@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeUiState
 import com.androidandrew.sunscreen.ui.burntime.BurnTimeWithState
-import com.androidandrew.sunscreen.ui.chart.UvChartUiState
+import com.androidandrew.sunscreen.ui.chart.UvChartState
 import com.androidandrew.sunscreen.ui.chart.UvChartWithState
 import com.androidandrew.sunscreen.ui.location.LocationBarEvent
 import com.androidandrew.sunscreen.ui.location.LocationBarState
@@ -25,6 +25,7 @@ import com.androidandrew.sunscreen.ui.tracking.UvTrackingEvent
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingState
 import com.androidandrew.sunscreen.ui.tracking.UvTrackingWithState
 import com.androidandrew.sunscreen.R
+import com.androidandrew.sunscreen.ui.chart.UvChartEvent
 import com.androidandrew.sunscreen.ui.common.OnePaneLayout
 import com.androidandrew.sunscreen.ui.common.TwoPaneLayout
 import com.androidandrew.sunscreen.ui.navigation.AppDestination
@@ -46,7 +47,7 @@ fun MainScreen(
     val appState: AppState by viewModel.appState.collectAsStateWithLifecycle()
     val settingsState: AppDestination by viewModel.settingsState.collectAsStateWithLifecycle()
     val burnTimeUiState: BurnTimeUiState by viewModel.burnTimeUiState.collectAsStateWithLifecycle()
-    val uvChartUiState: UvChartUiState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
+    val uvChartUiState: UvChartState by viewModel.uvChartUiState.collectAsStateWithLifecycle()
     val uvTrackingState: UvTrackingState by viewModel.uvTrackingState.collectAsStateWithLifecycle()
     val locationBarState: LocationBarState by viewModel.locationBarState.collectAsStateWithLifecycle()
     val forecastState: ForecastState by viewModel.forecastState.collectAsStateWithLifecycle()
@@ -76,6 +77,7 @@ fun MainScreen(
                 onLocationBarEvent = { viewModel.onLocationBarEvent(it) },
                 burnTimeUiState = burnTimeUiState,
                 uvChartUiState = uvChartUiState,
+                onUvChartEvent = { viewModel.onChartEvent(it) },
                 uvTrackingState = uvTrackingState,
                 onUvTrackingEvent = { viewModel.onUvTrackingEvent(it) },
                 modifier = modifier
@@ -105,7 +107,8 @@ private fun MainScreenWithState(
     locationBarState: LocationBarState,
     onLocationBarEvent: (LocationBarEvent) -> Unit,
     burnTimeUiState: BurnTimeUiState,
-    uvChartUiState: UvChartUiState,
+    uvChartUiState: UvChartState,
+    onUvChartEvent: (UvChartEvent) -> Unit,
     uvTrackingState: UvTrackingState,
     onUvTrackingEvent: (UvTrackingEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -115,7 +118,7 @@ private fun MainScreenWithState(
             modifier = modifier,
             contentAtStart = {
                 LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
-                UvChartWithState(uvChartUiState)
+                UvChartWithState(uvChartUiState, onUvChartEvent)
             },
             contentAtEnd = {
                 BurnTimeWithState(uiState = burnTimeUiState)
@@ -128,7 +131,7 @@ private fun MainScreenWithState(
             content = {
                 LocationBarWithState(uiState = locationBarState, onEvent = onLocationBarEvent)
                 BurnTimeWithState(uiState = burnTimeUiState)
-                UvChartWithState(uvChartUiState)
+                UvChartWithState(uvChartUiState, onUvChartEvent)
                 UvTrackingWithState(uiState = uvTrackingState, onEvent = onUvTrackingEvent)
             }
         )
@@ -146,6 +149,7 @@ fun MainScreenVerticalNightAndDayPreview() {
             onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,
             uvChartUiState = chartPreviewData,
+            onUvChartEvent = {},
             uvTrackingState = UvTrackingState.initialState,
             onUvTrackingEvent = {}
         )
@@ -164,6 +168,7 @@ fun MainScreenWideLayoutPreview() {
             onLocationBarEvent = {},
             burnTimeUiState = BurnTimeUiState.Unknown,
             uvChartUiState = chartPreviewData,
+            onUvChartEvent = {},
             uvTrackingState = UvTrackingState.initialState,
             onUvTrackingEvent = {}
         )
@@ -178,7 +183,7 @@ fun LoadingPreview() {
     }
 }
 
-private val chartPreviewData = UvChartUiState.HasData(
+private val chartPreviewData = UvChartState.HasData(
     data = LineDataSet(
         listOf(
             Entry(8.0f, 0.0f),
