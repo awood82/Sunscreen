@@ -20,6 +20,27 @@ interface EventLogger {
     fun selectSpf(spf: Int)
     fun selectReflectiveSurface(isReflective: Boolean)
 
-    fun startTracking()
-    fun finishTracking()
+    /**
+     * Log the current time, sunburn, and vitamin D
+     * @param currentTimeInMillis System time in milliseconds
+     * @param currentSunburnPercent0to1 Current sunburn as a float where 0.0f = 0% and 1.0f = 100%
+     * @param currentVitaminDPercent0to1 Current vitamin D as a float where 0.0f = 0% and 1.0f = 100%
+     */
+    fun startTracking(
+        currentTimeInMillis: Long,
+        currentSunburnPercent0to1: Float,
+        currentVitaminDPercent0to1: Float
+    )
+
+    /**
+     * Log the elapsed time, sunburn, and vitamin D since the tracking started
+     * @param currentTimeInMillis System time in milliseconds
+     * @param currentSunburnPercent0to1 Current sunburn as a float where 0.0f = 0% and 1.0f = 100%
+     * @param currentVitaminDPercent0to1 Current vitamin D as a float where 0.0f = 0% and 1.0f = 100%
+     */
+    fun finishTracking(
+        currentTimeInMillis: Long,
+        currentSunburnPercent0to1: Float,
+        currentVitaminDPercent0to1: Float
+    )
 }

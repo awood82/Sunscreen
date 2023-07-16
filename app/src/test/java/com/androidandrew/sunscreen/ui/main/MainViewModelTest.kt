@@ -6,6 +6,7 @@ import com.androidandrew.sharedtest.database.FakeDatabaseWrapper
 import com.androidandrew.sharedtest.network.FakeEpaService
 import com.androidandrew.sharedtest.util.FakeData
 import com.androidandrew.sunscreen.analytics.EventLogger
+import com.androidandrew.sunscreen.analytics.FirebaseEventLogger
 import com.androidandrew.sunscreen.common.DataResult
 import com.androidandrew.sunscreen.data.repository.*
 import com.androidandrew.sunscreen.domain.ConvertSpfUseCase
@@ -636,8 +637,8 @@ class MainViewModelTest {
         vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
         vm.onUvTrackingEvent(UvTrackingEvent.TrackingButtonClicked)
 
-        verify { mockAnalytics.startTracking() }
-        verify { mockAnalytics.finishTracking() }
+        verify { mockAnalytics.startTracking(any(), any(), any()) }
+        verify { mockAnalytics.finishTracking(any(), any(), any()) }
     }
 
 

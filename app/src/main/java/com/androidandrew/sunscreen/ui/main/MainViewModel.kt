@@ -335,15 +335,23 @@ class MainViewModel(
 
     private fun onTrackingClicked() {
         when (_isCurrentlyTracking.value) {
-            true -> {
-                analytics.finishTracking()
-                sunTrackerServiceController.stop()
-                _isCurrentlyTracking.update { false }
-            }
-            else -> {
-                analytics.startTracking()
+            false -> {
+                analytics.startTracking(
+                    currentTimeInMillis = System.currentTimeMillis(),
+                    currentSunburnPercent0to1 = uvTrackingState.value.sunburnProgressPercent0to1,
+                    currentVitaminDPercent0to1 = uvTrackingState.value.vitaminDProgressPercent0to1
+                )
                 sunTrackerServiceController.start()
                 _isCurrentlyTracking.update { true }
+            }
+            true -> {
+                analytics.finishTracking(
+                    currentTimeInMillis = System.currentTimeMillis(),
+                    currentSunburnPercent0to1 = uvTrackingState.value.sunburnProgressPercent0to1,
+                    currentVitaminDPercent0to1 = uvTrackingState.value.vitaminDProgressPercent0to1
+                )
+                sunTrackerServiceController.stop()
+                _isCurrentlyTracking.update { false }
             }
         }
     }

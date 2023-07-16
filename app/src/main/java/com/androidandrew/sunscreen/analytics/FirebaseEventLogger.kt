@@ -1,15 +1,18 @@
 package com.androidandrew.sunscreen.analytics
 
 import android.os.Bundle
+import androidx.annotation.VisibleForTesting
 import com.androidandrew.sunscreen.model.UserClothing
+import com.androidandrew.sunscreen.util.percentToInt
 import com.google.firebase.analytics.FirebaseAnalytics
 import java.util.concurrent.TimeUnit
 
 class FirebaseEventLogger(
     private val firebaseAnalytics: FirebaseAnalytics
 ) : EventLogger {
-
     private var trackingStartTimeMs: Long? = null
+    private var trackingStartSunburnPercent: Float? = null
+    private var trackingStartVitaminDPercent: Float? = null
 
     override fun startTutorial() {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null)
@@ -83,39 +86,64 @@ class FirebaseEventLogger(
         })
     }
 
-    override fun startTracking() {
-        // TODO: What to log? Time? Burn and IU?
-        trackingStartTimeMs = System.currentTimeMillis()
-        firebaseAnalytics.logEvent(Param.TRACKING_START.name, null)
+    override fun startTracking(
+        currentTimeInMillis: Long,
+        currentSunburnPercent0to1: Float,
+        currentVitaminDPercent0to1: Float
+    ) {
+        trackingStartTimeMs = currentTimeInMillis
+        trackingStartSunburnPercent = currentSunburnPercent0to1
+        trackingStartVitaminDPercent = currentVitaminDPercent0to1
+        firebaseAnalytics.logEvent(Event.TRACKING_START.name, null)
     }
 
-    override fun finishTracking() {
-        // TODO: What to log? Time? Burn and IU?
-        val elapsedTime = trackingStartTimeMs?.let {
-            TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - it))
+    override fun finishTracking(
+        currentTimeInMillis: Long,
+        currentSunburnPercent0to1: Float,
+        currentVitaminDPercent0to1: Float
+    ) {
+        val elapsedTimeInMinutes = trackingStartTimeMs?.let {
+            TimeUnit.MILLISECONDS.toMinutes(currentTimeInMillis - it)
         } ?: -1
-        trackingStartTimeMs = null
-        firebaseAnalytics.logEvent(Param.TRACKING_FINISH.name, Bundle().apply {
-            putLong("time", elapsedTime)
+        val elapsedSunburn = trackingStartSunburnPercent?.let {
+            (currentSunburnPercent0to1 - it).percentToInt()
+        } ?: -1
+        val elapsedVitaminD = trackingStartVitaminDPercent?.let {
+            (currentVitaminDPercent0to1 - it).percentToInt()
+        } ?: -1
+        firebaseAnalytics.logEvent(Event.TRACKING_FINISH.name, Bundle().apply {
+            putLong(Param.MINUTES.name, elapsedTimeInMinutes)
+            putInt(Param.SUNBURN.name, elapsedSunburn)
+            putInt(Param.VITAMIN_D.name, elapsedVitaminD)
         })
     }
+
+    @VisibleForTesting
+    fun forgetEverythingForTest() {
+        trackingStartTimeMs = null
+        trackingStartSunburnPercent = null
+        trackingStartVitaminDPercent = null
+    }
 }
 
-private enum class Event(name: String) {
+internal enum class Event(name: String) {
     SELECT_REFLECTIVE_SURFACE("select_reflective_surface"),
     SELECT_SPF("select_spf"),
-}
-
-private enum class Param(name: String) {
-    ERROR("error"),
-    ERROR_LOCATION("error_location"),
-    IS_REFLECTIVE("is_reflective"),
-    SPF("spf"),
     TRACKING_START("tracking_start"),
     TRACKING_FINISH("tracking_finish")
 }
 
-private enum class ContentType(name: String) {
+internal enum class Param(name: String) {
+    ERROR("error"),
+    ERROR_LOCATION("error_location"),
+    IS_REFLECTIVE("is_reflective"),
+    SPF("spf"),
+    MINUTES("minutes"),
+    SUNBURN("sunburn"),
+    VITAMIN_D("vitamin_d")
+}
+
+internal enum class ContentType(name: String) {
     LOCATION("location"),
     SKIN_TYPE("skin_type"),
     TOP("top"),
